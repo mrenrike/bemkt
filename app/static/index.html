@@ -1,0 +1,74 @@
+<!-- app/static/index.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agência IA — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container" style="padding-top:80px">
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:40px">🤖</div>
+      <h1 style="font-size:32px;margin-top:12px">Agência IA</h1>
+      <p class="subtitle">Carrosséis profissionais em minutos</p>
+    </div>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('login')">Entrar</button>
+        <button class="tab" onclick="showTab('cadastro')">Cadastrar</button>
+      </div>
+
+      <!-- Login -->
+      <div id="form-login">
+        <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
+        <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+        <button class="btn" onclick="login()">Entrar</button>
+        <p class="error" id="login-erro"></p>
+      </div>
+
+      <!-- Cadastro -->
+      <div id="form-cadastro" style="display:none">
+        <div class="field"><label>Nome</label><input type="text" id="cad-nome" placeholder="Seu nome"></div>
+        <div class="field"><label>Email</label><input type="email" id="cad-email" placeholder="seu@email.com"></div>
+        <div class="field"><label>Senha</label><input type="password" id="cad-senha" placeholder="mínimo 6 caracteres"></div>
+        <div class="field"><label>@ Instagram/LinkedIn (opcional)</label><input type="text" id="cad-username" placeholder="@seuhandle"></div>
+        <button class="btn" onclick="cadastrar()">Criar conta grátis</button>
+        <p class="error" id="cad-erro"></p>
+      </div>
+    </div>
+  </div>
+<script>
+function showTab(t){
+  document.getElementById('form-login').style.display = t==='login'?'block':'none';
+  document.getElementById('form-cadastro').style.display = t==='cadastro'?'block':'none';
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(t==='login'&&i===0)||(t==='cadastro'&&i===1)));
+}
+async function login(){
+  const email=document.getElementById('login-email').value;
+  const senha=document.getElementById('login-senha').value;
+  const r=await fetch('/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
+  const d=await r.json();
+  if(!r.ok){document.getElementById('login-erro').style.display='block';document.getElementById('login-erro').textContent=d.detail;return;}
+  localStorage.setItem('token',d.token);localStorage.setItem('nome',d.nome);
+  window.location='/static/chat.html';
+}
+async function cadastrar(){
+  const nome=document.getElementById('cad-nome').value;
+  const email=document.getElementById('cad-email').value;
+  const senha=document.getElementById('cad-senha').value;
+  const username=document.getElementById('cad-username').value;
+  const r=await fetch('/auth/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha,username})});
+  const d=await r.json();
+  if(!r.ok){document.getElementById('cad-erro').style.display='block';document.getElementById('cad-erro').textContent=d.detail;return;}
+  localStorage.setItem('token',d.token);localStorage.setItem('nome',d.nome);
+  window.location='/static/chat.html';
+}
+// Já logado? vai direto pro chat
+if(localStorage.getItem('token')) window.location='/static/chat.html';
+</script>
+</body>
+</html>
