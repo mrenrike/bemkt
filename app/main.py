@@ -60,18 +60,20 @@ def cadastro(data: CadastroIn):
         db.close()
         raise HTTPException(status_code=400, detail="Email já cadastrado")
     h = hash_senha(data.senha)
-    db.execute(
-        "INSERT INTO users (nome, email, senha_hash, username) VALUES (?,?,?,?)",
-        (data.nome, data.email, h, data.username)
-    )
-    db.commit()
-    user_id = db.execute("SELECT id FROM users WHERE email=?", (data.email,)).fetchone()[0]
-    db.execute(
-        "INSERT INTO credit_events (user_id, delta, motivo) VALUES (?,1,'trial')",
-        (user_id,)
-    )
-    db.commit()
-    db.close()
+    try:
+        db.execute(
+            "INSERT INTO users (nome, email, senha_hash, username) VALUES (?,?,?,?)",
+            (data.nome, data.email, h, data.username)
+        )
+        db.commit()
+        user_id = db.execute("SELECT id FROM users WHERE email=?", (data.email,)).fetchone()[0]
+        db.execute(
+            "INSERT INTO credit_events (user_id, delta, motivo) VALUES (?,1,'trial')",
+            (user_id,)
+        )
+        db.commit()
+    finally:
+        db.close()
     token = criar_token({"sub": str(user_id)})
     return {"token": token, "nome": data.nome}
 

@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
@@ -20,7 +20,7 @@ def verificar_senha(senha: str, hash: str) -> bool:
 
 def criar_token(data: dict) -> str:
     payload = data.copy()
-    payload["exp"] = datetime.utcnow() + timedelta(hours=TOKEN_EXPIRE_HOURS)
+    payload["exp"] = datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRE_HOURS)
     return jwt.encode(payload, JWT_SECRET, algorithm=ALGORITHM)
 
 def verificar_token(token: str) -> dict | None:
@@ -33,4 +33,10 @@ def usuario_atual(credentials: HTTPAuthorizationCredentials = Depends(bearer)) -
     payload = verificar_token(credentials.credentials)
     if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
-    return int(payload["sub"])
+    sub = payload.get("sub")
+    if not sub:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+    try:
+        return int(sub)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
