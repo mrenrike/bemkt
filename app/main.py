@@ -263,7 +263,11 @@ def servir_slide(job_id: int, filename: str, user_id: int = Depends(usuario_atua
     db.close()
     if not job:
         raise HTTPException(status_code=404)
-    path = Path(job["pasta_path"]) / filename
+    pasta = Path(job["pasta_path"]).resolve()
+    path = (pasta / filename).resolve()
+    # Prevent path traversal: ensure file is within the job's directory
+    if not str(path).startswith(str(pasta)):
+        raise HTTPException(status_code=400, detail="Filename inválido")
     if not path.exists():
         raise HTTPException(status_code=404)
     return FileResponse(str(path))
