@@ -3,7 +3,7 @@ import os
 import asyncio, json, zipfile, shutil
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, BackgroundTasks, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -12,6 +12,7 @@ from app.auth import hash_senha, verificar_senha, criar_token, usuario_atual
 from app.chat import PERGUNTAS, proxima_pergunta, resumo_job
 from app.carousel import gerar_carrossel
 from app.email_sender import criar_zip, enviar_email_zip
+from app.pagamentos import PLANOS, criar_preferencia_mp, validar_assinatura_webhook, MP_WEBHOOK_SECRET
 
 # ── Startup hook ─────────────────────────────────────────────────
 @asynccontextmanager
@@ -63,6 +64,9 @@ class LoginIn(BaseModel):
 
 class EmailIn(BaseModel):
     email: str
+
+class PagamentoIn(BaseModel):
+    plano: str
 
 # ── Auth endpoints ────────────────────────────────────────────────
 @app.post("/auth/cadastro")
@@ -304,3 +308,69 @@ def job_download(job_id: int, user_id: int = Depends(usuario_atual)):
         for png in sorted(pasta.glob("slide_*.png")):
             zf.write(png, png.name)
     return FileResponse(str(zip_path), media_type="application/zip", filename=f"carrossel_{job_id}.zip")
+
+# ── Pagamentos ────────────────────────────────────────────────────
+@app.get("/planos")
+def listar_planos():
+    return PLANOS
+
+@app.post("/pagamento/criar")
+def pagamento_criar(data: PagamentoIn, user_id: int = Depends(usuario_atual)):
+    if data.plano not in PLANOS:
+        raise HTTPException(status_code=400, detail="Plano inválido")
+    plano = PLANOS[data.plano]
+    db = get_db()
+    db.execute(
+        "INSERT INTO pagamentos (user_id, plano, valor, creditos_comprados) VALUES (?,?,?,?)",
+        (user_id, data.plano, plano["valor"], plano["creditos"])
+    )
+    db.commit()
+    pag_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+    db.close()
+    try:
+        init_point = criar_preferencia_mp(pag_id, data.plano)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Erro Mercado Pago: {e}")
+    return {"init_point": init_point}
+
+@app.post("/webhook/mercadopago")
+async def webhook_mp(request: Request):
+    corpo = await request.body()
+    sig = request.headers.get("x-signature", "")
+    if MP_WEBHOOK_SECRET and not validar_assinatura_webhook(sig, corpo, MP_WEBHOOK_SECRET):
+        raise HTTPException(status_code=400, detail="Assinatura inválida")
+    import json as _json
+    payload = _json.loads(corpo)
+    mp_id = str(payload.get("data", {}).get("id", "") or payload.get("id", ""))
+    if not mp_id:
+        return {"ok": True}
+    db = get_db()
+    pag = db.execute("SELECT * FROM pagamentos WHERE mp_payment_id=?", (mp_id,)).fetchone()
+    if pag:  # idempotente — já processado
+        db.close()
+        return {"ok": True}
+    # Busca external_reference via API do MP (não vem no corpo do webhook)
+    try:
+        from app.pagamentos import MP_ACCESS_TOKEN
+        import mercadopago as _mp
+        sdk = _mp.SDK(MP_ACCESS_TOKEN)
+        mp_payment = sdk.payment().get(mp_id)
+        ext_ref = str(mp_payment.get("response", {}).get("external_reference", ""))
+    except Exception:
+        db.close()
+        return {"ok": True}
+    if not ext_ref:
+        db.close()
+        return {"ok": True}
+    pag = db.execute("SELECT * FROM pagamentos WHERE id=? AND status='pendente'", (ext_ref,)).fetchone()
+    if not pag:
+        db.close()
+        return {"ok": True}
+    db.execute("UPDATE pagamentos SET status='aprovado', mp_payment_id=? WHERE id=?", (mp_id, pag["id"]))
+    db.execute(
+        "INSERT INTO credit_events (user_id, delta, motivo, ref_id) VALUES (?,?,'compra',?)",
+        (pag["user_id"], pag["creditos_comprados"], str(pag["id"]))
+    )
+    db.commit()
+    db.close()
+    return {"ok": True}

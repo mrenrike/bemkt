@@ -1,0 +1,72 @@
+<!-- app/static/planos.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agência IA — Planos</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:32px 20px;max-width:960px;margin:0 auto}
+    .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:16px}
+    .plan-card.featured{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+    .plan-name{font-size:20px;font-weight:700}
+    .plan-price{font-size:36px;font-weight:700;color:var(--accent)}
+    .plan-price span{font-size:16px;color:var(--muted);font-weight:400}
+    .plan-credits{color:var(--muted);font-size:14px}
+    .plan-btn{margin-top:auto}
+    .header{text-align:center;padding:48px 20px 0}
+    .loading{display:none;color:var(--muted);font-size:13px;margin-top:8px}
+  </style>
+</head>
+<body>
+<div class="header">
+  <div style="font-size:40px">💳</div>
+  <h1 style="margin-top:16px">Escolha seu plano</h1>
+  <p class="subtitle">Créditos não expiram • Pagamento via PIX ou cartão</p>
+</div>
+<div class="plans-grid" id="plans-grid">
+  <p style="color:var(--muted)">Carregando planos...</p>
+</div>
+<script>
+const token=localStorage.getItem('token');
+if(!token) window.location='/';
+
+async function init(){
+  const r=await fetch('/planos');
+  const planos=await r.json();
+  const grid=document.getElementById('plans-grid');
+  grid.innerHTML='';
+  const keys=Object.keys(planos);
+  keys.forEach((key,i)=>{
+    const p=planos[key];
+    const card=document.createElement('div');
+    card.className='plan-card'+(i===1?' featured':'');
+    card.innerHTML=`
+      <div class="plan-name">${p.nome}</div>
+      <div class="plan-price">R$ ${p.valor.toFixed(2).replace('.',',')} <span>/ único</span></div>
+      <div class="plan-credits">${p.creditos} crédito${p.creditos>1?'s':''} para gerar carrosséis</div>
+      <button class="btn plan-btn" onclick="comprar('${key}',this)">Comprar agora</button>
+      <p class="loading" id="loading-${key}">Redirecionando para pagamento...</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function comprar(plano, btn){
+  btn.disabled=true;btn.textContent='Aguarde...';
+  document.getElementById('loading-'+plano).style.display='block';
+  const r=await fetch('/pagamento/criar',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({plano})
+  });
+  if(!r.ok){btn.disabled=false;btn.textContent='Comprar agora';alert('Erro ao criar pagamento.');return;}
+  const d=await r.json();
+  window.location=d.init_point;
+}
+
+init();
+</script>
+</body>
+</html>
