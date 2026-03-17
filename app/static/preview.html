@@ -1,0 +1,74 @@
+<!-- app/static/preview.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agência IA — Prévia</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border)}
+    .slides-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:24px}
+    .slide-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;aspect-ratio:1}
+    .slide-card img{width:100%;height:100%;object-fit:cover}
+    .actions{padding:24px;display:flex;flex-direction:column;gap:12px;max-width:480px;margin:0 auto}
+    .email-row{display:flex;gap:8px}
+    .email-row input{flex:1;padding:14px;background:#1e1e1e;border:1px solid var(--border);border-radius:10px;color:var(--text)}
+    .novo-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:16px;border-radius:10px;cursor:pointer;font-size:15px;width:100%}
+  </style>
+</head>
+<body>
+<div class="header">
+  <span style="font-weight:700;font-size:20px">🤖 Carrossel Pronto!</span>
+  <a href="/static/chat.html" style="color:var(--muted);font-size:14px">+ Novo carrossel</a>
+</div>
+<div class="slides-grid" id="slides-grid">
+  <p style="color:var(--muted);padding:24px">Carregando slides...</p>
+</div>
+<div class="actions">
+  <a id="download-btn" class="btn" style="text-align:center;display:block">⬇ Baixar ZIP (7 slides)</a>
+  <div class="email-row">
+    <input type="email" id="email-field" placeholder="seu@email.com">
+    <button class="btn" style="width:auto;padding:14px 20px" onclick="enviarEmail()">📧 Enviar</button>
+  </div>
+  <p id="email-status" style="color:var(--muted);font-size:13px;display:none"></p>
+  <button class="novo-btn" onclick="window.location='/static/chat.html'">Gerar novo carrossel</button>
+</div>
+<script>
+const token=localStorage.getItem('token');
+const jobId=localStorage.getItem('job_id');
+if(!token||!jobId) window.location='/';
+const H={'Authorization':'Bearer '+token};
+
+async function init(){
+  const r=await fetch('/job/'+jobId+'/slides',{headers:H});
+  if(!r.ok){document.getElementById('slides-grid').innerHTML='<p style="color:red;padding:24px">Erro ao carregar slides.</p>';return;}
+  const d=await r.json();
+  const grid=document.getElementById('slides-grid');
+  grid.innerHTML='';
+  d.slides.forEach(url=>{
+    const card=document.createElement('div');
+    card.className='slide-card';
+    card.innerHTML=`<img src="${url}" loading="lazy">`;
+    grid.appendChild(card);
+  });
+  document.getElementById('download-btn').href='/job/'+jobId+'/download';
+  // preenche email do usuário
+  const me=await fetch('/me',{headers:H});
+  const md=await me.json();
+  document.getElementById('email-field').value=md.email||'';
+}
+
+async function enviarEmail(){
+  const email=document.getElementById('email-field').value.trim();
+  if(!email) return;
+  const r=await fetch('/job/'+jobId+'/email',{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({email})});
+  const el=document.getElementById('email-status');
+  el.style.display='block';
+  el.textContent=r.ok?'✅ Email enviado com sucesso!':'❌ Falha ao enviar. Tente novamente.';
+}
+
+init();
+</script>
+</body>
+</html>

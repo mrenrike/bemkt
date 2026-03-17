@@ -1,0 +1,66 @@
+<!-- app/static/loading.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agência IA — Gerando</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;gap:24px}
+    .spinner{width:64px;height:64px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .progress-bar{width:320px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 1s ease;width:5%}
+    .status-text{color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body>
+<div class="center">
+  <div style="font-size:48px">🤖</div>
+  <h1>Criando seu carrossel</h1>
+  <p class="status-text" id="status-text">Claude está escrevendo o conteúdo...</p>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="spinner"></div>
+  <p style="color:var(--muted);font-size:13px">Isso leva cerca de 30-60 segundos</p>
+</div>
+<script>
+const token=localStorage.getItem('token');
+const jobId=localStorage.getItem('job_id');
+if(!token||!jobId) window.location='/';
+
+const mensagens=['Claude está escrevendo o conteúdo...','Buscando imagens na Pexels...','Renderizando slides com Playwright...','Finalizando os 7 slides...'];
+let tick=0, tentativas=0;
+const MAX=120; // 120 * 3s = 6 min timeout
+
+const interval=setInterval(async()=>{
+  tentativas++;
+  tick=Math.min(tick+1,mensagens.length-1);
+  document.getElementById('status-text').textContent=mensagens[tick];
+  document.getElementById('progress-fill').style.width=Math.min(10+tentativas/MAX*85,95)+'%';
+
+  if(tentativas>=MAX){
+    clearInterval(interval);
+    document.querySelector('h1').textContent='Tempo esgotado';
+    document.getElementById('status-text').textContent='O job demorou demais. Tente novamente.';
+    return;
+  }
+  let r, d;
+  try {
+    r=await fetch('/job/'+jobId+'/status',{headers:{'Authorization':'Bearer '+token}});
+    if(!r.ok) return;
+    d=await r.json();
+  } catch(e) { return; }
+  if(d.status==='pronto'){
+    clearInterval(interval);
+    document.getElementById('progress-fill').style.width='100%';
+    setTimeout(()=>window.location='/static/preview.html',500);
+  } else if(d.status==='erro'){
+    clearInterval(interval);
+    document.querySelector('h1').textContent='Erro na geração';
+    document.getElementById('status-text').textContent='Ocorreu um erro. Seu crédito foi estornado.';
+  }
+},3000);
+</script>
+</body>
+</html>
