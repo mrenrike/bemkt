@@ -11,6 +11,7 @@ from app.database import init_db, get_db, creditos_disponiveis
 from app.auth import hash_senha, verificar_senha, criar_token, usuario_atual
 from app.chat import PERGUNTAS, proxima_pergunta, resumo_job
 from app.carousel import gerar_carrossel
+from app.email_sender import criar_zip, enviar_email_zip
 
 # ── Startup hook ─────────────────────────────────────────────────
 @asynccontextmanager
@@ -59,6 +60,9 @@ class CadastroIn(BaseModel):
 class LoginIn(BaseModel):
     email: str
     senha: str
+
+class EmailIn(BaseModel):
+    email: str
 
 # ── Auth endpoints ────────────────────────────────────────────────
 @app.post("/auth/cadastro")
@@ -271,6 +275,21 @@ def servir_slide(job_id: int, filename: str, user_id: int = Depends(usuario_atua
     if not path.exists():
         raise HTTPException(status_code=404)
     return FileResponse(str(path))
+
+@app.post("/job/{job_id}/email")
+def job_email(job_id: int, data: EmailIn, user_id: int = Depends(usuario_atual)):
+    db = get_db()
+    job = db.execute("SELECT status, pasta_path FROM carrosseis WHERE id=? AND user_id=?", (job_id, user_id)).fetchone()
+    db.close()
+    if not job or job["status"] != "pronto":
+        raise HTTPException(status_code=404)
+    pasta = Path(job["pasta_path"])
+    zip_path = criar_zip(pasta)
+    try:
+        enviar_email_zip(data.email, zip_path, job_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Falha ao enviar email: {str(e)}")
+    return {"ok": True}
 
 @app.get("/job/{job_id}/download")
 def job_download(job_id: int, user_id: int = Depends(usuario_atual)):
