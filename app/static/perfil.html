@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEMKT — Perfil</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
+  <script src="/static/nav.js" defer></script>
+  <style>
+    .perfil-wrap       { max-width: 520px; margin: 0 auto; padding: 32px 20px 60px; }
+    .perfil-title      { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 28px; }
+    .section-label     { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+    .divider           { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+    .success-msg       { color: var(--accent); font-size: 13px; margin-top: 10px; display: none; }
+    .readonly-field    { padding: 13px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 14px; }
+    .stats-row         { display: flex; gap: 12px; margin-bottom: 28px; }
+    .stat-box          { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-num          { font-size: 28px; font-weight: 900; letter-spacing: -1px; color: var(--accent); }
+    .stat-lbl          { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+    @media (max-width: 767px) { .perfil-wrap { padding-top: 68px; } }
+  </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
+</head>
+<body>
+<div class="perfil-wrap">
+  <div class="perfil-title">Perfil</div>
+
+  <!-- Stats rápidos -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="stat-creditos">—</div><div class="stat-lbl">Créditos</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-carrosseis">—</div><div class="stat-lbl">Carrosseis</div></div>
+  </div>
+
+  <!-- Dados pessoais -->
+  <div class="section-label">Dados pessoais</div>
+  <div class="card">
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="p-nome" placeholder="Seu nome" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <div class="readonly-field" id="p-email">—</div>
+    </div>
+    <div class="field">
+      <label>@ Instagram / LinkedIn</label>
+      <input type="text" id="p-username" placeholder="@seuhandle">
+    </div>
+    <button type="button" class="btn" id="btn-salvar" onclick="salvarPerfil()">Salvar alterações</button>
+    <p class="error"  id="perfil-erro"></p>
+    <p class="success-msg" id="perfil-ok">Perfil atualizado!</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Trocar senha -->
+  <div class="section-label">Alterar senha</div>
+  <div class="card">
+    <div class="field">
+      <label>Senha atual</label>
+      <input type="password" id="s-atual" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="field">
+      <label>Nova senha</label>
+      <input type="password" id="s-nova" placeholder="mínimo 8 caracteres" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label>Confirmar nova senha</label>
+      <input type="password" id="s-confirmar" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <button type="button" class="btn" id="btn-senha" onclick="trocarSenha()">Alterar senha</button>
+    <p class="error"  id="senha-erro"></p>
+    <p class="success-msg" id="senha-ok">Senha alterada com sucesso!</p>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location = '/';
+
+const H = { 'Authorization': 'Bearer ' + token };
+
+function showMsg(id, msg, isError) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
+
+async function init() {
+  const r = await fetch('/me', { headers: H });
+  if (!r.ok) return;
+  const d = await r.json();
+  document.getElementById('p-nome').value     = d.nome    || '';
+  document.getElementById('p-email').textContent = d.email || '—';
+  document.getElementById('p-username').value = d.username || '';
+  document.getElementById('stat-creditos').textContent = d.creditos ?? '—';
+
+  // Conta carrosseis do histórico
+  const rh = await fetch('/historico', { headers: H });
+  if (rh.ok) {
+    const lista = await rh.json();
+    document.getElementById('stat-carrosseis').textContent = lista.length;
+  }
+}
+
+async function salvarPerfil() {
+  hideMsg('perfil-erro'); hideMsg('perfil-ok');
+  const nome     = document.getElementById('p-nome').value.trim();
+  const username = document.getElementById('p-username').value.trim();
+  if (!nome) { showMsg('perfil-erro', 'Nome é obrigatório.', true); return; }
+
+  const btn = document.getElementById('btn-salvar');
+  btn.disabled = true;
+  const r = await fetch('/perfil', {
+    method: 'PUT',
+    headers: Object.assign({}, H, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ nome, username }),
+  });
+  btn.disabled = false;
+  const d = await r.json();
+  if (!r.ok) { showMsg('perfil-erro', d.detail || 'Erro ao salvar.', true); return; }
+  showMsg('perfil-ok', 'Perfil atualizado!', false);
+  localStorage.setItem('nome', nome);
+}
+
+async function trocarSenha() {
+  hideMsg('senha-erro'); hideMsg('senha-ok');
+  const atual     = document.getElementById('s-atual').value;
+  const nova      = document.getElementById('s-nova').value;
+  const confirmar = document.getElementById('s-confirmar').value;
+  if (!atual || !nova) { showMsg('senha-erro', 'Preencha todos os campos.', true); return; }
+  if (nova.length < 8) { showMsg('senha-erro', 'A nova senha deve ter pelo menos 8 caracteres.', true); return; }
+  if (nova !== confirmar) { showMsg('senha-erro', 'As senhas não coincidem.', true); return; }
+
+  const btn = document.getElementById('btn-senha');
+  btn.disabled = true;
+  const r = await fetch('/perfil/senha', {
+    method: 'PUT',
+    headers: Object.assign({}, H, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ senha_atual: atual, senha_nova: nova }),
+  });
+  btn.disabled = false;
+  const d = await r.json();
+  if (!r.ok) { showMsg('senha-erro', d.detail || 'Erro ao alterar senha.', true); return; }
+  showMsg('senha-ok', 'Senha alterada com sucesso!', false);
+  document.getElementById('s-atual').value = '';
+  document.getElementById('s-nova').value  = '';
+  document.getElementById('s-confirmar').value = '';
+}
+
+init();
+</script>
+</body>
+</html>

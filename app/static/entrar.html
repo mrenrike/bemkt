@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — BEMKT Carrosseis</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <style>
+    .auth-wrap       { padding-top: 72px; }
+    .auth-header     { text-align: center; margin-bottom: 36px; }
+    .back-link       { color: var(--muted); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 28px; text-decoration: none; transition: color .2s; }
+    .back-link:hover { color: var(--text); }
+    .auth-brand      { font-size: 13px; font-weight: 800; letter-spacing: 4px; color: var(--accent); margin-bottom: 12px; }
+    .optional-tag    { color: #444; font-weight: 400; text-transform: none; letter-spacing: 0; }
+    .trial-hint      { font-size: 12px; color: var(--muted); text-align: center; margin-top: 14px; }
+    .support-line    { text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
+    .support-line a  { color: var(--muted); text-decoration: underline; }
+    .hidden          { display: none; }
+  </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
+</head>
+<body>
+  <div class="container auth-wrap">
+
+    <div class="auth-header">
+      <a href="/" class="back-link">← Voltar para o site</a>
+      <div class="auth-brand">BEMKT</div>
+      <h1>Bem-vindo de volta</h1>
+      <p class="subtitle">Carrosseis profissionais com IA</p>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button type="button" class="tab active" onclick="showTab('login')">Entrar</button>
+        <button type="button" class="tab" onclick="showTab('cadastro')">Criar conta</button>
+      </div>
+
+      <!-- Login -->
+      <div id="form-login">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password"
+                 onkeydown="if(event.key==='Enter')login()">
+        </div>
+        <button type="button" class="btn" onclick="login()">Entrar</button>
+        <p class="error" id="login-erro"></p>
+      </div>
+
+      <!-- Cadastro -->
+      <div id="form-cadastro" class="hidden">
+        <div class="field">
+          <label>Nome</label>
+          <input type="text" id="cad-nome" placeholder="Seu nome" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="cad-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="cad-senha" placeholder="mínimo 8 caracteres" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label>@ Instagram / LinkedIn <span class="optional-tag">(opcional)</span></label>
+          <input type="text" id="cad-username" placeholder="@seuhandle">
+        </div>
+        <button type="button" class="btn" onclick="cadastrar()">Criar conta grátis</button>
+        <p class="trial-hint">Você ganha 1 carrossel grátis ao cadastrar.</p>
+        <p class="error" id="cad-erro"></p>
+      </div>
+    </div>
+
+    <p class="support-line">
+      Dúvidas? <a href="mailto:bruno@bemkt.com.br">bruno@bemkt.com.br</a>
+    </p>
+  </div>
+
+<script>
+function showTab(t) {
+  document.getElementById('form-login').classList.toggle('hidden',    t !== 'login');
+  document.getElementById('form-cadastro').classList.toggle('hidden', t !== 'cadastro');
+  document.querySelectorAll('.tab').forEach((el, i) =>
+    el.classList.toggle('active', (t === 'login' && i === 0) || (t === 'cadastro' && i === 1))
+  );
+}
+
+function showErro(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function login() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha  = document.getElementById('login-senha').value;
+  document.getElementById('login-erro').style.display = 'none';
+  const r = await fetch('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha })
+  });
+  const d = await r.json();
+  if (!r.ok) { showErro('login-erro', d.detail || 'Erro ao entrar'); return; }
+  localStorage.setItem('token', d.token);
+  localStorage.setItem('nome', d.nome);
+  window.location = '/static/chat.html';
+}
+
+async function cadastrar() {
+  const nome     = document.getElementById('cad-nome').value.trim();
+  const email    = document.getElementById('cad-email').value.trim();
+  const senha    = document.getElementById('cad-senha').value;
+  const username = document.getElementById('cad-username').value.trim();
+  document.getElementById('cad-erro').style.display = 'none';
+  const r = await fetch('/auth/cadastro', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome, email, senha, username })
+  });
+  const d = await r.json();
+  if (!r.ok) { showErro('cad-erro', d.detail || 'Erro ao cadastrar'); return; }
+  localStorage.setItem('token', d.token);
+  localStorage.setItem('nome', d.nome);
+  if (typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration');
+  if (typeof gtag !== 'undefined') gtag('event', 'sign_up', { method: 'email' });
+  window.location = '/static/chat.html';
+}
+
+if (localStorage.getItem('token')) window.location = '/static/chat.html';
+</script>
+</body>
+</html>

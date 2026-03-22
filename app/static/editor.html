@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>BEMKT — Editor Manual</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
+  <script src="/static/nav.js" defer></script>
+  <style>
+    .editor-wrap   { max-width: 1100px; margin: 0 auto; padding: 32px 20px 100px; }
+    .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .editor-title  { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .editor-title span { color: var(--accent); }
+    .editor-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Settings bar ── */
+    .settings-bar  { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .field-group   { display: flex; flex-direction: column; gap: 6px; }
+    .field-label   { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .field-select,
+    .field-input   { padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color .2s; width: 100%; }
+    .field-select:focus,
+    .field-input:focus { border-color: rgba(140,255,46,.4); }
+
+    /* ── Toggle foto ── */
+    .toggle-row    { display: flex; align-items: center; gap: 10px; padding: 12px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+    .toggle-label  { font-size: 13px; color: var(--muted); flex: 1; }
+    .toggle-label strong { color: var(--text); font-weight: 600; }
+    .toggle        { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle input  { opacity: 0; width: 0; height: 0; }
+    .toggle-track  { position: absolute; inset: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; cursor: pointer; transition: background .2s; }
+    .toggle input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
+    .toggle-track::before { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform .2s; }
+    .toggle input:checked + .toggle-track::before { transform: translateX(18px); }
+
+    /* ── AI suggestion strip ── */
+    .ai-strip      { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: rgba(140,255,46,.05); border: 1px solid rgba(140,255,46,.2); border-radius: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .ai-strip-text { flex: 1; font-size: 13px; color: var(--muted); min-width: 200px; }
+    .ai-strip-text strong { color: var(--text); }
+    .btn-suggest   { padding: 11px 22px; background: var(--accent); color: #080808; border: none; border-radius: 100px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; transition: opacity .2s; white-space: nowrap; flex-shrink: 0; }
+    .btn-suggest:hover    { opacity: .85; }
+    .btn-suggest:disabled { opacity: .4; cursor: not-allowed; }
+    .suggest-spinner { display: none; font-size: 13px; color: var(--accent); white-space: nowrap; }
+
+    /* ── Slides grid ── */
+    .slides-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .slide-card    { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; transition: border-color .2s; }
+    .slide-card:focus-within { border-color: rgba(140,255,46,.3); }
+    .slide-card.has-content  { border-color: rgba(140,255,46,.2); }
+    .card-header   { display: flex; align-items: center; gap: 10px; }
+    .card-num      { width: 28px; height: 28px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--muted); flex-shrink: 0; }
+    .card-tipo     { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; flex-shrink: 0; }
+    .tipo-gancho   { background: rgba(140,255,46,.12); color: var(--accent); }
+    .tipo-setup    { background: rgba(0,180,255,.1);   color: #00b4ff; }
+    .tipo-conteudo { background: rgba(255,255,255,.06); color: var(--muted); }
+    .tipo-virada   { background: rgba(255,200,0,.1);   color: #ffc800; }
+    .tipo-cta      { background: rgba(255,106,0,.12);  color: #ff6a00; }
+    .card-desc     { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+    .slide-input   { padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color .2s; width: 100%; resize: none; }
+    .slide-input:focus  { border-color: rgba(140,255,46,.35); }
+    .slide-input::placeholder { color: #3a3a3a; }
+    .input-lbl     { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
+    .hl-hint       { font-size: 11px; color: #444; line-height: 1.4; }
+
+    /* ── Bottom bar ── */
+    .bottom-bar    { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+                     background: rgba(8,8,8,.95); border-top: 1px solid var(--border);
+                     -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+                     padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .bottom-info   { font-size: 13px; color: var(--muted); }
+    .bottom-info em{ color: var(--accent); font-style: normal; font-weight: 700; }
+    .bottom-actions{ display: flex; gap: 10px; align-items: center; }
+    .btn-gen       { padding: 13px 32px; background: var(--accent); color: #080808; border: none; border-radius: 100px; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; transition: opacity .2s; white-space: nowrap; }
+    .btn-gen:hover { opacity: .85; }
+    .btn-gen:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-auto      { padding: 13px 20px; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 100px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-auto:hover{ border-color: #555; color: var(--text); }
+    .gen-status    { font-size: 13px; color: var(--muted); display: none; }
+
+    @media (max-width: 640px) {
+      .slides-grid { grid-template-columns: 1fr; }
+      .settings-bar { grid-template-columns: 1fr 1fr; }
+      .bottom-bar { padding: 12px 16px; flex-wrap: wrap; }
+    }
+  </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
+</head>
+<body>
+<div class="editor-wrap">
+  <div class="editor-header">
+    <div>
+      <div class="editor-title">Editor <span>Manual</span></div>
+      <div class="editor-subtitle">Escreva o conteúdo de cada slide — ou deixe a IA sugerir e edite à vontade.</div>
+    </div>
+    <a href="/static/chat.html" class="btn btn-ghost" style="font-size:13px">Usar modo automático →</a>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-bar">
+    <div class="field-group">
+      <label class="field-label">Tema do carrossel</label>
+      <input type="text" class="field-input" id="s-tema" placeholder="Ex: Como vender mais no Instagram">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Nicho</label>
+      <input type="text" class="field-input" id="s-nicho" placeholder="Ex: marketing digital">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Plataforma</label>
+      <select class="field-select" id="s-plataforma">
+        <option value="1">Instagram</option>
+        <option value="2">LinkedIn</option>
+        <option value="3">TikTok</option>
+        <option value="4">X (Twitter)</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Template visual</label>
+      <select class="field-select" id="s-modelo">
+        <option value="1">Authority Dark</option>
+        <option value="2">Clean Editorial</option>
+        <option value="3">Vibrant Gradient</option>
+        <option value="4" selected>Foto Bold</option>
+        <option value="5">Minimal Type</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Finalidade</label>
+      <select class="field-select" id="s-finalidade">
+        <option value="educacional">Educar</option>
+        <option value="vender">Vender</option>
+        <option value="engajamento">Engajamento</option>
+        <option value="awareness">Autoridade</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">CTA objetivo</label>
+      <select class="field-select" id="s-cta">
+        <option value="compartilhar">Salvar / Compartilhar</option>
+        <option value="seguir">Seguir o perfil</option>
+        <option value="comentar">Comentar</option>
+        <option value="link_bio">Link na bio</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Cor da marca (hex)</label>
+      <input type="text" class="field-input" id="s-cores" placeholder="#8CFF2E">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Username</label>
+      <input type="text" class="field-input" id="s-username" placeholder="@seuperfil">
+    </div>
+  </div>
+
+  <!-- Toggle foto de fundo -->
+  <div class="toggle-row">
+    <span class="toggle-label"><strong>Foto de fundo</strong> — busca imagens do Pexels para o template Foto Bold</span>
+    <label class="toggle">
+      <input type="checkbox" id="toggle-foto" checked>
+      <span class="toggle-track"></span>
+    </label>
+  </div>
+
+  <!-- AI suggestion strip -->
+  <div class="ai-strip">
+    <div class="ai-strip-text">
+      <strong>✨ Modo semi-automático</strong> — preencha o tema acima e clique para a IA sugerir o conteúdo dos 7 slides. Edite o que quiser depois.
+    </div>
+    <span class="suggest-spinner" id="suggest-spinner">⏳ Gerando sugestões...</span>
+    <button type="button" class="btn-suggest" id="btn-suggest" onclick="gerarSugestoes()">Sugestões com IA</button>
+  </div>
+
+  <!-- 7 Slide Cards -->
+  <div class="slides-grid" id="slides-grid"></div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <div class="bottom-info">
+    <em id="creditos-count">—</em> crédito<span id="creditos-s">s</span> · <span id="slides-filled">0</span>/7 slides preenchidos
+  </div>
+  <div class="bottom-actions">
+    <span class="gen-status" id="gen-status">Gerando slides...</span>
+    <button type="button" class="btn-auto" onclick="window.location='/static/chat.html'">Modo automático</button>
+    <button type="button" class="btn-gen" id="btn-gerar" onclick="gerarCarrossel()">Gerar carrossel →</button>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location = '/';
+const H = { 'Authorization': 'Bearer ' + token };
+
+const TIPOS = [
+  { key: 'gancho',   label: 'Gancho',   cls: 'tipo-gancho',   desc: 'Para o scroll' },
+  { key: 'setup',    label: 'Setup',    cls: 'tipo-setup',    desc: 'Contexto' },
+  { key: 'conteudo', label: 'Conteúdo', cls: 'tipo-conteudo', desc: 'Valor' },
+  { key: 'conteudo', label: 'Conteúdo', cls: 'tipo-conteudo', desc: 'Valor' },
+  { key: 'conteudo', label: 'Conteúdo', cls: 'tipo-conteudo', desc: 'Valor' },
+  { key: 'virada',   label: 'Virada',   cls: 'tipo-virada',   desc: 'Insight' },
+  { key: 'cta',      label: 'CTA',      cls: 'tipo-cta',      desc: 'Ação' },
+];
+
+const PLACEHOLDERS_TITULO = [
+  'Ex: O erro que 90% comete sem saber…',
+  'Ex: Neste carrossel você vai aprender…',
+  'Ex: Motivo 1 — Consistência bate talento',
+  'Ex: Motivo 2 — Distribuição é tudo',
+  'Ex: Motivo 3 — A audiência certa importa',
+  'Ex: Na verdade, o problema não é X. É Y.',
+  'Ex: Salva esse post. Você vai precisar.',
+];
+const PLACEHOLDERS_CORPO = [
+  '',
+  'Contextualize o problema. Use dado ou estatística.',
+  'Explicação em até 35 palavras + exemplo concreto.',
+  'Explicação em até 35 palavras + exemplo concreto.',
+  'Explicação em até 35 palavras + exemplo concreto.',
+  'O insight mais compartilhável. Inversão de crença.',
+  'Texto do CTA — o que você quer que a pessoa faça.',
+];
+
+function buildCards() {
+  const grid = document.getElementById('slides-grid');
+  grid.innerHTML = '';
+  TIPOS.forEach((t, i) => {
+    const num = i + 1;
+    const card = document.createElement('div');
+    card.className = 'slide-card';
+    card.id = 'card-' + num;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-num">${num}</div>
+        <span class="card-tipo ${t.cls}">${t.label}</span>
+        <span class="card-desc">${t.desc}</span>
+      </div>
+      <div>
+        <div class="input-lbl">Título <span style="color:#444;font-weight:400">(máx 8 palavras)</span></div>
+        <input type="text" class="slide-input" id="titulo-${num}"
+          placeholder="${PLACEHOLDERS_TITULO[i]}" maxlength="120"
+          oninput="atualizarContador()">
+      </div>
+      <div>
+        <div class="input-lbl">Corpo <span style="color:#444;font-weight:400">(máx 35 palavras)</span></div>
+        <textarea class="slide-input" id="corpo-${num}" rows="3"
+          placeholder="${PLACEHOLDERS_CORPO[i]}" maxlength="400"
+          oninput="atualizarContador()"></textarea>
+      </div>
+      <div>
+        <div class="input-lbl">Palavra em destaque <span style="color:#444;font-weight:400">(opcional)</span></div>
+        <input type="text" class="slide-input" id="hl-${num}"
+          placeholder="Palavra exata do título para destacar com a cor da marca" maxlength="80">
+        <div class="hl-hint" style="margin-top:4px">Deve ser uma substring exata do título acima.</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function preencherCards(slides) {
+  slides.forEach((s, i) => {
+    const num = i + 1;
+    const tEl = document.getElementById('titulo-' + num);
+    const cEl = document.getElementById('corpo-'  + num);
+    const hEl = document.getElementById('hl-'     + num);
+    if (tEl) tEl.value = s.titulo || '';
+    if (cEl) cEl.value = s.corpo  || s.cta || '';
+    if (hEl) hEl.value = s.titulo_highlight || '';
+    // Marca o card visualmente como preenchido
+    const card = document.getElementById('card-' + num);
+    if (card && (s.titulo || s.corpo)) card.classList.add('has-content');
+  });
+  atualizarContador();
+}
+
+function atualizarContador() {
+  let filled = 0;
+  for (let i = 1; i <= 7; i++) {
+    if ((document.getElementById('titulo-' + i)?.value || '').trim()) filled++;
+  }
+  document.getElementById('slides-filled').textContent = filled;
+}
+
+function getSettings() {
+  return {
+    tema:        document.getElementById('s-tema').value.trim(),
+    nicho:       document.getElementById('s-nicho').value.trim(),
+    plataforma:  document.getElementById('s-plataforma').value,
+    modelo:      document.getElementById('s-modelo').value,
+    finalidade:  document.getElementById('s-finalidade').value,
+    cta_objetivo:document.getElementById('s-cta').value,
+    cores_marca: document.getElementById('s-cores').value.trim(),
+    username:    document.getElementById('s-username').value.replace('@','').trim(),
+  };
+}
+
+async function gerarSugestoes() {
+  const { tema } = getSettings();
+  if (!tema) { alert('Preencha o tema do carrossel primeiro.'); return; }
+
+  const btn     = document.getElementById('btn-suggest');
+  const spinner = document.getElementById('suggest-spinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline';
+
+  try {
+    const r = await fetch('/editor/sugestoes', {
+      method: 'POST',
+      headers: Object.assign({}, H, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify(getSettings()),
+    });
+    if (!r.ok) throw new Error('Erro ao gerar sugestões.');
+    const d = await r.json();
+    if (d.slides && d.slides.length) {
+      preencherCards(d.slides);
+      // Scroll suave para os cards
+      document.getElementById('slides-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    btn.textContent = 'Gerar novamente';
+  }
+}
+
+async function gerarCarrossel() {
+  const settings = getSettings();
+  if (!settings.tema) { alert('Preencha o tema do carrossel.'); return; }
+
+  const slides = [];
+  let algumPreenchido = false;
+  for (let i = 1; i <= 7; i++) {
+    const titulo = (document.getElementById('titulo-' + i)?.value || '').trim();
+    const corpo  = (document.getElementById('corpo-'  + i)?.value || '').trim();
+    const hl     = (document.getElementById('hl-'     + i)?.value || '').trim();
+    if (titulo) algumPreenchido = true;
+    slides.push({
+      numero:           i,
+      tipo:             TIPOS[i-1].key,
+      titulo:           titulo,
+      corpo:            corpo,
+      titulo_highlight: hl,
+      categoria_label:  settings.tema.toUpperCase().slice(0, 20),
+      dado_destaque:    '',
+      cta:              i === 7 ? corpo : '',
+    });
+  }
+  if (!algumPreenchido) { alert('Preencha pelo menos o título do Slide 1 ou use as Sugestões com IA.'); return; }
+
+  const btn = document.getElementById('btn-gerar');
+  const status = document.getElementById('gen-status');
+  btn.disabled = true;
+  status.style.display = 'inline';
+
+  const payload = Object.assign({}, settings, {
+    slides,
+    usar_foto: document.getElementById('toggle-foto').checked,
+  });
+
+  try {
+    const r = await fetch('/editor/gerar', {
+      method: 'POST',
+      headers: Object.assign({}, H, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || 'Erro ao iniciar geração.');
+    }
+    const d = await r.json();
+    localStorage.setItem('job_id', d.job_id);
+    window.location = '/static/loading.html';
+  } catch (e) {
+    alert(e.message);
+    btn.disabled = false;
+    status.style.display = 'none';
+  }
+}
+
+async function init() {
+  buildCards();
+  try {
+    const r = await fetch('/me', { headers: H });
+    const d = await r.json();
+    const c = d.creditos;
+    document.getElementById('creditos-count').textContent = c;
+    document.getElementById('creditos-s').textContent = c !== 1 ? 's' : '';
+    if (d.username) document.getElementById('s-username').value = '@' + d.username;
+  } catch (e) {}
+}
+
+// Mostra/oculta o toggle de foto dependendo do template
+document.getElementById('s-modelo')?.addEventListener('change', function() {
+  document.querySelector('.toggle-row').style.display = this.value === '4' ? 'flex' : 'none';
+});
+
+init();
+</script>
+</body>
+</html>

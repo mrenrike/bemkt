@@ -1,0 +1,29 @@
+# Credenciais — NUNCA commitar
+.env
+*.db
+*.db-shm
+*.db-wal
+
+# Uploads e gerados
+uploads/
+carrosseis/
+agencia_ia.log
+carrossel_*/
+teste_*/
+testes_*/
+tmp_*/
+agencia.db
+agencia_v2.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Playwright
+.playwright/

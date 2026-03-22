@@ -1,69 +1,654 @@
-<!-- app/static/planos.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Agência IA — Planos</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>BEMKT — Planos</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
+  <script src="/static/nav.js" defer></script>
   <style>
-    .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:32px 20px;max-width:960px;margin:0 auto}
-    .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:16px}
-    .plan-card.featured{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-    .plan-name{font-size:20px;font-weight:700}
-    .plan-price{font-size:36px;font-weight:700;color:var(--accent)}
-    .plan-price span{font-size:16px;color:var(--muted);font-weight:400}
-    .plan-credits{color:var(--muted);font-size:14px}
-    .plan-btn{margin-top:auto}
-    .header{text-align:center;padding:48px 20px 0}
-    .loading{display:none;color:var(--muted);font-size:13px;margin-top:8px}
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* ── Hero header ── */
+    .plans-hero {
+      text-align: center;
+      padding: 64px 20px 48px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .plans-kicker {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(140,255,46,.08);
+      border: 1px solid rgba(140,255,46,.2);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+    }
+    .plans-title {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1.15;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .plans-title span { color: var(--accent); }
+    .plans-sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .trust-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    .trust-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #b0b0b0;
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 100px;
+      padding: 6px 14px;
+    }
+    .trust-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── What's included section ── */
+    .included-section {
+      max-width: 720px;
+      margin: 0 auto 56px;
+      padding: 0 20px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .included-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 12px;
+    }
+    .included-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color .2s;
+    }
+    .included-item:hover { border-color: #2a2a2a; }
+    .included-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 1px;
+    }
+    .included-text { font-size: 13px; color: #c0c0c0; line-height: 1.4; }
+    .included-text strong { color: var(--text); font-weight: 700; display: block; margin-bottom: 1px; }
+
+    /* ── Plans grid ── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 20px;
+      padding: 0 20px 20px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .loading-placeholder { color: var(--muted); text-align: center; grid-column: 1 / -1; padding: 48px 0; }
+
+    /* ── Card ── */
+    .plan-card {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 20px;
+      padding: 32px 26px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color .25s, transform .2s;
+    }
+    .plan-card:hover { border-color: #2e2e2e; transform: translateY(-2px); }
+    .plan-card.featured {
+      border-color: var(--accent);
+      background: linear-gradient(160deg, rgba(140,255,46,.04) 0%, #111 60%);
+    }
+    .plan-card.featured:hover { transform: translateY(-3px); }
+
+    .plan-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #080808;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      padding: 5px 18px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .plan-name {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .plan-price-row { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 4px; }
+    .plan-price {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -2.5px;
+      line-height: 1;
+      color: var(--text);
+    }
+    .plan-price-currency {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .plan-savings-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #080808;
+      background: var(--accent);
+      border-radius: 6px;
+      padding: 3px 8px;
+      margin-bottom: 8px;
+    }
+    .plan-price-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; line-height: 1.4; }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex: 1;
+    }
+    .plan-features li {
+      font-size: 13px;
+      color: #b0b0b0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      line-height: 1.45;
+    }
+    .plan-features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 800;
+      flex-shrink: 0;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+
+    /* ── Buttons ── */
+    .plan-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity .2s, transform .15s;
+      margin-bottom: 16px;
+      letter-spacing: .3px;
+    }
+    .plan-card.featured .plan-btn {
+      background: var(--accent);
+      color: #080808;
+    }
+    .plan-card:not(.featured) .plan-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid #2a2a2a;
+    }
+    .plan-btn:hover:not(:disabled) { opacity: .88; transform: scale(1.01); }
+    .plan-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    /* ── Pay icons ── */
+    .pay-methods {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .pay-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #1e1e1e;
+      background: #0e0e0e;
+      transition: border-color .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    .pay-icon:hover { border-color: #3a3a3a; transform: translateY(-1px); }
+    .pay-icon:active { transform: translateY(0); }
+
+    .pay-secure {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    /* ── FAQ ── */
+    .faq-section {
+      max-width: 680px;
+      margin: 60px auto 0;
+      padding: 0 20px;
+    }
+    .faq-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      color: var(--text);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .faq-item {
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+      padding: 18px 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: color .2s;
+    }
+    .faq-question:hover { color: var(--accent); }
+    .faq-chevron {
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--muted);
+      transition: transform .25s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--accent); }
+    .faq-answer {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease, padding .3s ease;
+    }
+    .faq-item.open .faq-answer { max-height: 200px; padding-bottom: 18px; }
+
+    /* ── Bottom trust bar ── */
+    .trust-bar {
+      text-align: center;
+      padding: 48px 20px 64px;
+      color: #444;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .trust-bar-icons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .trust-bar-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid #1e1e1e;
+      background: #0d0d0d;
+    }
+    .trust-bar-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #444;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 540px) {
+      .plans-hero { padding: 48px 16px 36px; }
+      .included-section, .faq-section { padding: 0 14px; }
+      .plans-grid { padding: 0 14px 14px; gap: 16px; }
+    }
   </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
 </head>
 <body>
-<div class="header">
-  <div style="font-size:40px">💳</div>
-  <h1 style="margin-top:16px">Escolha seu plano</h1>
-  <p class="subtitle">Créditos não expiram • Pagamento via PIX ou cartão</p>
-</div>
-<div class="plans-grid" id="plans-grid">
-  <p style="color:var(--muted)">Carregando planos...</p>
-</div>
-<script>
-const token=localStorage.getItem('token');
-if(!token) window.location='/';
 
-async function init(){
-  const r=await fetch('/planos');
-  const planos=await r.json();
-  const grid=document.getElementById('plans-grid');
-  grid.innerHTML='';
-  const keys=Object.keys(planos);
-  keys.forEach((key,i)=>{
-    const p=planos[key];
-    const card=document.createElement('div');
-    card.className='plan-card'+(i===1?' featured':'');
-    card.innerHTML=`
-      <div class="plan-name">${p.nome}</div>
-      <div class="plan-price">R$ ${p.valor.toFixed(2).replace('.',',')} <span>/ único</span></div>
-      <div class="plan-credits">${p.creditos} crédito${p.creditos>1?'s':''} para gerar carrosséis</div>
-      <button class="btn plan-btn" onclick="comprar('${key}',this)">Comprar agora</button>
-      <p class="loading" id="loading-${key}">Redirecionando para pagamento...</p>
-    `;
-    grid.appendChild(card);
-  });
+<!-- Hero -->
+<div class="plans-hero">
+  <div class="plans-kicker">BEMKT · Planos</div>
+  <h1 class="plans-title">Sem assinatura.<br><span>Pague só o que usar.</span></h1>
+  <p class="plans-sub">Gere carrosseis profissionais para Instagram com IA.<br>Créditos na sua conta, use quando quiser.</p>
+  <div class="trust-pills">
+    <div class="trust-pill"><span class="trust-pill-dot"></span>Créditos não expiram</div>
+    <div class="trust-pill"><span class="trust-pill-dot"></span>Aprovação imediata</div>
+    <div class="trust-pill"><span class="trust-pill-dot"></span>Reembolso em 7 dias</div>
+  </div>
+</div>
+
+<!-- What's included -->
+<div class="included-section">
+  <div class="section-label">O que está incluso em todos os planos</div>
+  <div class="included-grid">
+    <div class="included-item">
+      <div class="included-icon">🖼️</div>
+      <div class="included-text"><strong>7 slides 1080×1080px</strong>Formato quadrado ideal para Instagram</div>
+    </div>
+    <div class="included-item">
+      <div class="included-icon">🎨</div>
+      <div class="included-text"><strong>5 templates profissionais</strong>Designs modernos, prontos para publicar</div>
+    </div>
+    <div class="included-item">
+      <div class="included-icon">✍️</div>
+      <div class="included-text"><strong>Legenda do post por IA</strong>Texto persuasivo gerado automaticamente</div>
+    </div>
+    <div class="included-item">
+      <div class="included-icon">⚡</div>
+      <div class="included-text"><strong>Modo Automático + Manual com IA</strong>Gere no automático ou personalize cada slide</div>
+    </div>
+    <div class="included-item">
+      <div class="included-icon">📦</div>
+      <div class="included-text"><strong>Download ZIP + entrega por e-mail</strong>Receba seus arquivos na hora</div>
+    </div>
+    <div class="included-item">
+      <div class="included-icon">💡</div>
+      <div class="included-text"><strong>Sugestões de tema por nicho</strong>Ideias de conteúdo adaptadas ao seu mercado</div>
+    </div>
+  </div>
+</div>
+
+<!-- Plans grid -->
+<div class="plans-grid" id="plans-grid">
+  <p class="loading-placeholder">Carregando planos...</p>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-title">Dúvidas frequentes</div>
+
+  <div class="faq-item">
+    <button type="button" class="faq-question" onclick="toggleFaq(this)">
+      Os créditos expiram?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      Não. Seus créditos ficam na conta indefinidamente — use hoje, use daqui a seis meses. Não há prazo de validade nem taxa de inatividade.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button type="button" class="faq-question" onclick="toggleFaq(this)">
+      Posso pedir reembolso?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      Sim. Se você não estiver satisfeito por qualquer motivo, entre em contato em até 7 dias corridos após a compra e devolvemos 100% do valor sem burocracia.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button type="button" class="faq-question" onclick="toggleFaq(this)">
+      Funciona para LinkedIn e TikTok também?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      Os slides são gerados em 1080×1080px, formato ideal para Instagram. Para LinkedIn e TikTok, você pode adaptar o conteúdo manualmente — as imagens e legendas geradas pela IA funcionam muito bem nesses canais também.
+    </div>
+  </div>
+</div>
+
+<!-- Bottom trust bar -->
+<div class="trust-bar">
+  <div class="trust-bar-icons" id="trust-bar-icons">
+    <!-- preenchido pelo JS -->
+  </div>
+  <div class="trust-bar-text">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Pagamento 100% seguro · Mercado Pago
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location = '/';
+
+const FEATURES = {
+  avulso: [
+    '1 carrossel completo',
+    '7 slides em 1080×1080px',
+    '5 templates profissionais',
+    'Legenda do post por IA',
+    'Modo Automático e Manual',
+    'Download ZIP + e-mail',
+  ],
+  pack5: [
+    '5 carrosseis completos',
+    '7 slides cada em 1080×1080px',
+    '5 templates profissionais',
+    'Legenda do post por IA',
+    'Modo Automático e Manual',
+    'Download ZIP + e-mail',
+    'Créditos não expiram',
+  ],
+  pack15: [
+    '15 carrosseis completos',
+    '7 slides cada em 1080×1080px',
+    '5 templates profissionais',
+    'Legenda do post por IA',
+    'Modo Automático e Manual',
+    'Download ZIP + e-mail',
+    'Créditos não expiram',
+  ],
+};
+
+/* SVG inline de cada forma de pagamento */
+const PAY_ICONS = {
+  pix: `<svg width="36" height="14" viewBox="0 0 36 14" fill="none" aria-label="PIX">
+    <text x="0" y="11" font-family="inherit" font-size="11" font-weight="800" fill="#32BCAD" letter-spacing="0.5">PIX</text>
+    <polygon points="28,0 32,4 36,0 34,2 32,0 30,2" fill="#32BCAD"/>
+    <polygon points="28,14 32,10 36,14 34,12 32,14 30,12" fill="#32BCAD"/>
+    <polygon points="24,7 28,3 28,11" fill="#32BCAD"/>
+    <polygon points="36,7 32,3 32,11" fill="#32BCAD"/>
+  </svg>`,
+
+  visa: `<svg width="34" height="11" viewBox="0 0 34 11" aria-label="Visa">
+    <text x="0" y="10" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#1A1F71" letter-spacing="-0.5">VISA</text>
+  </svg>`,
+
+  mastercard: `<svg width="28" height="18" viewBox="0 0 28 18" aria-label="Mastercard">
+    <circle cx="10" cy="9" r="9" fill="#EB001B"/>
+    <circle cx="18" cy="9" r="9" fill="#F79E1B"/>
+    <path d="M14 2.8a9 9 0 0 1 0 12.4A9 9 0 0 1 14 2.8z" fill="#FF5F00"/>
+  </svg>`,
+
+  applepay: `<svg width="42" height="18" viewBox="0 0 42 18" aria-label="Apple Pay">
+    <text x="0" y="13" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" font-weight="600" fill="#f0f0f0"> Pay</text>
+    <path d="M5 4.5c-.6.7-1.5.6-1.5.6S3.3 4.2 4 3.5C4.6 2.8 5.5 2.9 5.5 2.9S5.6 3.8 5 4.5zm.5.8c-.9-.1-1.7.5-2.1.5-.4 0-1-.5-1.7-.5C.8 5.3 0 6 0 7.3c0 2.5 2.2 5.7 2.2 5.7s.8.1 1.5-1c.4-.6 1-.9 1.5-.9.5 0 1.1.3 1.5.9.7 1.1 1.5 1 1.5 1S10 9.8 10 7.3c0-1.3-.8-2-1.7-2-.7 0-1.3.5-1.7.5-.4 0-.7-.2-.6-.5z" fill="#f0f0f0"/>
+  </svg>`,
+
+  googlepay: `<svg width="42" height="18" viewBox="0 0 42 18" aria-label="Google Pay">
+    <text x="0" y="13" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#f0f0f0">G</text>
+    <text x="11" y="13" font-family="Arial,sans-serif" font-size="11" font-weight="500" fill="#f0f0f0">Pay</text>
+    <circle cx="4.5" cy="4.5" r="4.5" fill="url(#g)" transform="translate(0,0)"/>
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="9" y2="9" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#4285F4"/>
+        <stop offset="33%" stop-color="#EA4335"/>
+        <stop offset="66%" stop-color="#FBBC05"/>
+        <stop offset="100%" stop-color="#34A853"/>
+      </linearGradient>
+    </defs>
+  </svg>`,
+};
+
+const LOCK_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+
+function payIconHTML(key, plano) {
+  return `<span class="pay-icon" role="button" tabindex="0" title="Pagar com ${key}" onclick="comprar('${plano}')" onkeydown="if(event.key==='Enter')comprar('${plano}')">${PAY_ICONS[key]}</span>`;
 }
 
-async function comprar(plano, btn){
-  btn.disabled=true;btn.textContent='Aguarde...';
-  document.getElementById('loading-'+plano).style.display='block';
-  const r=await fetch('/pagamento/criar',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({plano})
+function trustBarIconHTML(key) {
+  return `<span class="trust-bar-icon">${PAY_ICONS[key]}</span>`;
+}
+
+async function init() {
+  const r      = await fetch('/planos');
+  const planos = await r.json();
+  const grid   = document.getElementById('plans-grid');
+  const keys   = Object.keys(planos);
+
+  // Populate bottom trust bar icons
+  document.getElementById('trust-bar-icons').innerHTML =
+    ['pix','visa','mastercard','applepay','googlepay'].map(trustBarIconHTML).join('');
+
+  grid.innerHTML = keys.map((key, i) => {
+    const p        = planos[key];
+    const featured = i === 1;
+    const features = (FEATURES[key] || []).map(f => `<li>${f}</li>`).join('');
+
+    let sub = 'pagamento único';
+    let savingsBadge = '';
+    if (key === 'pack5') {
+      const perUnit = (p.valor / 5).toFixed(2).replace('.', ',');
+      sub = `R$${perUnit}/carrossel · 20% de economia`;
+      savingsBadge = `<div class="plan-savings-badge">20% off</div>`;
+    } else if (key === 'pack15') {
+      const perUnit = (p.valor / 15).toFixed(2).replace('.', ',');
+      sub = `R$${perUnit}/carrossel · 34% de economia`;
+      savingsBadge = `<div class="plan-savings-badge">34% off</div>`;
+    }
+
+    const priceFormatted = p.valor.toFixed(2).replace('.', ',').replace(',00', '');
+    const icons = ['pix','visa','mastercard','applepay','googlepay']
+      .map(m => payIconHTML(m, key)).join('');
+
+    return `
+      <div class="plan-card${featured ? ' featured' : ''}">
+        ${featured ? '<div class="plan-badge">MAIS POPULAR</div>' : ''}
+        <div class="plan-name">${p.nome}</div>
+        <div class="plan-price-row">
+          <span class="plan-price-currency">R$</span>
+          <span class="plan-price">${priceFormatted}</span>
+        </div>
+        ${savingsBadge}
+        <div class="plan-price-sub">${sub}</div>
+        <ul class="plan-features">${features}</ul>
+        <button type="button" class="plan-btn" id="btn-${key}" onclick="comprar('${key}')">
+          ${featured ? 'Comprar agora — Mais popular' : 'Comprar agora'}
+        </button>
+        <div class="pay-methods">${icons}</div>
+        <div class="pay-secure">${LOCK_SVG} Pagamento seguro</div>
+      </div>`;
+  }).join('');
+}
+
+async function comprar(plano) {
+  if (typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout', { content_name: plano });
+  if (typeof gtag !== 'undefined') gtag('event', 'begin_checkout', { item_id: plano });
+  const btn = document.getElementById('btn-' + plano);
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecionando...'; }
+  const r = await fetch('/pagamento/criar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ plano })
   });
-  if(!r.ok){btn.disabled=false;btn.textContent='Comprar agora';alert('Erro ao criar pagamento.');return;}
-  const d=await r.json();
-  window.location=d.init_point;
+  if (!r.ok) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Comprar agora'; }
+    alert('Erro ao criar pagamento. Tente novamente.');
+    return;
+  }
+  const d = await r.json();
+  window.location = d.init_point;
+}
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
 }
 
 init();

@@ -22,7 +22,6 @@ def criar_preferencia_mp(pagamento_id: int, plano_key: str) -> str:
             "success": f"{APP_URL}/static/chat.html",
             "failure": f"{APP_URL}/static/planos.html",
         },
-        "auto_return": "approved",
         "notification_url": f"{APP_URL}/webhook/mercadopago",
     }
     result = sdk.preference().create(pref)

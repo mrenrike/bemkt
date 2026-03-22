@@ -5,9 +5,17 @@ from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-change-in-production")
+_raw_secret = os.getenv("JWT_SECRET", "")
+if not _raw_secret or _raw_secret == "dev-secret-change-in-production":
+    import secrets as _secrets
+    _raw_secret = _secrets.token_hex(32)
+    import logging as _log
+    _log.getLogger(__name__).warning(
+        "JWT_SECRET não definido — usando chave aleatória (sessões serão perdidas ao reiniciar)"
+    )
+JWT_SECRET = _raw_secret
 ALGORITHM = "HS256"
-TOKEN_EXPIRE_HOURS = 72
+TOKEN_EXPIRE_HOURS = 24
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer = HTTPBearer()
@@ -40,3 +48,13 @@ def usuario_atual(credentials: HTTPAuthorizationCredentials = Depends(bearer)) -
         return int(sub)
     except (ValueError, TypeError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+
+def admin_atual(credentials: HTTPAuthorizationCredentials = Depends(bearer)) -> int:
+    from app.database import get_db
+    user_id = usuario_atual(credentials)
+    db = get_db()
+    row = db.execute("SELECT is_admin FROM users WHERE id=?", (user_id,)).fetchone()
+    db.close()
+    if not row or not row["is_admin"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
+    return user_id

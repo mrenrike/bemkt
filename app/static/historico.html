@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEMKT — Histórico</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
+  <script src="/static/nav.js" defer></script>
+  <style>
+    .hist-wrap         { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
+    .hist-title        { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .hist-sub          { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    .hist-empty        { text-align: center; padding: 64px 20px; color: var(--muted); grid-column: 1 / -1; }
+    .hist-empty-cta    { margin-top: 12px; }
+    .hist-empty a      { color: var(--accent); }
+    .hist-grid         { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .hist-card         { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color .2s; cursor: pointer; text-decoration: none; display: block; color: inherit; }
+    .hist-card:hover   { border-color: #333; }
+    .hist-thumb        { width: 100%; aspect-ratio: 1; background: var(--surface2); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .hist-thumb img    { width: 100%; height: 100%; object-fit: cover; transition: opacity .3s; }
+    .hist-thumb-placeholder { font-size: 32px; color: var(--border); }
+    .hist-card-body    { padding: 14px 16px; }
+    .hist-tema         { font-size: 13px; font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hist-meta         { display: flex; justify-content: space-between; align-items: center; }
+    .hist-date         { font-size: 11px; color: var(--muted); }
+    .hist-badge        { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 100px; text-transform: uppercase; }
+    .badge-pronto      { background: rgba(140,255,46,.12); color: var(--accent); }
+    .badge-gerando     { background: rgba(255,255,255,.06); color: var(--muted); }
+    .badge-erro        { background: rgba(255,68,68,.12); color: var(--red); }
+    .badge-pendente    { background: rgba(255,255,255,.06); color: var(--muted); }
+    .hist-regen        { margin-top: 10px; width: 100%; padding: 8px 0; background: rgba(255,68,68,.10); border: 1px solid rgba(255,68,68,.25); border-radius: 8px; color: var(--red); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
+    .hist-regen:hover  { background: rgba(255,68,68,.20); border-color: rgba(255,68,68,.5); }
+    .hist-regen:disabled { opacity: .5; cursor: not-allowed; }
+  </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
+</head>
+<body>
+<div class="hist-wrap">
+  <div class="hist-title">Histórico</div>
+  <p class="hist-sub">Seus carrosseis gerados</p>
+  <div class="hist-grid" id="hist-grid">
+    <p class="hist-empty">Carregando...</p>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location = '/';
+
+const H = { 'Authorization': 'Bearer ' + token };
+
+const STATUS_LABEL = { pronto: 'Pronto', gerando: 'Gerando...', erro: 'Erro', pendente: 'Aguardando' };
+
+async function regenerar(jobId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    const r = await fetch('/job/' + jobId + '/regenerar', { method: 'POST', headers: H });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      alert(d.detail || 'Erro ao regenerar.');
+      btn.disabled = false;
+      btn.textContent = 'Tentar novamente';
+      return;
+    }
+    localStorage.setItem('job_id', jobId);
+    window.location = '/static/loading.html';
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Tentar novamente';
+  }
+}
+
+function formatData(iso) {
+  const d = new Date(iso + 'Z');
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+async function carregarThumb(jobId, imgEl) {
+  try {
+    const r = await fetch('/job/' + jobId + '/slide/slide_01.png', { headers: H });
+    if (!r.ok) return;
+    imgEl.src = URL.createObjectURL(await r.blob());
+    imgEl.style.opacity = '1';
+  } catch (_) {}
+}
+
+async function init() {
+  const grid = document.getElementById('hist-grid');
+  const r = await fetch('/historico', { headers: H });
+  if (!r.ok) { grid.innerHTML = '<p class="hist-empty" style="grid-column:1/-1">Erro ao carregar histórico.</p>'; return; }
+
+  const lista = await r.json();
+  if (!lista.length) {
+    grid.innerHTML = '<div class="hist-empty"><p>Nenhum carrossel ainda.</p><p class="hist-empty-cta"><a href="/static/chat.html">Criar meu primeiro carrossel →</a></p></div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  lista.forEach(job => {
+    const card = document.createElement('a');
+    card.className = 'hist-card';
+    card.href = '#';
+    card.setAttribute('aria-label', job.tema || 'Carrossel #' + job.id);
+
+    if (job.status === 'pronto') {
+      card.addEventListener('click', e => {
+        e.preventDefault();
+        localStorage.setItem('job_id', job.id);
+        window.location = '/static/preview.html';
+      });
+    }
+
+    const tema = job.tema ? (job.tema.length > 60 ? job.tema.slice(0, 58) + '…' : job.tema) : '(sem tema)';
+    const badgeClass = 'badge-' + (job.status || 'pendente');
+    const label = STATUS_LABEL[job.status] || job.status;
+
+    const regenBtn = (job.status === 'erro' || job.status === 'pendente')
+      ? `<button class="hist-regen" onclick="event.stopPropagation();regenerar(${job.id},this)">↺ Tentar novamente</button>`
+      : '';
+
+    card.innerHTML = `
+      <div class="hist-thumb" id="thumb-${job.id}">
+        <span class="hist-thumb-placeholder">▤</span>
+      </div>
+      <div class="hist-card-body">
+        <div class="hist-tema">${tema}</div>
+        <div class="hist-meta">
+          <span class="hist-date">${formatData(job.criado_em)}</span>
+          <span class="hist-badge ${badgeClass}">${label}</span>
+        </div>
+        ${regenBtn}
+      </div>`;
+    grid.appendChild(card);
+
+    // Carrega thumbnail apenas para carrosseis prontos
+    if (job.status === 'pronto') {
+      const img = document.createElement('img');
+      img.alt = 'Preview ' + (job.tema || '');
+      img.style.opacity = '0';
+      const thumbEl = card.querySelector('.hist-thumb');
+      thumbEl.innerHTML = '';
+      thumbEl.appendChild(img);
+      // Lazy load via IntersectionObserver
+      const obs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          obs.disconnect();
+          carregarThumb(job.id, img);
+        }
+      }, { rootMargin: '100px' });
+      obs.observe(card);
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>

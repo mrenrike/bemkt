@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEMKT — Carrossel</title>
+  <meta property="og:title" content="Carrossel criado com BEMKT">
+  <meta property="og:description" content="Veja este carrossel criado com IA em segundos.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+      --border: #222; --text: #f0f0f0; --muted: #666;
+      --accent: #8cff2e;
+    }
+    html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* ── Top bar ── */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .logo   { font-size: 15px; font-weight: 800; letter-spacing: -.3px; text-decoration: none; color: var(--text); }
+    .logo span { color: var(--accent); }
+    .cta-btn { padding: 9px 18px; background: var(--accent); color: #080808; font-weight: 800; font-size: 13px; border-radius: 100px; text-decoration: none; white-space: nowrap; transition: opacity .2s; }
+    .cta-btn:hover { opacity: .85; }
+
+    /* ── Carousel section ── */
+    .carousel-section { display: flex; flex-direction: column; align-items: center; padding: 28px 16px 16px; gap: 14px; }
+    .swiper-wrapper-outer { width: 100%; max-width: 480px; position: relative; }
+    .swiper { width: 100%; border-radius: 16px; overflow: hidden; background: var(--surface); box-shadow: 0 8px 40px rgba(0,0,0,.6); }
+    .swiper::before { content: ''; display: block; padding-top: 100%; }
+    .swiper .swiper-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .swiper-slide { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--surface); cursor: zoom-in; position: relative; }
+    .swiper-slide img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .3s; }
+
+    /* Skeleton */
+    .slide-skeleton { width: 100%; height: 100%; position: absolute; inset: 0; background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; z-index: 0; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Nav */
+    .swiper-button-prev,
+    .swiper-button-next { color: var(--text); background: rgba(0,0,0,.55); width: 36px; height: 36px; border-radius: 50%; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background .2s; }
+    .swiper-button-prev:hover,
+    .swiper-button-next:hover { background: rgba(255,255,255,.12); }
+    .swiper-button-prev::after,
+    .swiper-button-next::after { font-size: 13px; font-weight: 700; }
+    .swiper-pagination { bottom: 10px; }
+    .swiper-pagination-bullet { background: rgba(255,255,255,.3); opacity: 1; width: 7px; height: 7px; transition: background .25s, width .25s; }
+    .swiper-pagination-bullet-active { background: var(--accent); width: 20px; border-radius: 4px; }
+
+    /* Counter */
+    .slide-counter { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .5px; }
+    .slide-counter em { color: var(--text); font-style: normal; }
+
+    /* ── Legenda ── */
+    .legenda-wrap { width: 100%; max-width: 480px; padding: 0 16px 8px; }
+    .section-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .legenda-box { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .legenda-txt { font-size: 13px; color: var(--text); line-height: 1.65; white-space: pre-wrap; word-break: break-word; max-height: 140px; overflow-y: auto; padding-right: 36px; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all .2s; white-space: nowrap; font-family: inherit; }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Hashtags ── */
+    .hashtags-wrap { width: 100%; max-width: 480px; padding: 0 16px 8px; }
+    .hashtags-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .hashtags-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .htag { font-size: 12px; font-weight: 600; color: #b0b0b0; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 100px; padding: 5px 11px; line-height: 1; }
+
+    /* ── CTA footer ── */
+    .footer-cta { width: 100%; max-width: 480px; padding: 8px 16px 48px; }
+    .footer-cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    .footer-cta-title { font-size: 15px; font-weight: 800; }
+    .footer-cta-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .footer-cta-link { padding: 13px 32px; background: var(--accent); color: #080808; font-weight: 800; font-size: 14px; border-radius: 100px; text-decoration: none; display: inline-block; transition: opacity .2s; }
+    .footer-cta-link:hover { opacity: .85; }
+
+    /* ── Zoom ── */
+    .zoom-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.92); align-items: center; justify-content: center; cursor: zoom-out; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: fadeIn .2s ease; }
+    .zoom-modal.open { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .zoom-modal img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 80px rgba(0,0,0,.8); pointer-events: none; animation: zoomIn .2s ease; }
+    @keyframes zoomIn { from { transform: scale(.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .zoom-close { position: fixed; top: 18px; right: 20px; width: 38px; height: 38px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; z-index: 10000; line-height: 1; }
+    .zoom-close:hover { background: rgba(255,255,255,.22); }
+    .zoom-counter { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.6); font-weight: 600; letter-spacing: .5px; z-index: 10000; }
+
+    /* ── Error ── */
+    .error-state { color: #ff5a5a; padding: 40px; text-align: center; }
+  </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="logo">BEMKT<span>.</span></a>
+  <a href="/static/chat.html" class="cta-btn">Criar o meu →</a>
+</div>
+
+<div class="carousel-section">
+  <div class="swiper-wrapper-outer">
+    <div class="swiper" id="main-swiper">
+      <div class="swiper-wrapper" id="swiper-slides"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+  <div class="slide-counter" id="slide-counter">
+    Slide <em id="counter-current">1</em> de <em id="counter-total">?</em>
+  </div>
+</div>
+
+<!-- Legenda -->
+<div class="legenda-wrap" id="legenda-wrap" style="display:none">
+  <div class="section-label">Legenda sugerida para o post</div>
+  <div class="legenda-box">
+    <p class="legenda-txt" id="legenda-txt"></p>
+    <button type="button" class="copy-btn" onclick="copiarLegenda()">Copiar</button>
+  </div>
+</div>
+
+<!-- Hashtags -->
+<div class="hashtags-wrap" id="hashtags-wrap" style="display:none">
+  <div class="hashtags-header">
+    <div class="section-label" style="margin-bottom:0">Hashtags sugeridas</div>
+    <button type="button" class="copy-btn" id="hashtags-copy" onclick="copiarHashtags()">Copiar todas</button>
+  </div>
+  <div class="hashtags-chips" id="hashtags-chips"></div>
+</div>
+
+<!-- CTA footer -->
+<div class="footer-cta" id="footer-cta" style="display:none">
+  <div class="footer-cta-box">
+    <div class="footer-cta-title">Crie o seu carrossel em segundos</div>
+    <div class="footer-cta-sub">IA que gera slides prontos para o Instagram.<br>Sem designer. Sem câmera. Sem enrolação.</div>
+    <a href="/static/chat.html" class="footer-cta-link">Criar grátis →</a>
+  </div>
+</div>
+
+<!-- Modal zoom -->
+<div class="zoom-modal" id="zoom-modal">
+  <button type="button" class="zoom-close" onclick="fecharZoom()">&#x2715;</button>
+  <img id="zoom-img" src="" alt="Slide ampliado">
+  <div class="zoom-counter" id="zoom-counter"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  const token = window.location.pathname.split('/share/')[1];
+  if (!token) document.getElementById('swiper-slides').innerHTML = '<p class="error-state">Link inválido.</p>';
+
+  let swiper = null;
+  const slideUrls = {};
+  let totalSlides = 0;
+  let _hashtagsList = [];
+
+  function atualizarContador(atual, total) {
+    document.getElementById('counter-current').textContent = atual;
+    document.getElementById('counter-total').textContent   = total;
+  }
+
+  function initSwiper(count) {
+    swiper = new Swiper('#main-swiper', {
+      loop: false, slidesPerView: 1, centeredSlides: true, grabCursor: true,
+      keyboard: { enabled: true },
+      pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
+      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+      on: { slideChange() { atualizarContador(this.realIndex + 1, count); } },
+    });
+    atualizarContador(1, count);
+  }
+
+  function abrirZoom(index) {
+    const src = slideUrls[index];
+    if (!src) return;
+    document.getElementById('zoom-img').src             = src;
+    document.getElementById('zoom-counter').textContent = 'Slide ' + (index + 1) + ' de ' + totalSlides;
+    document.getElementById('zoom-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharZoom() {
+    document.getElementById('zoom-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('zoom-modal').addEventListener('click', fecharZoom);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharZoom(); });
+
+  async function init() {
+    if (!token) return;
+    const swiperSlides = document.getElementById('swiper-slides');
+    let info;
+    try {
+      const r = await fetch('/share/' + token + '/info');
+      if (!r.ok) throw new Error('not found');
+      info = await r.json();
+    } catch (e) {
+      swiperSlides.innerHTML = '<p class="error-state">Carrossel não encontrado ou link expirado.</p>';
+      return;
+    }
+
+    const slideFiles = info.slides || [];
+    totalSlides = slideFiles.length;
+
+    if (totalSlides === 0) {
+      swiperSlides.innerHTML = '<p class="error-state">Nenhum slide encontrado.</p>';
+      return;
+    }
+
+    // Update OG title with tema
+    if (info.tema) document.title = info.tema + ' — BEMKT';
+
+    slideFiles.forEach((filename, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'swiper-slide';
+
+      const skeleton = document.createElement('div');
+      skeleton.className = 'slide-skeleton';
+
+      const img = document.createElement('img');
+      img.alt = 'Slide ' + (i + 1);
+      img.style.opacity = '0';
+
+      slide.appendChild(skeleton);
+      slide.appendChild(img);
+      swiperSlides.appendChild(slide);
+      slide.addEventListener('click', () => abrirZoom(i));
+    });
+
+    initSwiper(totalSlides);
+
+    // Load images
+    slideFiles.forEach((filename, i) => {
+      const url = '/share/' + token + '/slide/' + filename;
+      const slide = swiperSlides.children[i];
+      const img = slide.querySelector('img');
+      const skeleton = slide.querySelector('.slide-skeleton');
+      img.src = url;
+      img.onload = () => {
+        slideUrls[i] = url;
+        img.style.opacity = '1';
+        if (skeleton) skeleton.style.display = 'none';
+        if (swiper) swiper.update();
+      };
+      img.onerror = () => { if (skeleton) skeleton.style.background = '#2a1a1a'; };
+    });
+
+    // Legenda
+    if (info.legenda) {
+      document.getElementById('legenda-txt').textContent = info.legenda;
+      document.getElementById('legenda-wrap').style.display = 'block';
+    }
+
+    // Hashtags
+    const tags = info.hashtags || [];
+    if (tags.length) {
+      _hashtagsList = tags;
+      const chips = document.getElementById('hashtags-chips');
+      chips.innerHTML = tags.map(t => `<span class="htag">${t}</span>`).join('');
+      document.getElementById('hashtags-wrap').style.display = 'block';
+    }
+
+    document.getElementById('footer-cta').style.display = 'block';
+  }
+
+  function copiarLegenda() {
+    const txt = document.getElementById('legenda-txt').textContent;
+    if (!txt) return;
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = document.querySelector('.legenda-wrap .copy-btn');
+      btn.textContent = 'Copiado!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copiarHashtags() {
+    const txt = _hashtagsList.join(' ');
+    if (!txt) return;
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = document.getElementById('hashtags-copy');
+      btn.textContent = 'Copiado!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar todas'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  init();
+</script>
+</body>
+</html>

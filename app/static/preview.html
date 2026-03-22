@@ -3,72 +3,560 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Agência IA — Prévia</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEMKT — Preview</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
+  <script src="/static/nav.js" defer></script>
   <style>
-    .header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border)}
-    .slides-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:24px}
-    .slide-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;aspect-ratio:1}
-    .slide-card img{width:100%;height:100%;object-fit:cover}
-    .actions{padding:24px;display:flex;flex-direction:column;gap:12px;max-width:480px;margin:0 auto}
-    .email-row{display:flex;gap:8px}
-    .email-row input{flex:1;padding:14px;background:#1e1e1e;border:1px solid var(--border);border-radius:10px;color:var(--text)}
-    .novo-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:16px;border-radius:10px;cursor:pointer;font-size:15px;width:100%}
+    body                { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Carrossel ── */
+    .carousel-section       { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px 16px; gap: 16px; }
+    .swiper-wrapper-outer   { width: 100%; max-width: 500px; position: relative; }
+    .swiper                 { width: 100%; border-radius: 16px; overflow: hidden; background: var(--surface); box-shadow: 0 8px 40px rgba(0,0,0,.6); }
+    .swiper::before         { content: ''; display: block; padding-top: 100%; }
+    .swiper .swiper-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .swiper-slide           { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--surface); cursor: zoom-in; position: relative; }
+    .swiper-slide img       { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .3s; position: relative; z-index: 1; }
+
+    /* Skeleton */
+    .slide-skeleton         { width: 100%; height: 100%; position: absolute; inset: 0; background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; z-index: 0; will-change: background-position; }
+    @keyframes shimmer      { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Setas */
+    .swiper-button-prev,
+    .swiper-button-next     { color: var(--text); background: rgba(0,0,0,.55); width: 38px; height: 38px; border-radius: 50%; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background .2s, transform .15s; }
+    .swiper-button-prev:hover,
+    .swiper-button-next:hover { background: rgba(255,255,255,.12); transform: scale(1.08); }
+    .swiper-button-prev::after,
+    .swiper-button-next::after { font-size: 14px; font-weight: 700; }
+
+    /* Paginação */
+    .swiper-pagination                    { bottom: 10px; }
+    .swiper-pagination-bullet             { background: rgba(255,255,255,.3); opacity: 1; width: 7px; height: 7px; transition: background .25s, width .25s; }
+    .swiper-pagination-bullet-active      { background: var(--accent); width: 20px; border-radius: 4px; }
+
+    /* Contador */
+    .slide-counter      { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .5px; -webkit-user-select: none; user-select: none; }
+    .slide-counter em   { color: var(--text); font-style: normal; }
+
+    /* ── Ações ── */
+    .actions            { padding: 8px 16px 40px; display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
+    .actions .btn       { width: 100%; text-align: center; }
+    .email-section      { display: flex; flex-direction: column; gap: 8px; }
+    .email-section label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .email-row          { display: flex; gap: 8px; }
+    .email-row input    { flex: 1; padding: 13px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 14px; outline: none; transition: border-color .2s; min-width: 0; }
+    .email-row input:focus { border-color: rgba(140,255,46,.4); }
+    .email-send-btn     { padding: 13px 20px; white-space: nowrap; flex-shrink: 0; border-radius: 10px; font-size: 14px; }
+    .email-status       { font-size: 13px; color: var(--muted); display: none; text-align: center; }
+
+    /* ── Modal zoom ── */
+    .zoom-modal         { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.92); align-items: center; justify-content: center; cursor: zoom-out; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: fadeIn .2s ease; }
+    .zoom-modal.open    { display: flex; }
+    @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+    .zoom-modal img     { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 80px rgba(0,0,0,.8); pointer-events: none; animation: zoomIn .2s ease; will-change: transform, opacity; }
+    @keyframes zoomIn   { from { transform: scale(.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .zoom-close         { position: fixed; top: 18px; right: 20px; width: 38px; height: 38px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; z-index: 10000; line-height: 1; }
+    .zoom-close:hover   { background: rgba(255,255,255,.22); }
+    .zoom-counter       { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.6); font-weight: 600; letter-spacing: .5px; z-index: 10000; }
+
+    /* ── Legenda ── */
+    .legenda-wrap       { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 16px 8px; }
+    .legenda-label      { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .legenda-box        { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .legenda-txt        { font-size: 13px; color: var(--text); line-height: 1.65; white-space: pre-wrap; word-break: break-word; max-height: 140px; overflow-y: auto; padding-right: 36px; }
+    .legenda-copy       { position: absolute; top: 10px; right: 10px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .legenda-copy:hover { border-color: var(--accent); color: var(--accent); }
+    .legenda-copy.copied{ border-color: var(--accent); color: var(--accent); }
+
+    /* ── Hashtags ── */
+    .hashtags-wrap      { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 16px 8px; }
+    .hashtags-header    { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .hashtags-chips     { display: flex; flex-wrap: wrap; gap: 7px; }
+    .htag               {
+      font-size: 12px;
+      font-weight: 600;
+      color: #b0b0b0;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 100px;
+      padding: 5px 11px;
+      cursor: default;
+      transition: border-color .18s, color .18s;
+      line-height: 1;
+    }
+    .htag:hover         { border-color: var(--accent); color: var(--accent); }
+    .hashtags-copy      { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all .2s; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
+    .hashtags-copy:hover { border-color: var(--accent); color: var(--accent); }
+    .hashtags-copy.copied { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Erro ── */
+    .error-state        { color: var(--red); padding: 24px; text-align: center; }
+
+    /* ── Edit hint on slide hover ── */
+    .swiper-slide::after {
+      content: '✏️ Editar';
+      position: absolute; bottom: 12px; right: 12px;
+      background: rgba(0,0,0,.7); color: #fff;
+      font-size: 11px; font-weight: 700; letter-spacing: .5px;
+      padding: 5px 10px; border-radius: 20px;
+      opacity: 0; transition: opacity .2s; z-index: 3;
+      pointer-events: none;
+    }
+    .swiper-slide:hover::after { opacity: 1; }
+
+    /* ── Editor modal ── */
+    .edit-modal         { display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(0,0,0,.85); align-items: flex-end; justify-content: center; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    .edit-modal.open    { display: flex; animation: slideUp .25s ease; }
+    @keyframes slideUp  { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    .edit-sheet         { background: #161616; border: 1px solid #2a2a2a; border-bottom: none; border-radius: 20px 20px 0 0; width: 100%; max-width: 560px; padding: 24px 20px 40px; display: flex; flex-direction: column; gap: 14px; max-height: 88vh; overflow-y: auto; }
+    .edit-handle        { width: 36px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 8px; }
+    .edit-title         { font-size: 14px; font-weight: 700; color: #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+    .edit-slide-num     { font-size: 11px; font-weight: 600; color: var(--accent); background: rgba(140,255,46,.1); padding: 3px 10px; border-radius: 20px; }
+    .edit-field         { display: flex; flex-direction: column; gap: 6px; }
+    .edit-field label   { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #555; }
+    .edit-field input,
+    .edit-field textarea { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; color: #f0f0f0; font-family: inherit; font-size: 14px; padding: 11px 14px; outline: none; transition: border-color .2s; resize: none; }
+    .edit-field input:focus,
+    .edit-field textarea:focus { border-color: rgba(140,255,46,.4); }
+    .edit-field textarea { min-height: 80px; line-height: 1.55; }
+    .edit-actions       { display: flex; gap: 10px; padding-top: 4px; }
+    .edit-save          { flex: 1; padding: 13px; background: var(--accent); color: #080808; border: none; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; transition: opacity .2s; }
+    .edit-save:hover    { opacity: .85; }
+    .edit-save:disabled { opacity: .4; cursor: not-allowed; }
+    .edit-cancel        { padding: 13px 20px; background: none; border: 1px solid #2a2a2a; border-radius: 10px; color: #888; font-family: inherit; font-size: 14px; cursor: pointer; transition: border-color .2s; }
+    .edit-cancel:hover  { border-color: #444; }
+    .edit-status        { font-size: 12px; color: var(--muted); text-align: center; min-height: 16px; }
   </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
 </head>
 <body>
-<div class="header">
-  <span style="font-weight:700;font-size:20px">🤖 Carrossel Pronto!</span>
-  <a href="/static/chat.html" style="color:var(--muted);font-size:14px">+ Novo carrossel</a>
-</div>
-<div class="slides-grid" id="slides-grid">
-  <p style="color:var(--muted);padding:24px">Carregando slides...</p>
-</div>
-<div class="actions">
-  <a id="download-btn" class="btn" style="text-align:center;display:block">⬇ Baixar ZIP (7 slides)</a>
-  <div class="email-row">
-    <input type="email" id="email-field" placeholder="seu@email.com">
-    <button class="btn" style="width:auto;padding:14px 20px" onclick="enviarEmail()">📧 Enviar</button>
+
+<!-- Carrossel -->
+<div class="carousel-section">
+  <div class="swiper-wrapper-outer">
+    <div class="swiper" id="main-swiper">
+      <div class="swiper-wrapper" id="swiper-slides"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination"></div>
+    </div>
   </div>
-  <p id="email-status" style="color:var(--muted);font-size:13px;display:none"></p>
-  <button class="novo-btn" onclick="window.location='/static/chat.html'">Gerar novo carrossel</button>
+  <div class="slide-counter" id="slide-counter">
+    Slide <em id="counter-current">1</em> de <em id="counter-total">7</em>
+  </div>
 </div>
+
+<!-- Legenda do post -->
+<div class="legenda-wrap" id="legenda-wrap" style="display:none">
+  <div class="legenda-label">Legenda sugerida para o post</div>
+  <div class="legenda-box">
+    <p class="legenda-txt" id="legenda-txt"></p>
+    <button type="button" class="legenda-copy" id="legenda-copy" onclick="copiarLegenda()">Copiar</button>
+  </div>
+</div>
+
+<!-- Hashtags sugeridas -->
+<div class="hashtags-wrap" id="hashtags-wrap" style="display:none">
+  <div class="hashtags-header">
+    <div class="legenda-label" style="margin-bottom:0">Hashtags sugeridas</div>
+    <button type="button" class="hashtags-copy" id="hashtags-copy" onclick="copiarHashtags()">Copiar todas</button>
+  </div>
+  <div class="hashtags-chips" id="hashtags-chips"></div>
+</div>
+
+<!-- Ações -->
+<div class="actions">
+  <button type="button" class="btn" id="download-btn">Baixar ZIP</button>
+  <button type="button" class="btn btn-ghost" id="share-btn" onclick="compartilhar()">Compartilhar carrossel</button>
+  <div class="email-section">
+    <label for="email-field">Enviar por e-mail</label>
+    <div class="email-row">
+      <input type="email" id="email-field" placeholder="seu@email.com">
+      <button type="button" class="btn email-send-btn" onclick="enviarEmail()">Enviar</button>
+    </div>
+    <p class="email-status" id="email-status"></p>
+  </div>
+  <button type="button" class="btn btn-ghost" onclick="window.location='/static/chat.html'">Gerar novo carrossel</button>
+</div>
+
+<!-- Modal de edição de slide -->
+<div class="edit-modal" id="edit-modal" role="dialog" aria-modal="true" aria-label="Editar slide">
+  <div class="edit-sheet" id="edit-sheet">
+    <div class="edit-handle"></div>
+    <div class="edit-title">
+      <span>Editar slide</span>
+      <span class="edit-slide-num" id="edit-slide-num">Slide 1</span>
+    </div>
+    <div class="edit-field">
+      <label for="edit-titulo">Título</label>
+      <input type="text" id="edit-titulo" placeholder="Título do slide" maxlength="120">
+    </div>
+    <div class="edit-field">
+      <label for="edit-corpo">Texto principal</label>
+      <textarea id="edit-corpo" placeholder="Texto do slide..." maxlength="400"></textarea>
+    </div>
+    <div class="edit-field" id="edit-dado-wrap" style="display:none">
+      <label for="edit-dado">Dado em destaque (ex: 87%)</label>
+      <input type="text" id="edit-dado" placeholder="Estatística ou dado" maxlength="30">
+    </div>
+    <div class="edit-actions">
+      <button type="button" class="edit-cancel" onclick="fecharEdit()">Cancelar</button>
+      <button type="button" class="edit-save" id="edit-save-btn" onclick="salvarSlide()">Regenerar slide</button>
+    </div>
+    <p class="edit-status" id="edit-status"></p>
+  </div>
+</div>
+
+<!-- Modal zoom -->
+<div class="zoom-modal" id="zoom-modal" role="dialog" aria-modal="true" aria-label="Visualização ampliada">
+  <button type="button" class="zoom-close" aria-label="Fechar zoom" onclick="fecharZoom()">&#x2715;</button>
+  <img id="zoom-img" src="" alt="Slide ampliado">
+  <div class="zoom-counter" id="zoom-counter"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-const token=localStorage.getItem('token');
-const jobId=localStorage.getItem('job_id');
-if(!token||!jobId) window.location='/';
-const H={'Authorization':'Bearer '+token};
+  const token = localStorage.getItem('token');
+  const jobId  = localStorage.getItem('job_id');
+  if (!token || !jobId) window.location = '/';
 
-async function init(){
-  const r=await fetch('/job/'+jobId+'/slides',{headers:H});
-  if(!r.ok){document.getElementById('slides-grid').innerHTML='<p style="color:red;padding:24px">Erro ao carregar slides.</p>';return;}
-  const d=await r.json();
-  const grid=document.getElementById('slides-grid');
-  grid.innerHTML='';
-  d.slides.forEach(url=>{
-    const card=document.createElement('div');
-    card.className='slide-card';
-    card.innerHTML=`<img src="${url}" loading="lazy">`;
-    grid.appendChild(card);
+  const H = { 'Authorization': 'Bearer ' + token };
+
+  let swiper      = null;
+  const slideUrls = {};
+  let totalSlides = 0;
+  let conteudoSlides = [];   // metadata dos slides para edição
+  let editSlideIndex = 0;    // índice 0-based do slide em edição
+
+  async function carregarImagem(url) {
+    try {
+      const r = await fetch(url, { headers: H });
+      if (!r.ok) return '';
+      return URL.createObjectURL(await r.blob());
+    } catch (e) { return ''; }
+  }
+
+  function initSwiper(count) {
+    swiper = new Swiper('#main-swiper', {
+      loop: false,
+      slidesPerView: 1,
+      centeredSlides: true,
+      grabCursor: true,
+      keyboard: { enabled: true },
+      pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
+      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+      on: { slideChange() { atualizarContador(this.realIndex + 1, count); } },
+    });
+    atualizarContador(1, count);
+  }
+
+  function atualizarContador(atual, total) {
+    document.getElementById('counter-current').textContent = atual;
+    document.getElementById('counter-total').textContent   = total;
+  }
+
+  // ── Zoom ──
+  function abrirZoom(index) {
+    const src = slideUrls[index];
+    if (!src) return;
+    document.getElementById('zoom-img').src              = src;
+    document.getElementById('zoom-counter').textContent  = 'Slide ' + (index + 1) + ' de ' + totalSlides;
+    document.getElementById('zoom-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharZoom() {
+    document.getElementById('zoom-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('zoom-modal').addEventListener('click', fecharZoom);
+
+  // ── Editor inline ──
+  function abrirEdit(index) {
+    if (conteudoSlides.length === 0) return;  // metadados ainda não carregaram
+    editSlideIndex = index;
+    const slide = conteudoSlides[index] || {};
+
+    document.getElementById('edit-slide-num').textContent = 'Slide ' + (index + 1);
+    document.getElementById('edit-titulo').value = slide.titulo || '';
+    document.getElementById('edit-corpo').value  = slide.corpo  || slide.texto || '';
+
+    const dado = slide.dado_destaque || '';
+    document.getElementById('edit-dado').value   = dado;
+    document.getElementById('edit-dado-wrap').style.display = dado !== null && dado !== undefined ? 'flex' : 'none';
+
+    document.getElementById('edit-status').textContent = '';
+    document.getElementById('edit-save-btn').disabled  = false;
+    document.getElementById('edit-save-btn').textContent = 'Regenerar slide';
+    document.getElementById('edit-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharEdit() {
+    document.getElementById('edit-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  async function salvarSlide() {
+    const btn    = document.getElementById('edit-save-btn');
+    const status = document.getElementById('edit-status');
+    const num    = (conteudoSlides[editSlideIndex] || {}).numero || (editSlideIndex + 1);
+
+    btn.disabled     = true;
+    btn.textContent  = 'Gerando...';
+    status.textContent = '';
+
+    const payload = {
+      titulo:         document.getElementById('edit-titulo').value.trim(),
+      corpo:          document.getElementById('edit-corpo').value.trim(),
+      dado_destaque:  document.getElementById('edit-dado').value.trim() || null,
+    };
+
+    try {
+      const r = await fetch('/job/' + jobId + '/slide/' + num + '/reeditar', {
+        method: 'POST',
+        headers: Object.assign({}, H, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error('fail');
+
+      // Atualiza metadados locais
+      if (conteudoSlides[editSlideIndex]) {
+        Object.assign(conteudoSlides[editSlideIndex], payload);
+      }
+
+      // Recarrega a imagem do slide atualizado
+      const slideUrl  = '/job/' + jobId + '/slide/slide_' + String(num).padStart(2,'0') + '.png?t=' + Date.now();
+      const novoSrc   = await carregarImagem(slideUrl);
+      if (novoSrc) {
+        slideUrls[editSlideIndex] = novoSrc;
+        const swiperEl = document.getElementById('swiper-slides');
+        const slideEl  = swiperEl.children[editSlideIndex];
+        if (slideEl) {
+          const img = slideEl.querySelector('img');
+          if (img) { img.style.opacity = '0'; img.src = novoSrc; img.onload = () => { img.style.opacity = '1'; }; }
+        }
+      }
+
+      status.textContent = '✓ Slide atualizado!';
+      setTimeout(fecharEdit, 1200);
+    } catch (e) {
+      status.textContent = 'Erro ao regenerar. Tente novamente.';
+      btn.disabled    = false;
+      btn.textContent = 'Regenerar slide';
+    }
+  }
+
+  document.getElementById('edit-sheet').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('edit-modal').addEventListener('click', fecharEdit);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { fecharZoom(); fecharEdit(); }
   });
-  document.getElementById('download-btn').href='/job/'+jobId+'/download';
-  // preenche email do usuário
-  const me=await fetch('/me',{headers:H});
-  const md=await me.json();
-  document.getElementById('email-field').value=md.email||'';
-}
 
-async function enviarEmail(){
-  const email=document.getElementById('email-field').value.trim();
-  if(!email) return;
-  const r=await fetch('/job/'+jobId+'/email',{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({email})});
-  const el=document.getElementById('email-status');
-  el.style.display='block';
-  el.textContent=r.ok?'✅ Email enviado com sucesso!':'❌ Falha ao enviar. Tente novamente.';
-}
+  async function init() {
+    const swiperSlides = document.getElementById('swiper-slides');
+    let r;
+    try {
+      r = await fetch('/job/' + jobId + '/slides', { headers: H });
+    } catch (e) {
+      swiperSlides.innerHTML = '<p class="error-state">Erro de conexão ao carregar slides.</p>';
+      return;
+    }
+    if (!r.ok) {
+      swiperSlides.innerHTML = '<p class="error-state">Erro ao carregar slides.</p>';
+      return;
+    }
 
-init();
+    const data = await r.json();
+    const urls = data.slides || [];
+    totalSlides = urls.length;
+
+    if (totalSlides === 0) {
+      swiperSlides.innerHTML = '<p class="error-state">Nenhum slide encontrado.</p>';
+      return;
+    }
+
+    const dlBtn = document.getElementById('download-btn');
+    dlBtn.textContent = 'Baixar ZIP (' + totalSlides + ' slides)';
+
+    urls.forEach((url, i) => {
+      const slide    = document.createElement('div');
+      slide.className    = 'swiper-slide';
+      slide.dataset.index = i;
+
+      const skeleton = document.createElement('div');
+      skeleton.className = 'slide-skeleton';
+
+      const img  = document.createElement('img');
+      img.alt    = 'Slide ' + (i + 1);
+      img.style.opacity = '0';
+
+      slide.appendChild(skeleton);
+      slide.appendChild(img);
+      swiperSlides.appendChild(slide);
+      slide.addEventListener('click',    () => abrirEdit(i));
+      slide.addEventListener('dblclick', () => abrirZoom(i));
+    });
+
+    initSwiper(totalSlides);
+
+    const loadPromises = urls.map((url, i) =>
+      carregarImagem(url).then(src => {
+        const slide    = swiperSlides.children[i];
+        if (!slide) return;
+        const img      = slide.querySelector('img');
+        const skeleton = slide.querySelector('.slide-skeleton');
+        if (src) {
+          slideUrls[i] = src;
+          img.src      = src;
+          img.onload   = () => { img.style.opacity = '1'; if (skeleton) skeleton.style.display = 'none'; };
+        } else {
+          if (skeleton) skeleton.style.background = '#2a1a1a';
+        }
+      })
+    );
+
+    Promise.all(loadPromises).then(() => { if (swiper) swiper.update(); });
+
+    dlBtn.addEventListener('click', async () => {
+      dlBtn.disabled    = true;
+      dlBtn.textContent = 'Preparando ZIP...';
+      try {
+        const res = await fetch('/job/' + jobId + '/download', { headers: H });
+        if (!res.ok) throw new Error('fail');
+        const a  = document.createElement('a');
+        a.href   = URL.createObjectURL(await res.blob());
+        a.download = 'carrossel_' + jobId + '.zip';
+        a.click();
+      } catch (e) {
+        alert('Erro ao baixar o ZIP. Tente novamente.');
+      }
+      dlBtn.disabled    = false;
+      dlBtn.textContent = 'Baixar ZIP (' + totalSlides + ' slides)';
+    });
+
+    try {
+      const me = await fetch('/me', { headers: H });
+      if (me.ok) {
+        const md = await me.json();
+        if (md.email) document.getElementById('email-field').value = md.email;
+      }
+    } catch (e) { /* silencia */ }
+
+    // Carrega legenda
+    try {
+      const lr = await fetch('/job/' + jobId + '/legenda', { headers: H });
+      if (lr.ok) {
+        const ld = await lr.json();
+        if (ld.legenda) {
+          document.getElementById('legenda-txt').textContent = ld.legenda;
+          document.getElementById('legenda-wrap').style.display = 'block';
+        }
+      }
+    } catch (e) { /* silencia */ }
+
+    // Carrega metadados dos slides para edição inline e hashtags (fetch único)
+    try {
+      const cr = await fetch('/job/' + jobId + '/conteudo', { headers: H });
+      if (cr.ok) {
+        const cd = await cr.json();
+        conteudoSlides = cd.slides || [];
+
+        // Carrega hashtags do metadata
+        const tags = cd.hashtags || [];
+        if (tags.length) {
+          const wrap = document.getElementById('hashtags-wrap');
+          const container = document.getElementById('hashtags-chips');
+          container.innerHTML = tags.map(t => `<span class="htag">${t}</span>`).join('');
+          wrap.style.display = 'block';
+          window._hashtagsList = tags;
+        }
+      }
+    } catch (e) { /* silencia */ }
+  }
+
+  function copiarLegenda() {
+    const txt = document.getElementById('legenda-txt').textContent;
+    if (!txt) return;
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = document.getElementById('legenda-copy');
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copiarHashtags() {
+    const txt = (window._hashtagsList || []).join(' ');
+    if (!txt) return;
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = document.getElementById('hashtags-copy');
+      btn.textContent = 'Copiado!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar todas'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  async function compartilhar() {
+    const btn = document.getElementById('share-btn');
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Gerando link...';
+    try {
+      const r = await fetch('/job/' + jobId + '/share-token', { headers: H });
+      if (!r.ok) throw new Error('fail');
+      const d = await r.json();
+      await navigator.clipboard.writeText(d.url);
+      btn.textContent = '✓ Link copiado!';
+      setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
+    } catch (e) {
+      btn.textContent = 'Erro ao gerar link';
+      setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+    }
+  }
+
+  async function enviarEmail() {
+    const email = document.getElementById('email-field').value.trim();
+    if (!email) return;
+    const el       = document.getElementById('email-status');
+    el.style.display = 'block';
+    el.textContent   = 'Enviando...';
+    try {
+      const r = await fetch('/job/' + jobId + '/email', {
+        method: 'POST',
+        headers: Object.assign({}, H, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ email }),
+      });
+      el.textContent = r.ok ? 'Email enviado com sucesso!' : 'Falha ao enviar. Tente novamente.';
+    } catch (e) {
+      el.textContent = 'Erro de conexão. Tente novamente.';
+    }
+  }
+
+  init();
 </script>
 </body>
 </html>

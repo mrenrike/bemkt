@@ -1,66 +1,136 @@
-<!-- app/static/loading.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Agência IA — Gerando</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>BEMKT — Gerando carrossel</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
   <style>
-    .center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;gap:24px}
-    .spinner{width:64px;height:64px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .progress-bar{width:320px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 1s ease;width:5%}
-    .status-text{color:var(--muted);font-size:14px}
+    .loading-wrap    { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; gap: 24px; padding: 32px; }
+    .loading-brand   { font-size: 13px; font-weight: 800; letter-spacing: 4px; color: var(--accent); margin-bottom: 8px; }
+    .loading-title   { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .loading-sub     { color: var(--muted); font-size: 14px; }
+    .progress-wrap   { width: 320px; max-width: 100%; }
+    .progress-bar    { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill   { height: 100%; background: var(--accent); border-radius: 2px; transition: width 1.2s ease; width: 5%; }
+    .progress-pct    { text-align: right; font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 8px; }
+    .spinner         { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; will-change: transform; }
+    @keyframes spin  { to { transform: rotate(360deg); } }
+    .steps-list      { display: flex; flex-direction: column; gap: 10px; width: 320px; max-width: 100%; }
+    .step-item       { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; color: var(--muted); transition: all .4s; }
+    .step-item.done  { border-color: rgba(140,255,46,.25); color: var(--text); }
+    .step-item.done .step-dot { background: var(--accent); box-shadow: 0 0 8px rgba(140,255,46,.6); }
+    .step-item.active { border-color: rgba(140,255,46,.15); color: var(--text); }
+    .step-dot        { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: all .4s; }
+    .step-item.active .step-dot { background: var(--accent); animation: pulse 1s ease infinite; will-change: opacity; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
   </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
 </head>
 <body>
-<div class="center">
-  <div style="font-size:48px">🤖</div>
-  <h1>Criando seu carrossel</h1>
-  <p class="status-text" id="status-text">Claude está escrevendo o conteúdo...</p>
-  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+<div class="loading-wrap">
+  <div class="loading-brand">BEMKT</div>
   <div class="spinner"></div>
-  <p style="color:var(--muted);font-size:13px">Isso leva cerca de 30-60 segundos</p>
+  <div>
+    <div class="loading-title">Criando seu carrossel</div>
+    <p class="loading-sub" id="status-text">Iniciando...</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-pct" id="progress-pct">0%</div>
+  </div>
+  <div class="steps-list">
+    <div class="step-item" id="step-1"><div class="step-dot"></div>Claude escrevendo o conteúdo</div>
+    <div class="step-item" id="step-2"><div class="step-dot"></div>Buscando imagens</div>
+    <div class="step-item" id="step-3"><div class="step-dot"></div>Renderizando os slides</div>
+    <div class="step-item" id="step-4"><div class="step-dot"></div>Finalizando e comprimindo</div>
+  </div>
 </div>
+
 <script>
-const token=localStorage.getItem('token');
-const jobId=localStorage.getItem('job_id');
-if(!token||!jobId) window.location='/';
+const token = localStorage.getItem('token');
+const jobId = localStorage.getItem('job_id');
+if (!token || !jobId) window.location = '/';
 
-const mensagens=['Claude está escrevendo o conteúdo...','Buscando imagens na Pexels...','Renderizando slides com Playwright...','Finalizando os 7 slides...'];
-let tick=0, tentativas=0;
-const MAX=120; // 120 * 3s = 6 min timeout
+const STEPS = [
+  { id: 'step-1', label: 'Claude escrevendo o conteúdo' },
+  { id: 'step-2', label: 'Buscando imagens' },
+  { id: 'step-3', label: 'Renderizando os slides' },
+  { id: 'step-4', label: 'Finalizando e comprimindo' },
+];
 
-const interval=setInterval(async()=>{
+let tentativas = 0;
+const MAX = 120;
+
+function setStep(idx) {
+  STEPS.forEach((s, i) => {
+    const el = document.getElementById(s.id);
+    el.classList.remove('done', 'active');
+    if (i < idx)  el.classList.add('done');
+    if (i === idx) el.classList.add('active');
+  });
+  if (idx < STEPS.length) {
+    document.getElementById('status-text').textContent = STEPS[idx].label + '...';
+  }
+}
+
+function setPct(pct) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent  = Math.round(pct) + '%';
+}
+
+setStep(0);
+
+const interval = setInterval(async () => {
   tentativas++;
-  tick=Math.min(tick+1,mensagens.length-1);
-  document.getElementById('status-text').textContent=mensagens[tick];
-  document.getElementById('progress-fill').style.width=Math.min(10+tentativas/MAX*85,95)+'%';
+  const pct     = Math.min(5 + (tentativas / MAX) * 88, 93);
+  const stepIdx = Math.min(Math.floor((tentativas / MAX) * STEPS.length), STEPS.length - 1);
+  setPct(pct);
+  setStep(stepIdx);
 
-  if(tentativas>=MAX){
+  if (tentativas >= MAX) {
     clearInterval(interval);
-    document.querySelector('h1').textContent='Tempo esgotado';
-    document.getElementById('status-text').textContent='O job demorou demais. Tente novamente.';
+    document.querySelector('.loading-title').textContent = 'Tempo esgotado';
+    document.getElementById('status-text').textContent   = 'O job demorou demais. Tente novamente.';
     return;
   }
-  let r, d;
+
   try {
-    r=await fetch('/job/'+jobId+'/status',{headers:{'Authorization':'Bearer '+token}});
-    if(!r.ok) return;
-    d=await r.json();
-  } catch(e) { return; }
-  if(d.status==='pronto'){
-    clearInterval(interval);
-    document.getElementById('progress-fill').style.width='100%';
-    setTimeout(()=>window.location='/static/preview.html',500);
-  } else if(d.status==='erro'){
-    clearInterval(interval);
-    document.querySelector('h1').textContent='Erro na geração';
-    document.getElementById('status-text').textContent='Ocorreu um erro. Seu crédito foi estornado.';
-  }
-},3000);
+    const r = await fetch('/job/' + jobId + '/status', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.status === 'pronto') {
+      clearInterval(interval);
+      setStep(STEPS.length);
+      setPct(100);
+      setTimeout(() => window.location = '/static/preview.html', 600);
+    } else if (d.status === 'erro') {
+      clearInterval(interval);
+      document.querySelector('.loading-title').textContent = 'Erro na geração';
+      document.getElementById('status-text').textContent   = 'Ocorreu um erro. Seu crédito foi estornado.';
+    }
+  } catch (_) { /* ignora erros de rede temporários */ }
+}, 3000);
 </script>
 </body>
 </html>

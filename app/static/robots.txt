@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Allow: /entrar
+
+# Páginas privadas (autenticadas) — não indexar
+Disallow: /static/chat.html
+Disallow: /static/preview.html
+Disallow: /static/loading.html
+Disallow: /static/historico.html
+Disallow: /static/perfil.html
+Disallow: /static/planos.html
+Disallow: /static/admin.html
+Disallow: /admin
+Disallow: /me
+Disallow: /job/
+Disallow: /chat/
+Disallow: /auth/
+Disallow: /pagamento/
+Disallow: /webhook/
+Disallow: /historico
+Disallow: /perfil
+
+Sitemap: https://appcarrossel.bemkt.com.br/sitemap.xml

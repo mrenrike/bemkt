@@ -1,0 +1,43 @@
+<h2>Como construir o Web App?</h2>
+<p class="subtitle">Escolha a abordagem que faz mais sentido para você agora</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Página única simples (HTML + FastAPI)</h3>
+      <p>Um formulário web que coleta briefing do cliente, chama o backend Python e retorna os PNGs em um ZIP para download. Sem banco de dados, sem login. Roda com <code>python app.py</code>.</p>
+      <ul style="margin-top:8px;font-size:13px;color:#aaa">
+        <li>✅ Pronto em 1 sessão</li>
+        <li>✅ Zero infra extra</li>
+        <li>⚠️ Sem histórico de pedidos</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Chat guiado (estilo WhatsApp)</h3>
+      <p>Interface de chat onde o sistema faz perguntas uma a uma: nicho, cores, logo, restrições, tema. Ao final gera o carrossel. Mais próximo da experiência que você descreveu.</p>
+      <ul style="margin-top:8px;font-size:13px;color:#aaa">
+        <li>✅ Experiência natural para o cliente</li>
+        <li>✅ Claude pode pedir esclarecimentos</li>
+        <li>⚠️ Um pouco mais de código no front</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Wizard em etapas (passo a passo)</h3>
+      <p>Telas separadas: 1) Identidade visual → 2) Tema/texto → 3) Restrições → 4) Revisão → 5) Download. Barra de progresso visível, upload de logo em etapa dedicada.</p>
+      <ul style="margin-top:8px;font-size:13px;color:#aaa">
+        <li>✅ Clareza total para o cliente</li>
+        <li>✅ Fácil de mostrar como produto</li>
+        <li>⚠️ Mais telas para construir</li>
+      </ul>
+    </div>
+  </div>
+</div>

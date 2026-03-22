@@ -1,133 +1,194 @@
-<!-- app/static/chat.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Agência IA — Chat</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <title>BEMKT — Criar Carrossel</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/auth.js"></script>
+  <script src="/static/nav.js" defer></script>
   <style>
-    .chat-wrap{max-width:640px;margin:0 auto;padding:20px;height:100vh;display:flex;flex-direction:column}
-    .chat-header{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:20px}
-    .messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding-bottom:20px}
-    .msg{max-width:80%;padding:14px 18px;border-radius:16px;font-size:15px;line-height:1.6}
-    .msg-bot{background:var(--surface);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
-    .msg-user{background:linear-gradient(135deg,var(--accent),var(--accent2));align-self:flex-end;border-bottom-right-radius:4px}
-    .input-area{display:flex;gap:12px;padding:16px 0;border-top:1px solid var(--border)}
-    .input-area input{flex:1;padding:14px 16px;background:#1e1e1e;border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:15px;outline:none}
-    .input-area input:focus{border-color:var(--accent)}
-    .send-btn{padding:14px 24px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-weight:600;cursor:pointer}
-    .upload-hint{font-size:12px;color:var(--muted);margin-top:6px}
-    .credits{font-size:13px;color:var(--muted)}
-    .skip-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px}
+    .chat-wrap        { max-width: 640px; margin: 0 auto; padding: 20px; height: calc(100vh - 56px); display: flex; flex-direction: column; }
+    .chat-header      { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .chat-logo        { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .chat-logo span   { color: var(--accent); }
+    .credits-badge    { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .messages         { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; }
+    .msg              { max-width: 82%; padding: 13px 17px; border-radius: 14px; font-size: 14px; line-height: 1.65; }
+    .msg-bot          { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg-user         { background: var(--accent); color: #080808; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+    .input-area       { display: flex; gap: 10px; padding: 16px 0; border-top: 1px solid var(--border); align-items: center; }
+    .input-area input { flex: 1; padding: 13px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; color: var(--text); font-size: 14px; outline: none; font-family: inherit; transition: border-color .2s; }
+    .input-area input:focus { border-color: rgba(140,255,46,.4); }
+    .send-btn         { padding: 13px 22px; background: var(--accent); color: #080808; border: none; border-radius: 100px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; flex-shrink: 0; transition: opacity .2s; }
+    .send-btn:hover   { opacity: .85; }
+    .skip-btn         { padding: 13px 16px; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 100px; cursor: pointer; font-size: 13px; font-family: inherit; flex-shrink: 0; transition: all .2s; }
+    .skip-btn:hover   { border-color: #333; color: var(--text); }
+    .hidden           { display: none; }
   </style>
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '319489982256904');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-54MPDRQ62N');
+  </script>
 </head>
 <body>
 <div class="chat-wrap">
   <div class="chat-header">
-    <span style="font-weight:700;font-size:18px">🤖 Agência IA</span>
-    <span class="credits" id="creditos-badge">— créditos</span>
+    <span class="chat-logo">BEMKT<span>.</span></span>
+    <div style="display:flex;align-items:center;gap:16px">
+      <a href="/static/editor.html" style="font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:6px 14px;border-radius:100px;transition:all .2s" onmouseover="this.style.color='var(--text)';this.style.borderColor='#333'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">✏️ Modo Manual</a>
+      <span class="credits-badge" id="creditos-badge">— créditos</span>
+    </div>
   </div>
   <div class="messages" id="messages"></div>
   <div class="input-area">
+    <input type="file" id="file-input" class="hidden" accept=".png,.jpg,.jpeg,.svg" onchange="enviarArquivo()">
     <input type="text" id="msg-input" placeholder="Digite sua resposta..." onkeydown="if(event.key==='Enter')enviar()">
-    <input type="file" id="file-input" style="display:none" accept=".png,.jpg,.jpeg,.svg" onchange="enviarArquivo()">
-    <button class="send-btn" onclick="enviar()">Enviar</button>
-    <button class="skip-btn" id="skip-btn" style="display:none" onclick="pular()">Pular</button>
+    <button type="button" class="skip-btn hidden" id="skip-btn" onclick="pular()">Pular</button>
+    <button type="button" class="send-btn" onclick="enviar()">Enviar</button>
   </div>
 </div>
+
 <script>
 const token = localStorage.getItem('token');
-if(!token) window.location='/';
-let jobId=null, campoAtual=null, isUpload=false;
+if (!token) window.location = '/';
+let jobId = null, campoAtual = null, isUpload = false;
 
-function auth(){return{'Authorization':'Bearer '+token};}
+function auth() { return { 'Authorization': 'Bearer ' + token }; }
 
-function addMsg(texto,tipo){
-  const d=document.createElement('div');
-  d.className='msg msg-'+tipo;
-  d.innerHTML=texto.replace(/\*([^*]+)\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+function addMsg(texto, tipo) {
+  const d = document.createElement('div');
+  d.className = 'msg msg-' + tipo;
+  d.innerHTML = texto.replace(/\*([^*]+)\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
   document.getElementById('messages').appendChild(d);
-  d.scrollIntoView({behavior:'smooth'});
+  d.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function init(){
-  const me=await fetch('/me',{headers:auth()});
-  const d=await me.json();
-  document.getElementById('creditos-badge').textContent=d.creditos+' crédito'+(d.creditos!==1?'s':'');
-  if(d.creditos<=0){
-    addMsg('Você não tem créditos. <a href="/static/planos.html">Ver planos →</a>','bot');
+async function init() {
+  const me = await fetch('/me', { headers: auth() });
+  const d  = await me.json();
+  document.getElementById('creditos-badge').textContent = d.creditos + ' crédito' + (d.creditos !== 1 ? 's' : '');
+  if (d.creditos <= 0) {
+    addMsg('Você não tem créditos. <a href="/static/planos.html" style="color:var(--accent)">Ver planos →</a>', 'bot');
     return;
   }
-  const r=await fetch('/chat/iniciar',{method:'POST',headers:auth()});
-  if(!r.ok){addMsg('Erro ao iniciar. Tente novamente.','bot');return;}
-  const d2=await r.json();
-  jobId=d2.job_id;
-  campoAtual=d2.campo;
-  isUpload=d2.upload||false;
-  addMsg(d2.pergunta,'bot');
-  if(isUpload) document.getElementById('skip-btn').style.display='inline-block';
+  const savedJobId = localStorage.getItem('chat_job_id');
+  if (savedJobId) {
+    const re = await fetch('/chat/estado/' + savedJobId, { headers: auth() });
+    if (re.ok) {
+      const de = await re.json();
+      jobId = parseInt(savedJobId);
+      if (de.done) {
+        addMsg(de.resumo, 'bot');
+        campoAtual = 'confirmar';
+        document.getElementById('msg-input').placeholder = 'Digite "confirmar" para gerar';
+      } else {
+        campoAtual = de.campo;
+        isUpload   = de.upload || false;
+        addMsg('↩️ Continuando de onde parou...', 'bot');
+        addMsg(de.pergunta, 'bot');
+        if (isUpload) document.getElementById('skip-btn').classList.remove('hidden');
+      }
+      return;
+    }
+    localStorage.removeItem('chat_job_id');
+  }
+  const r = await fetch('/chat/iniciar', { method: 'POST', headers: auth() });
+  if (!r.ok) { addMsg('Erro ao iniciar. Tente novamente.', 'bot'); return; }
+  const d2 = await r.json();
+  jobId       = d2.job_id;
+  campoAtual  = d2.campo;
+  isUpload    = d2.upload || false;
+  localStorage.setItem('chat_job_id', jobId);
+  addMsg(d2.pergunta, 'bot');
+  if (isUpload) document.getElementById('skip-btn').classList.remove('hidden');
 }
 
-async function enviar(){
-  const input=document.getElementById('msg-input');
-  const texto=input.value.trim();
-  if(!texto && !isUpload) return;
-  if(isUpload && texto){
-    document.getElementById('file-input').click();
+async function enviar() {
+  const input = document.getElementById('msg-input');
+  const texto = input.value.trim();
+  if (campoAtual === 'confirmar') {
+    if (texto.toLowerCase() === 'confirmar') {
+      addMsg('Gerando seu carrossel... 🚀', 'user');
+      input.value = '';
+      const r = await fetch('/chat/confirmar?job_id=' + jobId, { method: 'POST', headers: auth() });
+      if (r.ok) {
+        localStorage.setItem('job_id', jobId);
+        localStorage.removeItem('chat_job_id');
+        window.location = '/static/loading.html';
+      } else {
+        addMsg('Erro ao confirmar. Tente novamente.', 'bot');
+      }
+    }
     return;
   }
-  input.value='';
-  addMsg(texto||'(pulado)','user');
+  if (!texto && !isUpload) { await pular(); return; }
+  if (isUpload && texto) { document.getElementById('file-input').click(); return; }
+  input.value = '';
+  addMsg(texto || '(pulado)', 'user');
   await _enviarResposta(texto, null);
 }
 
-async function pular(){
-  addMsg('(pulado)','user');
+async function pular() {
+  addMsg('(pulado)', 'user');
   await _enviarResposta('', null);
 }
 
-async function enviarArquivo(){
-  const file=document.getElementById('file-input').files[0];
-  if(!file) return;
-  addMsg('📎 '+file.name,'user');
+async function enviarArquivo() {
+  const file = document.getElementById('file-input').files[0];
+  if (!file) return;
+  addMsg('📎 ' + file.name, 'user');
   await _enviarResposta('', file);
 }
 
-async function _enviarResposta(texto, arquivo){
-  const fd=new FormData();
-  fd.append('job_id',jobId);
-  fd.append('campo',campoAtual);
-  fd.append('resposta',texto);
-  if(arquivo) fd.append('arquivo',arquivo);
-  const r=await fetch('/chat/responder',{method:'POST',headers:auth(),body:fd});
-  const d=await r.json();
-  if(d.done){
-    addMsg(d.resumo,'bot');
-    campoAtual='confirmar';
-    document.getElementById('skip-btn').style.display='none';
-    document.getElementById('msg-input').placeholder='Digite "confirmar" para gerar';
+async function _enviarResposta(texto, arquivo) {
+  const fd = new FormData();
+  fd.append('job_id', jobId);
+  fd.append('campo', campoAtual);
+  fd.append('resposta', texto);
+  if (arquivo) fd.append('arquivo', arquivo);
+  const r = await fetch('/chat/responder', { method: 'POST', headers: auth(), body: fd });
+  const d = await r.json();
+  if (d.done) {
+    addMsg(d.resumo, 'bot');
+    campoAtual = 'confirmar';
+    document.getElementById('skip-btn').classList.add('hidden');
+    document.getElementById('msg-input').placeholder = 'Digite "confirmar" para gerar';
   } else {
-    campoAtual=d.campo;
-    isUpload=d.upload||false;
-    document.getElementById('skip-btn').style.display=isUpload?'inline-block':'none';
-    addMsg(d.pergunta,'bot');
+    campoAtual = d.campo;
+    isUpload   = d.upload || false;
+    document.getElementById('skip-btn').classList.toggle('hidden', !isUpload);
+    if (d.aviso) addMsg(d.aviso, 'bot');
+    addMsg(d.pergunta, 'bot');
   }
 }
 
-document.getElementById('msg-input').addEventListener('keydown',async e=>{
-  if(e.key==='Enter' && campoAtual==='confirmar'){
-    if(document.getElementById('msg-input').value.trim().toLowerCase()==='confirmar'){
-      addMsg('Gerando seu carrossel...🚀','user');
-      const r=await fetch('/chat/confirmar?job_id='+jobId,{method:'POST',headers:auth()});
-      if(r.ok){
-        localStorage.setItem('job_id',jobId);
-        window.location='/static/loading.html';
-      }
-    }
+// Detecta retorno do Mercado Pago com pagamento aprovado
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('status') === 'approved' || params.get('collection_status') === 'approved') {
+    if (typeof fbq !== 'undefined') fbq('track', 'Purchase', { currency: 'BRL', value: parseFloat(params.get('transaction_amount') || '0') });
+    if (typeof gtag !== 'undefined') gtag('event', 'purchase', { currency: 'BRL', value: parseFloat(params.get('transaction_amount') || '0') });
+    // Limpa params da URL sem recarregar
+    window.history.replaceState({}, '', '/static/chat.html');
   }
-});
+})();
 
 init();
 </script>
