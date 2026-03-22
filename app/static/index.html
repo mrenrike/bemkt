@@ -475,7 +475,8 @@
     .semcom-list li:last-child { border-bottom: none; }
     .semcom-col.antes .semcom-list li { color: var(--muted); }
     .semcom-col.depois .semcom-list li { color: var(--text); }
-    .semcom-icon { flex-shrink: 0; margin-top: 1px; font-size: 14px; }
+    .semcom-list li::before { content: '—'; color: var(--border); font-size: 12px; flex-shrink: 0; margin-top: 3px; }
+    .semcom-col.depois .semcom-list li::before { content: '✓'; color: var(--accent); font-weight: 700; }
     @media (max-width: 600px) {
       .semcom-grid { grid-template-columns: 1fr; }
     }
@@ -485,6 +486,61 @@
     .section-sub-lg  { margin-bottom: 48px; }
     .btn-inline      { display: inline-block; }
     .footer-links    { display: flex; gap: 24px; }
+
+    /* ── HERO MOCKUP ── */
+    .hero-visual {
+      margin-top: 56px;
+      position: relative;
+      width: 100%;
+      max-width: 680px;
+      height: 280px;
+    }
+    .mock-slide {
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.7);
+    }
+    .mock-s1 {
+      background: #050505; border: 1px solid #1e1e1e;
+      left: 50%; top: 10px; transform: translateX(-50%) rotate(-6deg);
+      z-index: 1;
+    }
+    .mock-s2 {
+      background: #f7f6f4;
+      left: 50%; top: 30px; transform: translateX(-80%) rotate(-1deg);
+      z-index: 2;
+    }
+    .mock-s3 {
+      background: linear-gradient(145deg,#7c3aed,#ec4899);
+      left: 50%; top: 20px; transform: translateX(0%) rotate(4deg);
+      z-index: 2;
+    }
+    .mock-s4 {
+      background: #080c14;
+      left: 50%; top: 5px; transform: translateX(-50%) rotate(0deg);
+      z-index: 3;
+      border: 1px solid #2a2a2a;
+    }
+    .mock-inner { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .mock-tag { font-size: 7px; letter-spacing: 3px; font-weight: 700; color: #8cff2e; border: 1px solid rgba(140,255,46,.3); padding: 2px 7px; border-radius: 100px; width: fit-content; margin-bottom: 8px; }
+    .mock-title { font-size: 14px; font-weight: 900; color: #fff; line-height: 1.1; letter-spacing: -.5px; }
+    .mock-line { height: 2px; width: 50%; margin-top: 6px; background: linear-gradient(90deg,#8cff2e,#ff6a00,transparent); }
+    .mock-num-big { font-size: 56px; font-weight: 900; color: rgba(140,255,46,.07); line-height: 1; position: absolute; top: 8px; right: 10px; }
+    .mock-body-text { font-size: 10px; color: #aaa; line-height: 1.5; }
+    .mock-accent-bar { width: 3px; height: 28px; background: linear-gradient(to bottom,#ff4d00,#ff8c42); border-radius: 2px; margin-bottom: 8px; }
+    .mock-white-tag { font-size: 7px; letter-spacing: 3px; font-weight: 600; color: #0d0d0d; border: 1px solid #0d0d0d; padding: 2px 7px; width: fit-content; margin-bottom: 8px; }
+    .mock-serif { font-size: 16px; font-weight: 700; color: #0d0d0d; line-height: 1.1; letter-spacing: -.5px; font-family: Georgia, serif; }
+    .mock-bar-top { height: 2px; background: #1a1a1a; margin-bottom: 12px; }
+    .mock-gradient-inner { position: absolute; inset: 0; padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .mock-glass { background: rgba(0,0,0,.22); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.15); border-radius: 10px; padding: 12px; }
+    .mock-glass-title { font-size: 13px; font-weight: 900; color: #fff; line-height: 1.1; }
+    .mock-badge-wrap { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(8,8,8,.9); border: 1px solid var(--border); border-radius: 100px; padding: 6px 16px; font-size: 12px; color: var(--muted); font-weight: 500; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    @media (max-width: 600px) { .hero-visual { height: 220px; } .mock-slide { width: 155px; height: 155px; } }
+
+    /* ── STEP ICON SVG ── */
+    .step-icon-svg { width: 40px; height: 40px; margin-bottom: 16px; color: var(--accent); opacity: .85; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
@@ -550,6 +606,36 @@
     <span>Sem cartão de crédito</span>
     <div class="dot"></div>
     <span>Qualquer nicho, qualquer tema</span>
+  </div>
+
+  <!-- Mockup visual dos slides -->
+  <div class="hero-visual" aria-hidden="true">
+    <!-- Slide de fundo esquerdo — Clean Editorial -->
+    <div class="mock-slide mock-s2">
+      <div class="mock-inner" style="justify-content:flex-start">
+        <div class="mock-bar-top"></div>
+        <div class="mock-white-tag">NEGÓCIOS</div>
+        <div class="mock-serif">5 erros que destroem sua autoridade</div>
+      </div>
+    </div>
+    <!-- Slide de fundo direito — Vibrant -->
+    <div class="mock-slide mock-s3">
+      <div class="mock-gradient-inner">
+        <div class="mock-glass">
+          <div class="mock-glass-title">3 estratégias que explodiram meu perfil</div>
+        </div>
+      </div>
+    </div>
+    <!-- Slide central — BrandsDecoded -->
+    <div class="mock-slide mock-s4">
+      <div class="mock-num-big">01</div>
+      <div class="mock-inner">
+        <div class="mock-tag">MARKETING</div>
+        <div class="mock-title">Como dobrar seu engajamento no Instagram</div>
+        <div class="mock-line"></div>
+      </div>
+    </div>
+    <div class="mock-badge-wrap">gerado em 58s pela IA ✦</div>
   </div>
 </section>
 
@@ -659,27 +745,27 @@
     <div class="semcom-col antes">
       <div class="semcom-header"><span>✗</span> Sem BEMKT</div>
       <ul class="semcom-list">
-        <li><span class="semcom-icon">😩</span>Fica horas no Canva sem saber o que escrever</li>
-        <li><span class="semcom-icon">😰</span>Posta conteúdo genérico igual ao da concorrência</li>
-        <li><span class="semcom-icon">🤔</span>Não sabe qual copy vai engajar o público</li>
-        <li><span class="semcom-icon">🎨</span>Design amador que não reflete a marca</li>
-        <li><span class="semcom-icon">📝</span>Posta sem legenda ou com legenda sem estratégia</li>
-        <li><span class="semcom-icon">💸</span>Paga caro por freelancer ou agência</li>
-        <li><span class="semcom-icon">📉</span>Cria um carrossel por semana — ou menos</li>
-        <li><span class="semcom-icon">😮‍💨</span>Esgota a criatividade antes de postar</li>
+        <li>Horas no Canva sem saber o que escrever</li>
+        <li>Conteúdo genérico igual ao da concorrência</li>
+        <li>Não sabe qual copy vai engajar o público</li>
+        <li>Design amador que não reflete a marca</li>
+        <li>Posta sem legenda ou com legenda sem estratégia</li>
+        <li>Paga caro por freelancer ou agência</li>
+        <li>Um carrossel por semana — quando consegue</li>
+        <li>Esgota a criatividade antes de postar</li>
       </ul>
     </div>
     <div class="semcom-col depois">
       <div class="semcom-header"><span>✓</span> Com BEMKT</div>
       <ul class="semcom-list">
-        <li><span class="semcom-icon">⚡</span>Carrossel completo gerado em menos de 60 segundos</li>
-        <li><span class="semcom-icon">🎯</span>Conteúdo personalizado pro seu nicho e público-alvo</li>
-        <li><span class="semcom-icon">🧠</span>IA usa copy estratégico para educar, engajar ou vender</li>
-        <li><span class="semcom-icon">✨</span>5 templates profissionais com sua identidade visual</li>
-        <li><span class="semcom-icon">📣</span>Legenda do post gerada automaticamente e pronta para copiar</li>
-        <li><span class="semcom-icon">💰</span>Cada carrossel a partir de R$13 — sem mensalidade</li>
-        <li><span class="semcom-icon">📈</span>Cria carrosseis diários sem esforço extra</li>
-        <li><span class="semcom-icon">😎</span>Sem aparecer na câmera e sem precisar de designer</li>
+        <li>Carrossel completo gerado em menos de 60 segundos</li>
+        <li>Conteúdo personalizado pro seu nicho e público-alvo</li>
+        <li>Copy estratégico para educar, engajar ou vender</li>
+        <li>5 templates profissionais com sua identidade visual</li>
+        <li>Legenda do post gerada automaticamente, pronta para copiar</li>
+        <li>A partir de R$13 por carrossel — sem mensalidade</li>
+        <li>Carrosseis diários sem esforço extra</li>
+        <li>Sem aparecer na câmera. Sem precisar de designer.</li>
       </ul>
     </div>
   </div>
@@ -695,7 +781,7 @@
   <div class="steps" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 64px;">
     <div class="step">
       <div class="step-num" style="color:rgba(140,255,46,.15)">AUTO</div>
-      <div class="step-icon">🤖</div>
+      <svg class="step-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/></svg>
       <h3>Modo Automático</h3>
       <p>Responda um chat rápido com tema, nicho, finalidade e CTA. A IA escreve todo o conteúdo, escolhe as imagens e gera os 7 slides prontos — em menos de 60 segundos.</p>
     </div>
@@ -713,19 +799,19 @@
   <div class="steps">
     <div class="step">
       <div class="step-num">01</div>
-      <div class="step-icon">💬</div>
+      <svg class="step-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
       <h3>Responda o chat</h3>
       <p>Tema, nicho, finalidade (educar / vender / engajar / autoridade), CTA desejado e cores da marca. Leva menos de 2 minutos.</p>
     </div>
     <div class="step">
       <div class="step-num">02</div>
-      <div class="step-icon">🤖</div>
+      <svg class="step-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/></svg>
       <h3>A IA gera tudo</h3>
       <p>Claude AI escreve o conteúdo estratégico, busca fotos e renderiza os 7 slides em 1080x1080px com a identidade da sua marca.</p>
     </div>
     <div class="step">
       <div class="step-num">03</div>
-      <div class="step-icon">📲</div>
+      <svg class="step-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
       <h3>Baixe e poste</h3>
       <p>Receba ZIP por e-mail ou baixe direto. A legenda do post já vem pronta para copiar e colar no Instagram.</p>
     </div>
