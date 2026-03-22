@@ -26,11 +26,14 @@ apt-get install -y -qq \
   fonts-liberation fonts-noto-color-emoji
 
 echo "==> [3/8] Criando diretório do app..."
-mkdir -p $APP_DIR/carrosseis $APP_DIR/uploads
-cd $APP_DIR
+rm -rf $APP_DIR
+mkdir -p /var/www
+cd /var/www
 
 echo "==> [4/8] Clonando repositório..."
-git clone $REPO . || (git fetch && git reset --hard origin/main)
+git clone $REPO bemkt
+mkdir -p $APP_DIR/carrosseis $APP_DIR/uploads
+cd $APP_DIR
 
 echo "==> [5/8] Configurando ambiente Python..."
 $PYTHON -m venv venv
