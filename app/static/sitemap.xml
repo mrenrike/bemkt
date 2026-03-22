@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://appcarrossel.bemkt.com.br/</loc>
+    <loc>https://becontent.bemkt.com.br/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <lastmod>2026-03-22</lastmod>
   </url>
   <url>
-    <loc>https://appcarrossel.bemkt.com.br/entrar</loc>
+    <loc>https://becontent.bemkt.com.br/static/planos.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <lastmod>2026-03-22</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/static/entrar.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-22</lastmod>
   </url>
 </urlset>
