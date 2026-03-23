@@ -22,7 +22,7 @@ def _html_email(job_id: int, n_slides: int) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Seu carrossel está pronto — BEMKT</title>
+<title>Seu carrossel está pronto — BeContent</title>
 </head>
 <body style="margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 
@@ -43,7 +43,7 @@ def _html_email(job_id: int, n_slides: int) -> str:
     <tr>
       <td align="center" style="padding:36px 40px 28px;">
         <span style="font-size:22px;font-weight:900;color:#f0f0f0;letter-spacing:-0.5px;">
-          BEMKT<span style="color:#8cff2e;">.</span>
+          BeContent<span style="color:#8cff2e;">.</span>
         </span>
       </td>
     </tr>
@@ -52,7 +52,7 @@ def _html_email(job_id: int, n_slides: int) -> str:
     <tr>
       <td align="center" style="padding:0 40px 8px;">
         <p style="margin:0;font-size:28px;font-weight:800;color:#f0f0f0;letter-spacing:-1px;line-height:1.2;">
-          Seu carrossel está pronto! 🎉
+          Seu carrossel está pronto!
         </p>
       </td>
     </tr>
@@ -151,7 +151,7 @@ def _html_email(job_id: int, n_slides: int) -> str:
           </a>
         </p>
         <p style="margin:0;font-size:11px;color:#2a2a2a;">
-          © 2025 BEMKT Carrosseis ·
+          © 2025 BeContent ·
           <a href="mailto:bruno@bemkt.com.br" style="color:#2a2a2a;text-decoration:none;">bruno@bemkt.com.br</a>
         </p>
       </td>
@@ -176,8 +176,85 @@ def _texto_email(n_slides: int) -> str:
         f"1. Abra o ZIP em anexo e extraia os slides\n"
         f"2. Acesse a plataforma para copiar a legenda do post\n"
         f"3. Publique no Instagram selecionando os {n_slides} slides em ordem\n\n"
-        f"Bom proveito!\n\nBEMKT Carrosseis\nhttps://appcarrossel.bemkt.com.br"
+        f"Bom proveito!\n\nBeContent\nhttps://becontent.bemkt.com.br"
     )
+
+
+def notificar_admin_cadastro(nome: str, email: str, username: str):
+    """Envia email para o admin quando um novo usuário se cadastra."""
+    host     = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+    port     = int(os.getenv("EMAIL_PORT", "587"))
+    user     = os.getenv("EMAIL_USER", "")
+    password = os.getenv("EMAIL_PASSWORD", "")
+    admin    = os.getenv("ADMIN_EMAIL", "bruno@bemkt.com.br")
+
+    msg = MIMEMultipart("alternative")
+    msg["From"]    = f"BeContent <{user}>"
+    msg["To"]      = admin
+    msg["Subject"] = f"Novo cadastro: {nome}"
+
+    texto = (
+        f"Novo usuário cadastrado!\n\n"
+        f"Nome:      {nome}\n"
+        f"Email:     {email}\n"
+        f"Username:  {username or '—'}\n"
+    )
+    html = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#080808;padding:32px 16px;">
+<tr><td align="center">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"
+         style="max-width:480px;background:#111111;border-radius:16px;border:1px solid #1e1e1e;overflow:hidden;">
+    <tr>
+      <td style="height:4px;background:linear-gradient(90deg,#8cff2e,#ff6a00);font-size:0;line-height:0;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="padding:32px 36px 8px;">
+        <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#444;">NOVO CADASTRO</p>
+        <p style="margin:12px 0 0;font-size:22px;font-weight:800;color:#f0f0f0;letter-spacing:-0.5px;">{nome}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 36px 32px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #1e1e1e;">
+              <p style="margin:0;font-size:12px;color:#444;text-transform:uppercase;letter-spacing:1px;">Email</p>
+              <p style="margin:4px 0 0;font-size:14px;color:#f0f0f0;">{email}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0;">
+              <p style="margin:0;font-size:12px;color:#444;text-transform:uppercase;letter-spacing:1px;">Instagram / LinkedIn</p>
+              <p style="margin:4px 0 0;font-size:14px;color:#f0f0f0;">{username or '—'}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding:0 36px 28px;">
+        <p style="margin:0;font-size:11px;color:#2a2a2a;">BeContent · bruno@bemkt.com.br</p>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+</table>
+</body>
+</html>"""
+
+    msg.attach(MIMEText(texto, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
+
+    try:
+        with smtplib.SMTP(host, port) as server:
+            server.starttls()
+            server.login(user, password)
+            server.sendmail(user, admin, msg.as_string())
+    except Exception:
+        pass  # Falha silenciosa — não bloqueia o cadastro do usuário
 
 
 def enviar_email_zip(destinatario: str, zip_path: Path, job_id: int):
@@ -201,13 +278,17 @@ def enviar_email_zip(destinatario: str, zip_path: Path, job_id: int):
     except Exception:
         n_slides = 7
 
-    msg = MIMEMultipart("alternative")
-    msg["From"]    = f"BEMKT Carrosseis <{user}>"
+    # Estrutura correta: mixed (texto+html alternativo + anexo ZIP)
+    msg = MIMEMultipart("mixed")
+    msg["From"]    = f"BeContent <{user}>"
     msg["To"]      = destinatario
-    msg["Subject"] = f"Seu carrossel está pronto — BEMKT 🎉"
+    msg["Subject"] = f"Seu carrossel está pronto — BeContent"
 
-    msg.attach(MIMEText(_texto_email(n_slides), "plain", "utf-8"))
-    msg.attach(MIMEText(_html_email(job_id, n_slides), "html", "utf-8"))
+    # Parte alternativa (texto plano + HTML)
+    alternativa = MIMEMultipart("alternative")
+    alternativa.attach(MIMEText(_texto_email(n_slides), "plain", "utf-8"))
+    alternativa.attach(MIMEText(_html_email(job_id, n_slides), "html", "utf-8"))
+    msg.attach(alternativa)
 
     # Anexa o ZIP
     zip_part = MIMEBase("application", "zip")

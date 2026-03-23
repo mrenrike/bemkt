@@ -27,7 +27,7 @@ from app.database import init_db, get_db, creditos_disponiveis, registrar_tentat
 from app.auth import hash_senha, verificar_senha, criar_token, usuario_atual, admin_atual
 from app.chat import PERGUNTAS, proxima_pergunta, resumo_job
 from app.carousel import gerar_carrossel, gerar_carrossel_manual
-from app.email_sender import criar_zip, enviar_email_zip
+from app.email_sender import criar_zip, enviar_email_zip, notificar_admin_cadastro
 from app.pagamentos import PLANOS, criar_preferencia_mp, validar_assinatura_webhook, MP_WEBHOOK_SECRET
 from app.security import (
     SecurityHeadersMiddleware, rate_limit,
@@ -195,7 +195,7 @@ class PagamentoIn(BaseModel):
 
 # ── Auth endpoints ────────────────────────────────────────────────
 @app.post("/auth/cadastro")
-def cadastro(data: CadastroIn, request: Request):
+def cadastro(data: CadastroIn, request: Request, background_tasks: BackgroundTasks):
     rate_limit(request, max_requests=5, window_seconds=300, scope="cadastro")
     db = get_db()
     existing = db.execute("SELECT id FROM users WHERE email=?", (data.email,)).fetchone()
@@ -218,6 +218,7 @@ def cadastro(data: CadastroIn, request: Request):
     finally:
         db.close()
     token = criar_token({"sub": str(user_id)})
+    background_tasks.add_task(notificar_admin_cadastro, data.nome, data.email, data.username or "")
     return {"token": token, "nome": data.nome}
 
 @app.post("/auth/login")
