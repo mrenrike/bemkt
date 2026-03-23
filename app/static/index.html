@@ -490,7 +490,7 @@
     .semcom-col.depois .semcom-list li { color: var(--text); }
     .semcom-list li::before { content: '—'; color: var(--border); font-size: 12px; flex-shrink: 0; margin-top: 3px; }
     .semcom-col.depois .semcom-list li::before { content: '✓'; color: var(--accent); font-weight: 700; }
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .semcom-grid { grid-template-columns: 1fr; }
     }
 
@@ -555,15 +555,80 @@
     /* ── STEP ICON SVG ── */
     .step-icon-svg { width: 40px; height: 40px; margin-bottom: 16px; color: var(--accent); opacity: .85; }
 
-    /* ── RESPONSIVE ── */
+    /* ── TOUCH ── */
+    a, button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+    /* ── RESPONSIVE 768px ── */
     @media (max-width: 768px) {
+      nav { padding: 14px 4%; }
       .nav-links { display: none; }
-      .proof-bar { gap: 24px; }
+      .nav-cta { padding: 9px 16px; font-size: 13px; }
+
+      section { padding: 64px 5%; }
+      .hero { padding: 96px 5% 40px; min-height: auto; }
+      .hero-badge { font-size: 12px; padding: 5px 14px; }
+      .hero-sub br { display: none; }
+      .hero-proof { gap: 12px; font-size: 12px; }
+
+      /* Mockup menor */
+      .hero-visual { height: 210px; margin-top: 36px; }
+      .mock-slide { width: 150px; height: 150px; border-radius: 12px; }
+      .mock-title { font-size: 11px; }
+      .mock-glass-title { font-size: 10px; }
+      .mock-serif { font-size: 12px; }
+      .mock-num-big { font-size: 40px; }
+
+      .proof-bar { gap: 20px; padding: 16px 5%; }
+      .proof-num { font-size: 22px; }
+
+      /* Grids → 1 coluna */
+      .steps { grid-template-columns: 1fr; }
+      .testimonials { grid-template-columns: 1fr; }
+      .templates-grid { grid-template-columns: 1fr 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .result-strip { gap: 20px; }
+      .result-num { font-size: 28px; }
+
+      /* Footer */
+      footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; flex-wrap: wrap; gap: 16px; }
+
+      h2 { letter-spacing: -.5px; }
+      .section-sub { font-size: 1rem; }
+      .cta-final { padding: 64px 5%; }
     }
+
+    /* ── RESPONSIVE 480px ── */
     @media (max-width: 480px) {
+      nav { padding: 12px 4%; }
+
+      .hero { padding: 80px 4% 32px; }
       h1 { letter-spacing: -1px; }
-      .hero-btns { flex-direction: column; align-items: center; }
-      .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+      .hero-btns { flex-direction: column; align-items: stretch; }
+      .btn-primary, .btn-secondary { width: 100%; text-align: center; padding: 15px 24px; }
+
+      /* Mockup bem pequeno */
+      .hero-visual { height: 170px; margin-top: 28px; }
+      .mock-slide { width: 120px; height: 120px; border-radius: 10px; }
+      .mock-badge-wrap { font-size: 10px; padding: 4px 10px; bottom: 0; }
+      .mock-tag, .mock-white-tag { font-size: 6px; letter-spacing: 2px; }
+      .mock-title { font-size: 9px; }
+      .mock-glass-title { font-size: 9px; }
+      .mock-serif { font-size: 10px; }
+
+      .templates-grid { grid-template-columns: 1fr; }
+      .semcom-grid { grid-template-columns: 1fr; }
+
+      section { padding: 48px 4%; }
+      .proof-bar { flex-wrap: wrap; gap: 16px; padding: 16px 4%; }
+      .proof-num { font-size: 20px; }
+      .proof-label { font-size: 11px; }
+
+      .tpl-preview { height: 180px; }
+      .plan { padding: 28px 20px; }
+
+      .faq-q { font-size: 14px; padding: 16px 18px; }
+      .faq-item.open .faq-a { padding: 0 18px 16px; }
     }
   </style>
   <!-- Meta Pixel -->
