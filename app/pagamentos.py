@@ -12,6 +12,12 @@ PLANOS = {
     "pack15": {"nome": "Pack 15 Carrosséis", "valor": 197.00, "creditos": 15},
 }
 
+PLANOS_TEMPLATE = {
+    "starter": {"nome": "Template Exclusivo Starter", "valor": 127.00},
+    "pro":     {"nome": "Template Exclusivo Pro",     "valor": 247.00},
+    "agency":  {"nome": "Template Exclusivo Agency",  "valor": 497.00},
+}
+
 def criar_preferencia_mp(pagamento_id: int, plano_key: str) -> str:
     plano = PLANOS[plano_key]
     sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
@@ -21,6 +27,22 @@ def criar_preferencia_mp(pagamento_id: int, plano_key: str) -> str:
         "back_urls": {
             "success": f"{APP_URL}/static/chat.html",
             "failure": f"{APP_URL}/static/planos.html",
+        },
+        "notification_url": f"{APP_URL}/webhook/mercadopago",
+    }
+    result = sdk.preference().create(pref)
+    return result["response"]["init_point"]
+
+def criar_preferencia_template(pedido_id: int, plano_key: str) -> str:
+    """Cria preferência MP para compra de template exclusivo."""
+    plano = PLANOS_TEMPLATE[plano_key]
+    sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
+    pref = {
+        "items": [{"title": plano["nome"], "quantity": 1, "unit_price": float(plano["valor"])}],
+        "external_reference": f"tpl_{pedido_id}",
+        "back_urls": {
+            "success": f"{APP_URL}/static/briefing.html?pedido={pedido_id}",
+            "failure": f"{APP_URL}/static/exclusivo.html?erro=1",
         },
         "notification_url": f"{APP_URL}/webhook/mercadopago",
     }

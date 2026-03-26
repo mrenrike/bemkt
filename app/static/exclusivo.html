@@ -524,25 +524,56 @@
       if (!isOpen) item.classList.add('open');
     }
 
-    // Mercado Pago integration — read plan from URL param ?plano=starter|pro|agency
+    // Detecta ?erro=1 (retorno de falha do MP)
     (function() {
       const params = new URLSearchParams(window.location.search);
-      const plano = params.get('plano');
-      const valoresMap = { starter: 127, pro: 247, agency: 497 };
-      if (plano && valoresMap[plano]) {
-        iniciarCheckout(plano, valoresMap[plano]);
+      if (params.get('erro') === '1') {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#ff4444;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:999';
+        banner.textContent = 'Pagamento não concluído. Tente novamente.';
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 5000);
+        window.history.replaceState({}, '', '/static/exclusivo.html');
       }
     })();
 
-    // iniciarCheckout(plano, valor) — stores plano+valor in localStorage then redirects to /static/briefing.html
-    // (actual MP checkout will be wired later, for now redirect to briefing with plan info)
-    function iniciarCheckout(plano, valor) {
+    let _checkoutLoading = false;
+
+    async function iniciarCheckout(plano, valor) {
       if (!token) { window.location = '/'; return; }
-      localStorage.setItem('tpl_plano', plano);
-      localStorage.setItem('tpl_valor', valor);
-      // TODO: integrate Mercado Pago checkout here
-      // For now redirect to briefing directly
-      window.location = '/static/briefing.html';
+      if (_checkoutLoading) return;
+      _checkoutLoading = true;
+
+      // Mostra feedback visual em todos os botões do plano clicado
+      const btns = document.querySelectorAll('button[onclick*="' + plano + '"]');
+      btns.forEach(b => { b._txt = b.textContent; b.textContent = 'Aguarde...'; b.disabled = true; });
+
+      try {
+        const fd = new FormData();
+        fd.append('plano', plano);
+        const r = await fetch('/pagamento/template', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: fd,
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Erro ao criar pagamento');
+
+        // Salva info no localStorage para o briefing usar após o retorno
+        localStorage.setItem('tpl_plano', plano);
+        localStorage.setItem('tpl_valor', valor);
+        localStorage.setItem('tpl_pedido_id', d.pedido_id);
+
+        // Analytics
+        if (typeof bct !== 'undefined') bct('begin_checkout', { plano, valor });
+
+        // Redireciona para o checkout do Mercado Pago
+        window.location = d.init_point;
+      } catch(e) {
+        alert('Erro ao iniciar checkout: ' + e.message);
+        btns.forEach(b => { b.textContent = b._txt; b.disabled = false; });
+        _checkoutLoading = false;
+      }
     }
 
     // Analytics

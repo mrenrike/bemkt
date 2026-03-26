@@ -339,20 +339,24 @@
 
   <script>
   (function () {
-    /* ── 1. Read localStorage ── */
-    var plano = localStorage.getItem('tpl_plano');
-    var valor = localStorage.getItem('tpl_valor');
+    /* ── 1. Read pedido_id from URL or localStorage ── */
+    var urlParams  = new URLSearchParams(window.location.search);
+    var pedidoId   = urlParams.get('pedido') || localStorage.getItem('tpl_pedido_id');
+    var plano      = localStorage.getItem('tpl_plano');
+    var valor      = localStorage.getItem('tpl_valor');
 
-    if (!plano) {
+    if (!pedidoId && !plano) {
       window.location.href = '/static/exclusivo.html';
       return;
     }
 
+    // Salva pedidoId para caso venha só da URL
+    if (pedidoId) localStorage.setItem('tpl_pedido_id', pedidoId);
+
     /* ── 2. Populate banner ── */
     var planBadge = document.getElementById('planBadge');
-    var labelText = plano;
-    if (valor) labelText += ' — ' + valor;
-    planBadge.textContent = labelText;
+    var PLANO_LABELS = { starter: 'Starter — R$127', pro: 'Pro — R$247', agency: 'Agency — R$497' };
+    planBadge.textContent = PLANO_LABELS[plano] || ('Plano ' + (plano || '') + (valor ? ' — R$' + valor : ''));
 
     /* ── 3. Color picker sync ── */
     function bindColor(pickerId, hexId) {
@@ -498,33 +502,41 @@
       if (!nicho)     { showError('Por favor, informe o nicho/segmento.'); return; }
       if (!estilo)    { showError('Por favor, descreva o estilo desejado.'); return; }
 
-      /* Build FormData */
+      /* Build FormData — campos mapeados para o endpoint /briefing */
       var fd = new FormData();
-      fd.append('plano',           plano || '');
-      fd.append('valor',           valor || '');
-      fd.append('nome_marca',      nomeMarca);
-      fd.append('nicho',           nicho);
-      fd.append('instagram',       document.getElementById('instagram').value.trim());
-      fd.append('cor_primaria',    document.getElementById('corPrimariaHex').value.trim());
-      fd.append('cor_secundaria',  document.getElementById('corSecundariaHex').value.trim());
-      fd.append('fonte',           document.getElementById('fonte').value);
-      fd.append('estilo_desejado', estilo);
-      fd.append('referencias',     document.getElementById('referencias').value.trim());
-      fd.append('observacoes',     document.getElementById('observacoes').value.trim());
+      var cores = document.getElementById('corPrimariaHex').value.trim()
+                + ' ' + document.getElementById('corSecundariaHex').value.trim();
+      fd.append('briefing_nome',       nomeMarca);
+      fd.append('briefing_nicho',      nicho);
+      fd.append('briefing_username',   document.getElementById('instagram').value.trim());
+      fd.append('briefing_cores',      cores);
+      fd.append('briefing_fontes',     document.getElementById('fonte').value);
+      fd.append('briefing_estilo',     estilo);
+      fd.append('briefing_refs_texto', document.getElementById('referencias').value.trim());
+      fd.append('briefing_obs',        document.getElementById('observacoes').value.trim());
 
       selectedFiles.forEach(function (f) {
-        fd.append('referencias_visuais', f, f.name);
+        fd.append('refs', f, f.name);
       });
 
       /* Auth token */
       var token = localStorage.getItem('token') || localStorage.getItem('auth_token') || '';
-
       var headers = {};
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
+      /* Endpoint: usa pedidoId se existir, senão cria novo pedido */
+      var endpoint = pedidoId
+        ? '/pedido-template/' + pedidoId + '/briefing'
+        : '/pedido-template';
+
+      if (!pedidoId) {
+        fd.append('plano', plano || 'starter');
+        fd.append('valor', valor || '127');
+      }
+
       setLoading(true);
 
-      fetch('/pedido-template', {
+      fetch(endpoint, {
         method: 'POST',
         headers: headers,
         body: fd,

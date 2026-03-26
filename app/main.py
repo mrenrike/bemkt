@@ -28,7 +28,7 @@ from app.auth import hash_senha, verificar_senha, criar_token, usuario_atual, ad
 from app.chat import PERGUNTAS, proxima_pergunta, resumo_job
 from app.carousel import gerar_carrossel, gerar_carrossel_manual
 from app.email_sender import criar_zip, enviar_email_zip, notificar_admin_cadastro
-from app.pagamentos import PLANOS, criar_preferencia_mp, validar_assinatura_webhook, MP_WEBHOOK_SECRET
+from app.pagamentos import PLANOS, PLANOS_TEMPLATE, criar_preferencia_mp, criar_preferencia_template, validar_assinatura_webhook, MP_WEBHOOK_SECRET
 from app.security import (
     SecurityHeadersMiddleware, rate_limit,
     validar_email, sanitizar_texto, validar_magic_bytes
@@ -1338,6 +1338,31 @@ def pagamento_criar(data: PagamentoIn, user_id: int = Depends(usuario_atual)):
         raise HTTPException(status_code=502, detail=f"Erro Mercado Pago: {e}")
     return {"init_point": init_point}
 
+@app.post("/pagamento/template")
+def pagamento_template_criar(
+    plano: str = Form(...),
+    user_id: int = Depends(usuario_atual),
+):
+    """Cria pedido de template exclusivo e retorna init_point do MP."""
+    if plano not in PLANOS_TEMPLATE:
+        raise HTTPException(400, "Plano de template inválido")
+    info = PLANOS_TEMPLATE[plano]
+    db = get_db()
+    db.execute(
+        "INSERT INTO pedidos_template (user_id, plano, valor, status) VALUES (?,?,?,?)",
+        (user_id, plano, info["valor"], "aguardando_pagamento")
+    )
+    db.commit()
+    pedido_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+    db.close()
+    try:
+        init_point = criar_preferencia_template(pedido_id, plano)
+    except Exception as e:
+        logger.error("Erro MP template: %s", e)
+        raise HTTPException(502, f"Erro Mercado Pago: {e}")
+    return {"init_point": init_point, "pedido_id": pedido_id}
+
+
 @app.post("/webhook/mercadopago")
 async def webhook_mp(request: Request):
     corpo = await request.body()
@@ -1374,6 +1399,38 @@ async def webhook_mp(request: Request):
     if not ext_ref:
         db.close()
         return {"ok": True}
+    # Template exclusivo — external_reference começa com "tpl_"
+    if ext_ref.startswith("tpl_"):
+        pedido_id = int(ext_ref[4:])
+        pedido = db.execute(
+            "SELECT * FROM pedidos_template WHERE id=? AND status='aguardando_pagamento'", (pedido_id,)
+        ).fetchone()
+        if not pedido:
+            db.close()
+            return {"ok": True}
+        db.execute(
+            "UPDATE pedidos_template SET status='aguardando_producao', payment_id=? WHERE id=?",
+            (mp_id, pedido_id)
+        )
+        db.commit()
+        user = db.execute("SELECT nome, email FROM users WHERE id=?", (pedido["user_id"],)).fetchone()
+        db.close()
+        # Notifica admin
+        try:
+            from app.email_sender import enviar_email
+            enviar_email(
+                "bruno@bemkt.com.br",
+                f"[BeContent] Pagamento confirmado — Template #{pedido_id}",
+                f"<h2>Pagamento aprovado — Template Exclusivo #{pedido_id}</h2>"
+                f"<p><b>Cliente:</b> {user['nome']} ({user['email']})</p>"
+                f"<p><b>Plano:</b> {pedido['plano']} — R${pedido['valor']:.2f}</p>"
+                f"<p>O cliente será redirecionado para preencher o briefing.</p>"
+            )
+        except Exception as e:
+            logger.error("Erro email template webhook: %s", e)
+        return {"ok": True}
+
+    # Pagamento de créditos normal
     pag = db.execute("SELECT * FROM pagamentos WHERE id=? AND status='pendente'", (ext_ref,)).fetchone()
     if not pag:
         db.close()
@@ -1499,6 +1556,77 @@ def admin_page():
 
 
 # ── Template Exclusivo endpoints ──────────────────────────────────
+
+@app.post("/pedido-template/{pedido_id}/briefing")
+async def pedido_template_briefing(
+    pedido_id: int,
+    background_tasks: BackgroundTasks,
+    briefing_nome: str = Form(""),
+    briefing_nicho: str = Form(""),
+    briefing_username: str = Form(""),
+    briefing_cores: str = Form(""),
+    briefing_fontes: str = Form(""),
+    briefing_estilo: str = Form(""),
+    briefing_refs_texto: str = Form(""),
+    briefing_obs: str = Form(""),
+    refs: list[UploadFile] = File(default=[]),
+    user_id: int = Depends(usuario_atual),
+):
+    """Recebe briefing para um pedido já pago."""
+    db = get_db()
+    pedido = db.execute(
+        "SELECT * FROM pedidos_template WHERE id=? AND user_id=?", (pedido_id, user_id)
+    ).fetchone()
+    if not pedido:
+        db.close()
+        raise HTTPException(404, "Pedido não encontrado")
+
+    # Salva arquivos de referência
+    refs_paths = []
+    for i, arquivo in enumerate(refs[:5]):
+        if not arquivo.filename:
+            continue
+        conteudo = await arquivo.read()
+        if len(conteudo) > 10 * 1024 * 1024:
+            continue
+        ext = Path(arquivo.filename).suffix.lower()
+        if ext not in {".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"}:
+            continue
+        nome = f"ref_{user_id}_{pedido_id}_{i}{ext}"
+        caminho = REFS_DIR / nome
+        caminho.write_bytes(conteudo)
+        refs_paths.append(str(caminho))
+
+    obs_completo = "\n".join(filter(None, [
+        sanitizar_texto(briefing_estilo, 2000),
+        sanitizar_texto(briefing_refs_texto, 1000),
+        sanitizar_texto(briefing_obs, 1000),
+    ]))
+
+    db.execute(
+        """UPDATE pedidos_template SET
+           status='aguardando_producao',
+           briefing_nome=?, briefing_cores=?, briefing_fontes=?,
+           briefing_nicho=?, briefing_username=?, briefing_obs=?, refs_paths=?
+           WHERE id=?""",
+        (sanitizar_texto(briefing_nome, 200),
+         sanitizar_texto(briefing_cores, 200),
+         sanitizar_texto(briefing_fontes, 100),
+         sanitizar_texto(briefing_nicho, 200),
+         sanitizar_texto(briefing_username, 60),
+         obs_completo,
+         json.dumps(refs_paths),
+         pedido_id)
+    )
+    db.commit()
+    user = db.execute("SELECT nome, email FROM users WHERE id=?", (user_id,)).fetchone()
+    db.close()
+
+    background_tasks.add_task(
+        _notificar_pedido_template, pedido_id, dict(user), pedido["plano"], pedido["valor"]
+    )
+    return {"ok": True, "pedido_id": pedido_id}
+
 
 @app.post("/pedido-template")
 async def pedido_template(
