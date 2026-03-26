@@ -17,10 +17,25 @@ def _hex_rgb(h: str) -> str:
     return "140,255,46"
 
 def _extract_colors(cores_marca: str):
-    """Extract up to 2 hex colors from brand colors string."""
+    """Extract up to 2 hex colors. If only 1 provided, derives accent2 as a darker shade."""
     hexes = re.findall(r'#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b', cores_marca or "")
-    accent  = hexes[0] if hexes else "#8CFF2E"
-    accent2 = hexes[1] if len(hexes) > 1 else "#ff6a00"
+    accent = hexes[0] if hexes else "#8CFF2E"
+    if len(hexes) >= 2:
+        accent2 = hexes[1]
+    elif hexes:
+        # Deriva accent2 como versão escurecida (55%) da cor primária
+        h = accent.lstrip("#")
+        if len(h) == 3:
+            h = h[0]*2 + h[1]*2 + h[2]*2
+        try:
+            r = max(0, int(int(h[0:2], 16) * 0.55))
+            g = max(0, int(int(h[2:4], 16) * 0.55))
+            b = max(0, int(int(h[4:6], 16) * 0.55))
+            accent2 = f"#{r:02x}{g:02x}{b:02x}"
+        except ValueError:
+            accent2 = "#444444"
+    else:
+        accent2 = "#ff6a00"
     return accent, accent2
 
 def _apply_highlight(titulo: str, highlight: str, accent: str) -> str:

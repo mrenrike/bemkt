@@ -568,6 +568,163 @@ def chat_confirmar(job_id: int, background_tasks: BackgroundTasks, user_id: int 
     background_tasks.add_task(_executar_job, job_id, user_id, dict(job))
     return {"status": "gerando", "job_id": job_id}
 
+
+# ── Wizard form endpoints ─────────────────────────────────────────
+
+@app.get("/minhas-preferencias")
+def minhas_preferencias(user_id: int = Depends(usuario_atual)):
+    """Retorna as preferências do último carrossel gerado pelo usuário."""
+    db = get_db()
+    row = db.execute(
+        """SELECT plataforma, nicho, modelo, cores_marca, username_slide,
+                  tema, finalidade, cta_objetivo
+           FROM carrosseis WHERE user_id=? AND status='pronto'
+           ORDER BY criado_em DESC LIMIT 1""",
+        (user_id,)
+    ).fetchone()
+    db.close()
+    if not row:
+        return {}
+    return {k: row[k] for k in row.keys() if row[k] is not None}
+
+
+@app.post("/analisar-imagem")
+async def analisar_imagem(
+    arquivo: UploadFile = File(...),
+    user_id: int = Depends(usuario_atual)
+):
+    """Recebe uma imagem e extrai o tema/assunto via Claude Vision."""
+    conteudo = await arquivo.read()
+    if len(conteudo) > 5 * 1024 * 1024:
+        raise HTTPException(400, "Arquivo muito grande (máx 5MB)")
+    nome = Path(arquivo.filename or "img.jpg").name
+    if not validar_magic_bytes(conteudo, nome):
+        raise HTTPException(400, "Arquivo não é uma imagem válida")
+    import base64, anthropic
+    mime = arquivo.content_type or "image/jpeg"
+    b64 = base64.b64encode(conteudo).decode()
+    try:
+        client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+        resp = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=200,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "image", "source": {"type": "base64", "media_type": mime, "data": b64}},
+                    {"type": "text", "text": (
+                        "Analise esta imagem e extraia o assunto/tema principal em 1-2 frases curtas e diretas em português. "
+                        "O tema será usado para criar um carrossel para Instagram. "
+                        "Responda APENAS com o tema, sem introdução, sem explicação."
+                    )}
+                ]
+            }]
+        )
+        tema = resp.content[0].text.strip().strip('"')
+        return {"tema": tema}
+    except Exception as e:
+        logger.error("Erro ao analisar imagem: %s", e)
+        raise HTTPException(500, "Erro ao analisar imagem")
+
+
+@app.post("/gerar")
+async def gerar_direto(
+    background_tasks: BackgroundTasks,
+    plataforma: str = Form(...),
+    nicho: str = Form(""),
+    tema: str = Form(...),
+    finalidade: str = Form(""),
+    cta_objetivo: str = Form(""),
+    modelo: str = Form("1"),
+    cores_marca: str = Form(""),
+    username_slide: str = Form(""),
+    restricoes: str = Form(""),
+    logo: UploadFile | None = File(None),
+    user_id: int = Depends(usuario_atual),
+):
+    """Cria e inicia um job de geração a partir do wizard form."""
+    db = get_db()
+
+    # Verifica créditos + jobs simultâneos
+    if creditos_disponiveis(user_id, db) <= 0:
+        db.close()
+        raise HTTPException(402, "Sem créditos")
+    ativos = db.execute(
+        "SELECT COUNT(*) FROM carrosseis WHERE user_id=? AND status IN ('pendente','gerando')",
+        (user_id,)
+    ).fetchone()[0]
+    if ativos >= 3:
+        db.close()
+        raise HTTPException(429, "Máximo de 3 jobs simultâneos")
+
+    # Logo upload
+    logo_path = None
+    if logo and logo.filename:
+        nome_seguro = Path(logo.filename).name
+        ext = Path(nome_seguro).suffix.lower()
+        if ext not in [".png", ".jpg", ".jpeg", ".svg"]:
+            db.close()
+            raise HTTPException(400, "Logo: use PNG, JPG ou SVG")
+        conteudo_logo = await logo.read()
+        if len(conteudo_logo) > 5 * 1024 * 1024:
+            db.close()
+            raise HTTPException(400, "Logo maior que 5MB")
+        if not validar_magic_bytes(conteudo_logo, nome_seguro):
+            db.close()
+            raise HTTPException(400, "Logo não é uma imagem válida")
+        logo_file = UPLOAD_DIR / f"logo_{user_id}_{nome_seguro}"
+        logo_file.write_bytes(conteudo_logo)
+        logo_path = str(logo_file)
+
+    # Sanitiza campos
+    tema_s         = sanitizar_texto(tema, max_len=2000)
+    nicho_s        = sanitizar_texto(nicho, max_len=500)
+    restricoes_s   = sanitizar_texto(restricoes, max_len=1000)
+    cores_s        = sanitizar_texto(cores_marca, max_len=500)
+    username_s     = sanitizar_texto(username_slide, max_len=60)
+    finalidade_s   = sanitizar_texto(finalidade, max_len=50)
+    cta_s          = sanitizar_texto(cta_objetivo, max_len=50)
+    modelo_s       = modelo if modelo in {"1","2","3","4","5"} else "1"
+    plataforma_s   = plataforma if plataforma in {"1","2","3","4"} else "1"
+
+    # Cria job e já preenche todos os campos
+    db.execute("BEGIN IMMEDIATE")
+    try:
+        creditos = db.execute(
+            "SELECT COALESCE(SUM(delta),0) FROM credit_events WHERE user_id=?", (user_id,)
+        ).fetchone()[0]
+        if creditos <= 0:
+            db.execute("ROLLBACK")
+            db.close()
+            raise HTTPException(402, "Sem créditos")
+        db.execute(
+            """INSERT INTO carrosseis
+               (user_id, status, plataforma, nicho, tema, finalidade, cta_objetivo,
+                modelo, cores_marca, username_slide, restricoes, logo_path)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            ("gerando", plataforma_s, nicho_s, tema_s, finalidade_s, cta_s,
+             modelo_s, cores_s, username_s, restricoes_s, logo_path, user_id)
+        )
+        job_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+        db.execute(
+            "INSERT INTO credit_events (user_id, delta, motivo, ref_id) VALUES (?,?,'uso',?)",
+            (user_id, -1, str(job_id))
+        )
+        db.execute("COMMIT")
+    except HTTPException:
+        raise
+    except Exception:
+        db.execute("ROLLBACK")
+        db.close()
+        raise
+
+    job = db.execute("SELECT * FROM carrosseis WHERE id=?", (job_id,)).fetchone()
+    db.close()
+
+    background_tasks.add_task(_executar_job, job_id, user_id, dict(job))
+    return {"status": "gerando", "job_id": job_id}
+
+
 async def _executar_job(job_id: int, user_id: int, job: dict):
     pasta = CARROSSEIS_DIR / str(user_id) / str(job_id)
     print(f"\n>>> JOB {job_id} INICIADO tema={job.get('tema')}", flush=True)

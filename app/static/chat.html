@@ -2,88 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>BeContent — Criar Carrossel</title>
   <link rel="stylesheet" href="/static/style.css?v=2">
   <script src="/static/auth.js"></script>
-  <script src="/static/nav.js" defer></script>
-  <style>
-    .chat-wrap {
-      max-width: 640px; margin: 0 auto; padding: 0 16px;
-      height: 100dvh;
-      height: calc(100vh - env(safe-area-inset-bottom, 0px));
-      display: flex; flex-direction: column;
-    }
-    .chat-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 0; border-bottom: 1px solid var(--border);
-      margin-bottom: 16px; flex-shrink: 0; gap: 10px;
-    }
-    .chat-logo      { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap; }
-    .chat-logo span { color: var(--accent); }
-    .header-right   { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .credits-badge  { font-size: 13px; color: var(--muted); font-weight: 500; white-space: nowrap; }
-    .manual-link    {
-      font-size: 12px; color: var(--muted); text-decoration: none;
-      border: 1px solid var(--border); padding: 6px 12px; border-radius: 100px;
-      transition: all .2s; white-space: nowrap; flex-shrink: 0;
-    }
-    .manual-link:hover { color: var(--text); border-color: #333; }
-
-    .messages {
-      flex: 1; overflow-y: auto; display: flex; flex-direction: column;
-      gap: 12px; padding-bottom: 12px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .msg {
-      max-width: 85%; padding: 12px 16px; border-radius: 14px;
-      font-size: 15px; line-height: 1.6; word-break: break-word;
-    }
-    .msg-bot  { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
-    .msg-user { background: var(--accent); color: #080808; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
-
-    .input-area {
-      display: flex; gap: 8px;
-      padding: 12px 0;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-      border-top: 1px solid var(--border); align-items: center; flex-shrink: 0;
-    }
-    .input-area input {
-      flex: 1; min-width: 0;
-      padding: 13px 16px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 100px;
-      color: var(--text); font-size: 16px; /* 16px previne zoom no iOS */
-      outline: none; font-family: inherit; transition: border-color .2s;
-      -webkit-appearance: none;
-    }
-    .input-area input:focus { border-color: rgba(140,255,46,.4); }
-
-    .send-btn {
-      width: 46px; height: 46px; flex-shrink: 0;
-      background: var(--accent); color: #080808; border: none;
-      border-radius: 50%; font-weight: 700; font-size: 18px;
-      cursor: pointer; font-family: inherit; transition: opacity .2s;
-      display: flex; align-items: center; justify-content: center;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-    }
-    .send-btn:hover { opacity: .85; }
-
-    .skip-btn {
-      padding: 0 14px; height: 46px; flex-shrink: 0;
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      border-radius: 100px; cursor: pointer; font-size: 13px; font-family: inherit;
-      transition: all .2s; white-space: nowrap;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-    }
-    .skip-btn:hover { border-color: #333; color: var(--text); }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 400px) {
-      .manual-link { display: none; }
-      .msg { font-size: 14px; }
-    }
-  </style>
   <!-- Meta Pixel -->
   <script>
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -91,162 +13,839 @@
   n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
   t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
   document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '319489982256904');
-  fbq('track', 'PageView');
+  fbq('init','319489982256904'); fbq('track','PageView');
   </script>
-  <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
   <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
   <script>
-  window.dataLayer = window.dataLayer || [];
+  window.dataLayer=window.dataLayer||[];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-54MPDRQ62N');
+  gtag('js',new Date()); gtag('config','G-54MPDRQ62N');
   </script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#080808;--surface:#111;--surface2:#161616;--border:#1e1e1e;
+      --text:#f0f0f0;--muted:#555;--accent:#8cff2e;--accent-rgb:140,255,46;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);
+      font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;overflow:hidden}
+
+    /* ── topbar ── */
+    .topbar{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      height:52px;background:var(--surface);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+    }
+    .topbar-logo{font-size:15px;font-weight:900;letter-spacing:-0.3px}
+    .topbar-logo span{color:var(--accent)}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .credits-chip{font-size:12px;color:var(--muted);border:1px solid var(--border);
+      padding:4px 10px;border-radius:20px}
+    .progress-bar-wrap{height:2px;background:var(--border);position:fixed;top:52px;left:0;right:0;z-index:99}
+    .progress-bar-fill{height:100%;background:var(--accent);transition:width .4s ease}
+
+    /* ── wizard stage ── */
+    .stage{
+      position:fixed;inset:0;top:54px;
+      display:flex;align-items:center;justify-content:center;
+      padding:20px 16px;overflow:hidden;
+    }
+
+    /* ── steps ── */
+    .step{
+      position:absolute;width:100%;max-width:600px;
+      display:flex;flex-direction:column;gap:28px;
+      transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease;
+      padding:0 4px;
+    }
+    .step.hidden  {transform:translateX(100%);opacity:0;pointer-events:none}
+    .step.exit    {transform:translateX(-100%);opacity:0;pointer-events:none}
+    .step.active  {transform:translateX(0);opacity:1}
+
+    .step-question{font-size:22px;font-weight:800;line-height:1.3;letter-spacing:-0.3px}
+    .step-sub{font-size:14px;color:var(--muted);margin-top:-18px;line-height:1.5}
+
+    /* ── option cards ── */
+    .options{display:grid;gap:10px}
+    .options.cols-2{grid-template-columns:1fr 1fr}
+    .options.cols-4{grid-template-columns:1fr 1fr;gap:10px}
+    @media(min-width:480px){.options.cols-4{grid-template-columns:repeat(4,1fr)}}
+
+    .opt-card{
+      background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+      padding:16px 18px;cursor:pointer;transition:all .15s;
+      display:flex;flex-direction:column;gap:6px;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+    }
+    .opt-card:hover{border-color:#333;background:var(--surface2)}
+    .opt-card.selected{border-color:var(--accent);background:rgba(var(--accent-rgb),.07)}
+    .opt-card .opt-icon{font-size:22px;line-height:1}
+    .opt-card .opt-label{font-size:14px;font-weight:700;color:var(--text)}
+    .opt-card .opt-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+    /* ── template cards ── */
+    .templates{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:500px){.templates{grid-template-columns:repeat(3,1fr)}}
+    .tpl-card{
+      background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+      overflow:hidden;cursor:pointer;transition:all .15s;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+    }
+    .tpl-card:hover{border-color:#333}
+    .tpl-card.selected{border-color:var(--accent)}
+    .tpl-preview{height:120px;position:relative;overflow:hidden}
+    .tpl-info{padding:10px 12px}
+    .tpl-name{font-size:12px;font-weight:700;color:var(--text)}
+    .tpl-tag{font-size:10px;color:var(--muted);margin-top:2px}
+
+    /* ── template CSS previews ── */
+    .p-dark{background:#080808;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;height:100%}
+    .p-dark .p-line{width:28px;height:2px;background:#8cff2e;margin-bottom:8px}
+    .p-dark .p-title{font-size:11px;font-weight:900;color:#fff;line-height:1.2;letter-spacing:-.2px}
+    .p-dark .p-body{font-size:8px;color:#555;margin-top:5px}
+    .p-dark .p-num{font-size:28px;font-weight:900;color:rgba(140,255,46,.15);position:absolute;top:8px;right:10px;line-height:1}
+    .p-dark .p-dot{width:5px;height:5px;border-radius:50%;background:#8cff2e;display:inline-block;margin-right:4px;margin-bottom:1px}
+
+    .p-edit{background:#f7f6f4;display:flex;flex-direction:column;padding:14px;height:100%;position:relative}
+    .p-edit .p-topbar{width:100%;height:2px;background:v;margin-bottom:10px;border-radius:1px}
+    .p-edit .p-badge{font-size:7px;letter-spacing:3px;color:#333;border:1px solid #ccc;padding:2px 6px;border-radius:2px;align-self:flex-start;text-transform:uppercase;margin-bottom:10px}
+    .p-edit .p-title{font-size:10px;font-weight:700;color:#0d0d0d;line-height:1.3;font-family:Georgia,serif;max-width:90%}
+    .p-edit .p-rule{width:24px;height:1.5px;margin:8px 0 6px;border-radius:1px}
+    .p-edit .p-body{font-size:7px;color:#666;line-height:1.4}
+    .p-edit .p-ghost{position:absolute;bottom:-10px;right:-4px;font-size:60px;font-weight:900;color:#0d0d0d;opacity:.04;font-family:Georgia,serif;line-height:1}
+
+    .p-grad{display:flex;flex-direction:column;padding:12px;height:100%;position:relative}
+    .p-grad .p-tag{font-size:7px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase}
+    .p-grad .p-glass{background:rgba(0,0,0,.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px;margin-top:8px;flex:1;display:flex;flex-direction:column;justify-content:center}
+    .p-grad .p-title{font-size:10px;font-weight:900;color:#fff;line-height:1.2}
+    .p-grad .p-div{width:18px;height:2px;background:rgba(255,255,255,.4);margin:6px 0}
+    .p-grad .p-body{font-size:7px;color:rgba(255,255,255,.7)}
+
+    .p-foto{display:flex;flex-direction:column;justify-content:flex-end;padding:12px;height:100%;position:relative}
+    .p-foto-bg{position:absolute;inset:0;background:linear-gradient(160deg,#2a2a2a 0%,#111 100%)}
+    .p-foto-ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.75) 100%)}
+    .p-foto .p-badge2{position:absolute;top:10px;right:10px;font-size:7px;font-weight:700;padding:3px 7px;border-radius:10px;z-index:2}
+    .p-foto .p-inner{position:relative;z-index:2}
+    .p-foto .p-cat{font-size:7px;letter-spacing:3px;font-weight:700;text-transform:uppercase;margin-bottom:4px}
+    .p-foto .p-title{font-size:10px;font-weight:900;color:#fff;line-height:1.2}
+    .p-foto .p-bar{width:24px;height:3px;border-radius:2px;margin-top:6px}
+
+    .p-mini{background:#f0eee8;display:flex;flex-direction:column;justify-content:center;padding:14px;height:100%;position:relative}
+    .p-mini .p-bignum{font-size:48px;font-weight:800;line-height:1;position:absolute;bottom:-4px;right:6px;opacity:.1;color:#111}
+    .p-mini .p-cat{font-size:7px;letter-spacing:3px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px}
+    .p-mini .p-title{font-size:11px;font-weight:800;color:#111;line-height:1.2}
+    .p-mini .p-sep{width:18px;height:2px;border-radius:1px;margin:8px 0}
+    .p-mini .p-body{font-size:7px;color:#888}
+
+    /* ── text inputs ── */
+    .field-wrap{display:flex;flex-direction:column;gap:8px}
+    .field-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+    .field-input{
+      width:100%;padding:14px 16px;background:var(--surface);
+      border:1.5px solid var(--border);border-radius:12px;
+      color:var(--text);font-size:16px;font-family:inherit;outline:none;
+      transition:border-color .2s;resize:none;-webkit-appearance:none;
+    }
+    .field-input:focus{border-color:rgba(var(--accent-rgb),.5)}
+    .field-input::placeholder{color:var(--muted)}
+
+    .upload-btn{
+      display:flex;align-items:center;gap:10px;
+      padding:12px 16px;background:var(--surface);border:1.5px dashed var(--border);
+      border-radius:12px;cursor:pointer;color:var(--muted);font-size:14px;
+      transition:all .2s;-webkit-tap-highlight-color:transparent;
+    }
+    .upload-btn:hover{border-color:#333;color:var(--text)}
+    .upload-btn.has-file{border-color:rgba(var(--accent-rgb),.4);color:var(--accent);border-style:solid}
+
+    /* ── color row ── */
+    .color-row{display:flex;gap:12px}
+    .color-field{flex:1;display:flex;flex-direction:column;gap:6px}
+    .color-field label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+    .color-picker-wrap{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);
+      border-radius:12px;cursor:pointer;transition:border-color .2s;
+    }
+    .color-picker-wrap:focus-within{border-color:rgba(var(--accent-rgb),.5)}
+    .color-swatch{width:28px;height:28px;border-radius:8px;border:none;cursor:pointer;
+      background:none;padding:0;flex-shrink:0}
+    .color-hex{flex:1;background:none;border:none;color:var(--text);font-size:14px;
+      font-family:inherit;outline:none;letter-spacing:1px}
+
+    /* ── navigation ── */
+    .nav-row{display:flex;gap:10px;align-items:center}
+    .btn-next{
+      flex:1;padding:15px;background:var(--accent);color:#080808;border:none;
+      border-radius:100px;font-weight:800;font-size:15px;cursor:pointer;
+      font-family:inherit;transition:opacity .2s;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+    }
+    .btn-next:hover{opacity:.9}
+    .btn-next:disabled{opacity:.4;cursor:not-allowed}
+    .btn-back{
+      padding:15px 20px;background:none;border:1.5px solid var(--border);color:var(--muted);
+      border-radius:100px;font-size:14px;cursor:pointer;font-family:inherit;
+      transition:all .2s;-webkit-tap-highlight-color:transparent;
+    }
+    .btn-back:hover{border-color:#333;color:var(--text)}
+    .btn-skip{
+      padding:0;background:none;border:none;color:var(--muted);
+      font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    /* ── summary ── */
+    .summary-list{display:flex;flex-direction:column;gap:8px}
+    .summary-row{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 14px;background:var(--surface);border-radius:10px;
+      border:1px solid var(--border);
+    }
+    .summary-key{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+    .summary-val{font-size:13px;font-weight:600;color:var(--text);text-align:right;max-width:60%}
+
+    /* ── recall banner ── */
+    .recall-banner{
+      background:var(--surface);border:1px solid var(--border);border-radius:14px;
+      padding:16px 18px;display:flex;flex-direction:column;gap:12px;
+    }
+    .recall-banner .recall-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+    .recall-banner .recall-tema{font-size:15px;font-weight:700;color:var(--text)}
+    .recall-actions{display:flex;gap:8px}
+    .btn-recall-yes{
+      flex:1;padding:11px;background:rgba(var(--accent-rgb),.12);border:1.5px solid rgba(var(--accent-rgb),.3);
+      color:var(--accent);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;
+      font-family:inherit;-webkit-tap-highlight-color:transparent;
+    }
+    .btn-recall-no{
+      flex:1;padding:11px;background:none;border:1.5px solid var(--border);
+      color:var(--muted);border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;
+      font-family:inherit;-webkit-tap-highlight-color:transparent;
+    }
+
+    /* ── loading overlay ── */
+    .gen-overlay{
+      display:none;position:fixed;inset:0;background:var(--bg);z-index:200;
+      align-items:center;justify-content:center;flex-direction:column;gap:16px;
+    }
+    .gen-overlay.show{display:flex}
+    .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);
+      border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .gen-txt{font-size:14px;color:var(--muted)}
+
+    /* ── misc ── */
+    .hidden-input{display:none}
+    .analyzing-txt{font-size:12px;color:var(--accent);margin-top:4px;display:none}
+    .img-preview{
+      width:100%;max-height:120px;object-fit:cover;border-radius:8px;
+      margin-top:8px;border:1px solid var(--border);display:none;
+    }
+  </style>
 </head>
 <body>
-<div class="chat-wrap">
-  <div class="chat-header">
-    <span class="chat-logo">Be<span>Content</span></span>
-    <div class="header-right">
-      <a href="/static/editor.html" class="manual-link">✏️ Modo Manual</a>
-      <span class="credits-badge" id="creditos-badge">— créditos</span>
+
+<div class="topbar">
+  <span class="topbar-logo">Be<span>Content</span></span>
+  <div class="topbar-right">
+    <span class="credits-chip" id="credits-chip">— créditos</span>
+  </div>
+</div>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+
+<div class="stage" id="stage">
+
+  <!-- STEP 0: Boas-vindas / recall -->
+  <div class="step hidden" id="step-0">
+    <div class="step-question">Vamos criar seu próximo carrossel</div>
+    <div class="recall-banner hidden" id="recall-banner">
+      <div class="recall-label">Último carrossel gerado</div>
+      <div class="recall-tema" id="recall-tema">—</div>
+      <div class="recall-actions">
+        <button class="btn-recall-yes" onclick="usarAnterior()">Usar mesmo tema</button>
+        <button class="btn-recall-no" onclick="novoCarrossel()">Novo tema</button>
+      </div>
+    </div>
+    <div id="step0-btn-wrap">
+      <button class="btn-next" onclick="novoCarrossel()">Começar</button>
     </div>
   </div>
-  <div class="messages" id="messages"></div>
-  <div class="input-area">
-    <input type="file" id="file-input" class="hidden" accept=".png,.jpg,.jpeg,.svg" onchange="enviarArquivo()">
-    <input type="text" id="msg-input" placeholder="Digite sua resposta..." onkeydown="if(event.key==='Enter')enviar()">
-    <button type="button" class="skip-btn hidden" id="skip-btn" onclick="pular()">Pular</button>
-    <button type="button" class="send-btn" onclick="enviar()" aria-label="Enviar">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
+
+  <!-- STEP 1: Plataforma -->
+  <div class="step hidden" id="step-1">
+    <div class="step-question">Para qual rede social?</div>
+    <div class="options cols-4" id="opts-plataforma">
+      <div class="opt-card" data-val="1" onclick="selectOpt(this,'plataforma')">
+        <div class="opt-icon">📸</div>
+        <div class="opt-label">Instagram</div>
+      </div>
+      <div class="opt-card" data-val="2" onclick="selectOpt(this,'plataforma')">
+        <div class="opt-icon">💼</div>
+        <div class="opt-label">LinkedIn</div>
+      </div>
+      <div class="opt-card" data-val="3" onclick="selectOpt(this,'plataforma')">
+        <div class="opt-icon">🎵</div>
+        <div class="opt-label">TikTok</div>
+      </div>
+      <div class="opt-card" data-val="4" onclick="selectOpt(this,'plataforma')">
+        <div class="opt-icon">𝕏</div>
+        <div class="opt-label">X / Twitter</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(0)">←</button>
+      <button class="btn-next" id="btn-next-1" disabled onclick="goStep(2)">Continuar</button>
+    </div>
   </div>
+
+  <!-- STEP 2: Nicho -->
+  <div class="step hidden" id="step-2">
+    <div class="step-question">Qual é o nicho ou segmento?</div>
+    <div class="step-sub">Ex: marketing digital, moda feminina, academia, finanças pessoais…</div>
+    <div class="field-wrap">
+      <input class="field-input" id="input-nicho" type="text" placeholder="Digite o nicho..." maxlength="200"
+        oninput="updateNicho()" onkeydown="if(event.key==='Enter')goStep(3)">
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(1)">←</button>
+      <button class="btn-skip" onclick="goStep(3)">Pular</button>
+      <button class="btn-next" id="btn-next-2" onclick="goStep(3)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Tema -->
+  <div class="step hidden" id="step-3">
+    <div class="step-question">Qual o assunto do carrossel?</div>
+    <div class="step-sub">Descreva o tema ou envie um print com o conteúdo.</div>
+    <div class="field-wrap">
+      <textarea class="field-input" id="input-tema" rows="3" placeholder="Ex: 5 erros que impedem seu negócio de crescer..." maxlength="1000"
+        oninput="updateTema()"></textarea>
+      <div class="analyzing-txt" id="analyzing-txt">Analisando imagem...</div>
+      <img class="img-preview" id="img-preview" alt="preview">
+      <input type="file" class="hidden-input" id="file-tema" accept="image/*" onchange="analisarImagem(this)">
+      <button class="upload-btn" id="upload-btn" onclick="document.getElementById('file-tema').click()">
+        <span>📎</span> <span id="upload-label">Enviar print ou imagem</span>
+      </button>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(2)">←</button>
+      <button class="btn-next" id="btn-next-3" disabled onclick="goStep(4)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Objetivo -->
+  <div class="step hidden" id="step-4">
+    <div class="step-question">Qual o objetivo do carrossel?</div>
+    <div class="options cols-2">
+      <div class="opt-card" data-val="educacional" onclick="selectOpt(this,'finalidade')">
+        <div class="opt-icon">🎓</div>
+        <div class="opt-label">Educar</div>
+        <div class="opt-desc">Ensine algo valioso</div>
+      </div>
+      <div class="opt-card" data-val="vender" onclick="selectOpt(this,'finalidade')">
+        <div class="opt-icon">💰</div>
+        <div class="opt-label">Vender</div>
+        <div class="opt-desc">Apresente seu produto ou serviço</div>
+      </div>
+      <div class="opt-card" data-val="engajamento" onclick="selectOpt(this,'finalidade')">
+        <div class="opt-icon">🔥</div>
+        <div class="opt-label">Engajar</div>
+        <div class="opt-desc">Salve, compartilhe, comente</div>
+      </div>
+      <div class="opt-card" data-val="awareness" onclick="selectOpt(this,'finalidade')">
+        <div class="opt-icon">⭐</div>
+        <div class="opt-label">Autoridade</div>
+        <div class="opt-desc">Posicione sua marca</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(3)">←</button>
+      <button class="btn-next" id="btn-next-4" disabled onclick="goStep(5)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: CTA -->
+  <div class="step hidden" id="step-5">
+    <div class="step-question">O que você quer que o seguidor faça?</div>
+    <div class="options cols-2">
+      <div class="opt-card" data-val="link_bio" onclick="selectOpt(this,'cta_objetivo')">
+        <div class="opt-icon">🔗</div>
+        <div class="opt-label">Link na bio</div>
+        <div class="opt-desc">Direciona para fora</div>
+      </div>
+      <div class="opt-card" data-val="seguir" onclick="selectOpt(this,'cta_objetivo')">
+        <div class="opt-icon">➕</div>
+        <div class="opt-label">Seguir</div>
+        <div class="opt-desc">Cresce o perfil</div>
+      </div>
+      <div class="opt-card" data-val="compartilhar" onclick="selectOpt(this,'cta_objetivo')">
+        <div class="opt-icon">↗️</div>
+        <div class="opt-label">Compartilhar</div>
+        <div class="opt-desc">Alcance orgânico</div>
+      </div>
+      <div class="opt-card" data-val="comentar" onclick="selectOpt(this,'cta_objetivo')">
+        <div class="opt-icon">💬</div>
+        <div class="opt-label">Comentar</div>
+        <div class="opt-desc">Aumenta engajamento</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(4)">←</button>
+      <button class="btn-next" id="btn-next-5" disabled onclick="goStep(6)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Template -->
+  <div class="step hidden" id="step-6">
+    <div class="step-question">Escolha o estilo visual</div>
+    <div class="templates" id="opts-modelo">
+
+      <!-- 1: Authority Dark -->
+      <div class="tpl-card" data-val="1" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-dark" style="background:#080808">
+            <div class="p-num">01</div>
+            <div style="width:22px;height:2px;background:#8cff2e;margin-bottom:7px;border-radius:1px"></div>
+            <div style="font-size:10px;font-weight:900;color:#fff;line-height:1.2;letter-spacing:-.2px">Como dobrar<br><span style="color:#8cff2e">resultados</span><br>em 30 dias</div>
+            <div style="font-size:7px;color:#444;margin-top:5px">Estratégia comprovada com…</div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Authority Dark</div>
+          <div class="tpl-tag">Neon · Negrito · Viral</div>
+        </div>
+      </div>
+
+      <!-- 2: Clean Editorial -->
+      <div class="tpl-card" data-val="2" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-edit">
+            <div style="width:100%;height:2.5px;background:#8cff2e;margin-bottom:10px;border-radius:1px"></div>
+            <div style="font-size:7px;letter-spacing:3px;color:#333;border:1px solid #ccc;padding:2px 6px;border-radius:2px;align-self:flex-start;text-transform:uppercase;margin-bottom:8px">SÉRIE</div>
+            <div style="font-size:10px;font-weight:700;color:#0d0d0d;line-height:1.3;font-family:Georgia,serif">Como construir <span style="color:#8cff2e">autoridade</span> no seu nicho</div>
+            <div style="width:20px;height:1.5px;background:#8cff2e;margin:7px 0;border-radius:1px"></div>
+            <div style="font-size:7px;color:#666;line-height:1.4">A percepção do mercado define…</div>
+            <div class="p-ghost">02</div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Clean Editorial</div>
+          <div class="tpl-tag">Refinado · Profissional</div>
+        </div>
+      </div>
+
+      <!-- 3: Vibrant Gradient -->
+      <div class="tpl-card" data-val="3" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-grad" style="background:linear-gradient(145deg,#8cff2e 0%,#ff6a00 100%)">
+            <div style="font-size:7px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase">ESTRATÉGIA</div>
+            <div class="p-glass">
+              <div style="font-size:10px;font-weight:900;color:#fff;line-height:1.2">O segredo que ninguém te contou</div>
+              <div style="width:18px;height:2px;background:rgba(255,255,255,.4);margin:6px 0;border-radius:1px"></div>
+              <div style="font-size:7px;color:rgba(255,255,255,.7)">Descubra como os melhores…</div>
+            </div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Vibrant Gradient</div>
+          <div class="tpl-tag">Colorido · Energético</div>
+        </div>
+      </div>
+
+      <!-- 4: Foto Bold -->
+      <div class="tpl-card" data-val="4" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-foto">
+            <div class="p-foto-bg"></div>
+            <div class="p-foto-ov"></div>
+            <div class="p-foto .p-badge2" style="position:absolute;top:10px;right:10px;font-size:7px;font-weight:700;padding:3px 7px;border-radius:10px;z-index:2;background:#8cff2e;color:#080808">01/07</div>
+            <div class="p-inner">
+              <div style="font-size:7px;letter-spacing:3px;font-weight:700;text-transform:uppercase;margin-bottom:4px;color:#8cff2e">NEGÓCIOS</div>
+              <div style="font-size:10px;font-weight:900;color:#fff;line-height:1.2">O erro que custa R$10k por mês</div>
+              <div style="width:22px;height:2.5px;border-radius:2px;margin-top:5px;background:linear-gradient(90deg,#8cff2e,#4a8f00)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Foto Bold</div>
+          <div class="tpl-tag">Fotos de fundo · Impactante</div>
+        </div>
+      </div>
+
+      <!-- 5: Minimal Type -->
+      <div class="tpl-card" data-val="5" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-mini">
+            <div class="p-bignum">01</div>
+            <div style="font-size:7px;letter-spacing:3px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px">INSIGHT</div>
+            <div style="font-size:11px;font-weight:800;color:#111;line-height:1.2">Menos é mais quando você sabe o que cortar</div>
+            <div style="width:16px;height:2px;border-radius:1px;background:#8cff2e;margin:7px 0"></div>
+            <div style="font-size:7px;color:#888">Simplicidade como estratégia…</div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Minimal Type</div>
+          <div class="tpl-tag">Tipografia · Sem fotos</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(5)">←</button>
+      <button class="btn-next" id="btn-next-6" disabled onclick="goStep(7)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 7: Marca -->
+  <div class="step hidden" id="step-7">
+    <div class="step-question">Identidade da marca</div>
+    <div class="step-sub">Opcional — ajuda a personalizar as cores e visual.</div>
+
+    <div class="color-row">
+      <div class="color-field">
+        <label>Cor principal</label>
+        <div class="color-picker-wrap">
+          <input type="color" class="color-swatch" id="color1" value="#8cff2e" oninput="syncColorHex('color1','hex1')">
+          <input class="color-hex" id="hex1" value="#8cff2e" maxlength="7" oninput="syncColorPicker('hex1','color1')">
+        </div>
+      </div>
+      <div class="color-field">
+        <label>Cor secundária</label>
+        <div class="color-picker-wrap">
+          <input type="color" class="color-swatch" id="color2" value="#444444" oninput="syncColorHex('color2','hex2')">
+          <input class="color-hex" id="hex2" value="#444444" maxlength="7" oninput="syncColorPicker('hex2','color2')">
+        </div>
+      </div>
+    </div>
+
+    <div class="field-wrap">
+      <label class="field-label">@username (aparece nos slides)</label>
+      <input class="field-input" id="input-username" type="text" placeholder="@seuperfil" maxlength="60"
+        style="font-size:15px">
+    </div>
+
+    <div class="field-wrap">
+      <label class="field-label">Logo (PNG, JPG ou SVG)</label>
+      <input type="file" class="hidden-input" id="file-logo" accept=".png,.jpg,.jpeg,.svg" onchange="previewLogo(this)">
+      <button class="upload-btn" id="btn-logo" onclick="document.getElementById('file-logo').click()">
+        <span>🏷️</span> <span id="logo-label">Enviar logo da marca</span>
+      </button>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(6)">←</button>
+      <button class="btn-next" onclick="goStep(8)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 8: Resumo + Gerar -->
+  <div class="step hidden" id="step-8">
+    <div class="step-question">Pronto para gerar!</div>
+    <div class="summary-list" id="summary-list"></div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(7)">←</button>
+      <button class="btn-next" id="btn-gerar" onclick="gerarCarrossel()">Gerar carrossel</button>
+    </div>
+  </div>
+
+</div><!-- /stage -->
+
+<!-- Loading overlay -->
+<div class="gen-overlay" id="gen-overlay">
+  <div class="spinner"></div>
+  <div class="gen-txt">Enviando para geração...</div>
 </div>
 
 <script>
 const token = localStorage.getItem('token');
 if (!token) window.location = '/';
-let jobId = null, campoAtual = null, isUpload = false;
+function auth(extra){ return Object.assign({'Authorization':'Bearer '+token}, extra||{}); }
 
-function auth() { return { 'Authorization': 'Bearer ' + token }; }
+// ── State ──────────────────────────────────────────────────────────
+const state = {
+  plataforma: '', nicho: '', tema: '', finalidade: '', cta_objetivo: '',
+  modelo: '', cores_marca: '', username_slide: '', logo_file: null,
+};
+let prevPrefs = null;
+let currentStep = 0;
+const TOTAL_STEPS = 9; // 0..8
 
-function addMsg(texto, tipo) {
-  const d = document.createElement('div');
-  d.className = 'msg msg-' + tipo;
-  d.innerHTML = texto.replace(/\*([^*]+)\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-  document.getElementById('messages').appendChild(d);
-  d.scrollIntoView({ behavior: 'smooth' });
-}
+const PLAT_LABELS  = {'1':'Instagram','2':'LinkedIn','3':'TikTok','4':'X / Twitter'};
+const FIN_LABELS   = {'educacional':'Educar','vender':'Vender','engajamento':'Engajar','awareness':'Autoridade'};
+const CTA_LABELS   = {'link_bio':'Link na bio','seguir':'Seguir','compartilhar':'Compartilhar','comentar':'Comentar'};
+const TPL_LABELS   = {'1':'Authority Dark','2':'Clean Editorial','3':'Vibrant Gradient','4':'Foto Bold','5':'Minimal Type'};
 
+// ── Init ──────────────────────────────────────────────────────────
 async function init() {
-  const me = await fetch('/me', { headers: auth() });
-  const d  = await me.json();
-  document.getElementById('creditos-badge').textContent = d.creditos + ' crédito' + (d.creditos !== 1 ? 's' : '');
-  if (d.creditos <= 0) {
-    addMsg('Você não tem créditos. <a href="/static/planos.html" style="color:var(--accent)">Ver planos →</a>', 'bot');
-    return;
-  }
-  const savedJobId = localStorage.getItem('chat_job_id');
-  if (savedJobId) {
-    const re = await fetch('/chat/estado/' + savedJobId, { headers: auth() });
-    if (re.ok) {
-      const de = await re.json();
-      jobId = parseInt(savedJobId);
-      if (de.done) {
-        addMsg(de.resumo, 'bot');
-        campoAtual = 'confirmar';
-        document.getElementById('msg-input').placeholder = 'Digite "confirmar" para gerar';
-      } else {
-        campoAtual = de.campo;
-        isUpload   = de.upload || false;
-        addMsg('↩️ Continuando de onde parou...', 'bot');
-        addMsg(de.pergunta, 'bot');
-        if (isUpload) document.getElementById('skip-btn').classList.remove('hidden');
-      }
+  try {
+    const r = await fetch('/me', {headers: auth()});
+    const d = await r.json();
+    document.getElementById('credits-chip').textContent = d.creditos + ' crédito' + (d.creditos!==1?'s':'');
+    if (d.creditos <= 0) {
+      window.location = '/static/planos.html';
       return;
     }
-    localStorage.removeItem('chat_job_id');
-  }
-  const r = await fetch('/chat/iniciar', { method: 'POST', headers: auth() });
-  if (!r.ok) { addMsg('Erro ao iniciar. Tente novamente.', 'bot'); return; }
-  const d2 = await r.json();
-  jobId       = d2.job_id;
-  campoAtual  = d2.campo;
-  isUpload    = d2.upload || false;
-  localStorage.setItem('chat_job_id', jobId);
-  addMsg(d2.pergunta, 'bot');
-  if (isUpload) document.getElementById('skip-btn').classList.remove('hidden');
-}
+  } catch{}
 
-async function enviar() {
-  const input = document.getElementById('msg-input');
-  const texto = input.value.trim();
-  if (campoAtual === 'confirmar') {
-    if (texto.toLowerCase() === 'confirmar') {
-      addMsg('Gerando seu carrossel... 🚀', 'user');
-      input.value = '';
-      const r = await fetch('/chat/confirmar?job_id=' + jobId, { method: 'POST', headers: auth() });
-      if (r.ok) {
-        localStorage.setItem('job_id', jobId);
-        localStorage.removeItem('chat_job_id');
-        window.location = '/static/loading.html';
-      } else {
-        addMsg('Erro ao confirmar. Tente novamente.', 'bot');
+  // Busca preferências anteriores
+  try {
+    const r = await fetch('/minhas-preferencias', {headers: auth()});
+    if (r.ok) {
+      prevPrefs = await r.json();
+      if (prevPrefs && prevPrefs.tema) {
+        document.getElementById('recall-tema').textContent = prevPrefs.tema;
+        document.getElementById('recall-banner').classList.remove('hidden');
+        document.getElementById('step0-btn-wrap').style.display = 'none';
       }
     }
-    return;
+  } catch{}
+
+  goStep(0, true);
+}
+
+// ── Navigation ────────────────────────────────────────────────────
+function goStep(n, instant) {
+  const prev = document.getElementById('step-' + currentStep);
+  const next = document.getElementById('step-' + n);
+  if (!next) return;
+
+  if (prev && prev.id !== next.id) {
+    prev.classList.remove('active');
+    prev.classList.add(n > currentStep ? 'exit' : 'hidden');
+    setTimeout(() => { prev.classList.add('hidden'); prev.classList.remove('exit'); }, 350);
   }
-  if (!texto && !isUpload) { await pular(); return; }
-  if (isUpload && texto) { document.getElementById('file-input').click(); return; }
-  input.value = '';
-  addMsg(texto || '(pulado)', 'user');
-  await _enviarResposta(texto, null);
-}
 
-async function pular() {
-  addMsg('(pulado)', 'user');
-  await _enviarResposta('', null);
-}
-
-async function enviarArquivo() {
-  const file = document.getElementById('file-input').files[0];
-  if (!file) return;
-  addMsg('📎 ' + file.name, 'user');
-  await _enviarResposta('', file);
-}
-
-async function _enviarResposta(texto, arquivo) {
-  const fd = new FormData();
-  fd.append('job_id', jobId);
-  fd.append('campo', campoAtual);
-  fd.append('resposta', texto);
-  if (arquivo) fd.append('arquivo', arquivo);
-  const r = await fetch('/chat/responder', { method: 'POST', headers: auth(), body: fd });
-  const d = await r.json();
-  if (d.done) {
-    addMsg(d.resumo, 'bot');
-    campoAtual = 'confirmar';
-    document.getElementById('skip-btn').classList.add('hidden');
-    document.getElementById('msg-input').placeholder = 'Digite "confirmar" para gerar';
+  next.classList.remove('hidden','exit');
+  if (instant) {
+    next.classList.add('active');
   } else {
-    campoAtual = d.campo;
-    isUpload   = d.upload || false;
-    document.getElementById('skip-btn').classList.toggle('hidden', !isUpload);
-    if (d.aviso) addMsg(d.aviso, 'bot');
-    addMsg(d.pergunta, 'bot');
+    next.style.transform = n > currentStep ? 'translateX(100%)' : 'translateX(-100%)';
+    next.style.opacity = '0';
+    next.classList.add('active');
+    requestAnimationFrame(() => {
+      next.style.transition = 'transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease';
+      next.style.transform = 'translateX(0)';
+      next.style.opacity = '1';
+    });
+  }
+
+  currentStep = n;
+  updateProgress();
+
+  if (n === 8) buildSummary();
+}
+
+function updateProgress() {
+  const pct = currentStep === 0 ? 0 : Math.round((currentStep / 8) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+// ── Recall ────────────────────────────────────────────────────────
+function usarAnterior() {
+  if (!prevPrefs) { novoCarrossel(); return; }
+  // Pre-fill tudo exceto tema
+  if (prevPrefs.plataforma) preSelectOpt('opts-plataforma', prevPrefs.plataforma, 'plataforma');
+  if (prevPrefs.nicho)      document.getElementById('input-nicho').value = prevPrefs.nicho;
+  if (prevPrefs.finalidade) preSelectOpt(null, prevPrefs.finalidade, 'finalidade');
+  if (prevPrefs.cta_objetivo) preSelectOpt(null, prevPrefs.cta_objetivo, 'cta_objetivo');
+  if (prevPrefs.modelo)     { const c = document.querySelector('.tpl-card[data-val="'+prevPrefs.modelo+'"]'); if(c) selectTplEl(c); }
+  if (prevPrefs.cores_marca) {
+    const hexes = prevPrefs.cores_marca.match(/#[0-9a-fA-F]{6}/g);
+    if (hexes && hexes[0]) { document.getElementById('color1').value = hexes[0]; document.getElementById('hex1').value = hexes[0]; }
+    if (hexes && hexes[1]) { document.getElementById('color2').value = hexes[1]; document.getElementById('hex2').value = hexes[1]; }
+  }
+  if (prevPrefs.username_slide) document.getElementById('input-username').value = prevPrefs.username_slide;
+  // Pula direto para o tema
+  goStep(3);
+}
+
+function novoCarrossel() {
+  goStep(1);
+}
+
+// ── Option selection ──────────────────────────────────────────────
+function selectOpt(el, field) {
+  const parent = el.closest('.options');
+  parent.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[field] = el.dataset.val;
+  const btnId = 'btn-next-' + currentStep;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = false;
+  // Auto-avança em 300ms se for card simples
+  setTimeout(() => {
+    const next = currentStep + 1;
+    if (next <= 8) goStep(next);
+  }, 280);
+}
+
+function preSelectOpt(containerId, val, field) {
+  const container = containerId
+    ? document.getElementById(containerId)
+    : document.querySelector(`[data-val="${val}"]`)?.closest('.options');
+  if (!container) return;
+  const el = container.querySelector(`[data-val="${val}"]`);
+  if (!el) return;
+  container.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[field] = val;
+  const btnId = 'btn-next-' + Array.from(document.querySelectorAll('.step')).findIndex(s => s.contains(container));
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = false;
+}
+
+function selectTpl(el) { selectTplEl(el); }
+function selectTplEl(el) {
+  document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.modelo = el.dataset.val;
+  document.getElementById('btn-next-6').disabled = false;
+  setTimeout(() => goStep(7), 280);
+}
+
+// ── Text inputs ───────────────────────────────────────────────────
+function updateNicho() {
+  state.nicho = document.getElementById('input-nicho').value.trim();
+}
+
+function updateTema() {
+  state.tema = document.getElementById('input-tema').value.trim();
+  document.getElementById('btn-next-3').disabled = state.tema.length < 3;
+}
+
+// ── Image analysis ────────────────────────────────────────────────
+async function analisarImagem(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('img-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+
+  // Upload label
+  document.getElementById('upload-label').textContent = file.name;
+  document.getElementById('upload-btn').classList.add('has-file');
+  document.getElementById('analyzing-txt').style.display = 'block';
+  document.getElementById('btn-next-3').disabled = true;
+
+  try {
+    const fd = new FormData();
+    fd.append('arquivo', file);
+    const r = await fetch('/analisar-imagem', { method: 'POST', headers: auth(), body: fd });
+    if (r.ok) {
+      const d = await r.json();
+      document.getElementById('input-tema').value = d.tema;
+      state.tema = d.tema;
+      document.getElementById('btn-next-3').disabled = false;
+    }
+  } catch(e) {
+    console.error(e);
+  } finally {
+    document.getElementById('analyzing-txt').style.display = 'none';
   }
 }
 
-// Detecta retorno do Mercado Pago com pagamento aprovado
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('status') === 'approved' || params.get('collection_status') === 'approved') {
-    if (typeof fbq !== 'undefined') fbq('track', 'Purchase', { currency: 'BRL', value: parseFloat(params.get('transaction_amount') || '0') });
-    if (typeof gtag !== 'undefined') gtag('event', 'purchase', { currency: 'BRL', value: parseFloat(params.get('transaction_amount') || '0') });
-    // Limpa params da URL sem recarregar
-    window.history.replaceState({}, '', '/static/chat.html');
+// ── Colors ────────────────────────────────────────────────────────
+function syncColorHex(pickerId, hexId) {
+  document.getElementById(hexId).value = document.getElementById(pickerId).value;
+}
+function syncColorPicker(hexId, pickerId) {
+  const val = document.getElementById(hexId).value;
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    document.getElementById(pickerId).value = val;
+  }
+}
+
+// ── Logo ──────────────────────────────────────────────────────────
+function previewLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  state.logo_file = file;
+  document.getElementById('logo-label').textContent = file.name;
+  document.getElementById('btn-logo').classList.add('has-file');
+}
+
+// ── Summary ───────────────────────────────────────────────────────
+function buildSummary() {
+  const c1 = document.getElementById('color1').value;
+  const c2 = document.getElementById('color2').value;
+  state.cores_marca   = c1 + ' ' + c2;
+  state.username_slide = document.getElementById('input-username').value.trim();
+  state.nicho          = document.getElementById('input-nicho').value.trim();
+  state.tema           = document.getElementById('input-tema').value.trim();
+
+  const rows = [
+    ['Plataforma', PLAT_LABELS[state.plataforma] || state.plataforma],
+    ['Tema',       state.tema || '—'],
+    ['Nicho',      state.nicho || '—'],
+    ['Objetivo',   FIN_LABELS[state.finalidade] || state.finalidade || '—'],
+    ['CTA',        CTA_LABELS[state.cta_objetivo] || state.cta_objetivo || '—'],
+    ['Template',   TPL_LABELS[state.modelo] || state.modelo || '—'],
+    ['Cores',      c1 + ' · ' + c2],
+  ];
+  if (state.username_slide) rows.push(['@username', state.username_slide]);
+  if (state.logo_file)      rows.push(['Logo', state.logo_file.name]);
+
+  const list = document.getElementById('summary-list');
+  list.innerHTML = rows.map(([k,v]) => `
+    <div class="summary-row">
+      <span class="summary-key">${k}</span>
+      <span class="summary-val">${esc(String(v))}</span>
+    </div>
+  `).join('');
+}
+
+// ── Generate ──────────────────────────────────────────────────────
+async function gerarCarrossel() {
+  if (!state.plataforma) { alert('Selecione a plataforma (passo 1)'); goStep(1); return; }
+  if (!state.tema)       { alert('Digite o tema (passo 3)'); goStep(3); return; }
+
+  document.getElementById('gen-overlay').classList.add('show');
+
+  const fd = new FormData();
+  fd.append('plataforma',    state.plataforma);
+  fd.append('nicho',         state.nicho);
+  fd.append('tema',          state.tema);
+  fd.append('finalidade',    state.finalidade);
+  fd.append('cta_objetivo',  state.cta_objetivo);
+  fd.append('modelo',        state.modelo || '1');
+  fd.append('cores_marca',   state.cores_marca);
+  fd.append('username_slide', state.username_slide);
+  if (state.logo_file) fd.append('logo', state.logo_file);
+
+  try {
+    const r = await fetch('/gerar', { method: 'POST', headers: auth(), body: fd });
+    const d = await r.json();
+    if (!r.ok) {
+      document.getElementById('gen-overlay').classList.remove('show');
+      alert(d.detail || 'Erro ao iniciar geração');
+      return;
+    }
+    localStorage.setItem('job_id', d.job_id);
+    window.location = '/static/loading.html';
+  } catch(e) {
+    document.getElementById('gen-overlay').classList.remove('show');
+    alert('Erro de conexão. Tente novamente.');
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Detecta status=approved (retorno MP)
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('status')==='approved'||p.get('collection_status')==='approved'){
+    if(typeof fbq!=='undefined') fbq('track','Purchase',{currency:'BRL',value:parseFloat(p.get('transaction_amount')||'0')});
+    if(typeof gtag!=='undefined') gtag('event','purchase',{currency:'BRL',value:parseFloat(p.get('transaction_amount')||'0')});
+    window.history.replaceState({},'','/static/chat.html');
   }
 })();
 
