@@ -627,6 +627,42 @@ async def analisar_imagem(
         raise HTTPException(500, "Erro ao analisar imagem")
 
 
+@app.post("/sugerir-tema")
+async def sugerir_tema(
+    nicho: str = Form(""),
+    plataforma: str = Form(""),
+    user_id: int = Depends(usuario_atual),
+):
+    """Sugere temas de carrossel com base no nicho e plataforma do usuário."""
+    import anthropic as _ant
+    nicho_s = sanitizar_texto(nicho, 200)
+    plat_s  = sanitizar_texto(plataforma, 20)
+    prompt = (
+        f"Sugira 5 ideias de tema para carrossel de {'Instagram' if plat_s=='1' else 'redes sociais'} "
+        f"no nicho: {nicho_s or 'geral'}. "
+        "Retorne apenas uma lista numerada, cada linha com a ideia do tema (máx 15 palavras cada). "
+        "Sem explicações extras."
+    )
+    try:
+        client = _ant.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+        resp = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=300,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = resp.content[0].text.strip()
+        # Extrai as linhas numeradas
+        sugestoes = [
+            line.lstrip("0123456789. )-").strip()
+            for line in raw.splitlines()
+            if line.strip() and line.strip()[0].isdigit()
+        ][:5]
+        return {"sugestoes": sugestoes}
+    except Exception as e:
+        logger.error("Erro ao sugerir tema: %s", e)
+        raise HTTPException(500, "Erro ao sugerir tema")
+
+
 @app.post("/gerar")
 async def gerar_direto(
     background_tasks: BackgroundTasks,
@@ -639,6 +675,7 @@ async def gerar_direto(
     cores_marca: str = Form(""),
     username_slide: str = Form(""),
     restricoes: str = Form(""),
+    uso_fotos: str = Form("fotos"),
     logo: UploadFile | None = File(None),
     user_id: int = Depends(usuario_atual),
 ):
@@ -679,7 +716,10 @@ async def gerar_direto(
     # Sanitiza campos
     tema_s         = sanitizar_texto(tema, max_len=2000)
     nicho_s        = sanitizar_texto(nicho, max_len=500)
+    uso_fotos_s    = "sem_fotos" if uso_fotos == "sem_fotos" else "fotos"
     restricoes_s   = sanitizar_texto(restricoes, max_len=1000)
+    if uso_fotos_s == "sem_fotos":
+        restricoes_s = ("sem fotos de fundo; use apenas tipografia e cores. " + restricoes_s).strip()
     cores_s        = sanitizar_texto(cores_marca, max_len=500)
     username_s     = sanitizar_texto(username_slide, max_len=60)
     finalidade_s   = sanitizar_texto(finalidade, max_len=50)
@@ -702,8 +742,8 @@ async def gerar_direto(
                (user_id, status, plataforma, nicho, tema, finalidade, cta_objetivo,
                 modelo, cores_marca, username_slide, restricoes, logo_path)
                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
-            ("gerando", plataforma_s, nicho_s, tema_s, finalidade_s, cta_s,
-             modelo_s, cores_s, username_s, restricoes_s, logo_path, user_id)
+            (user_id, "gerando", plataforma_s, nicho_s, tema_s, finalidade_s, cta_s,
+             modelo_s, cores_s, username_s, restricoes_s, logo_path)
         )
         job_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
         db.execute(

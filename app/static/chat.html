@@ -237,6 +237,26 @@
       width:100%;max-height:120px;object-fit:cover;border-radius:8px;
       margin-top:8px;border:1px solid var(--border);display:none;
     }
+
+    /* ── sugestões de tema ── */
+    .suggest-btn{
+      display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+      color:var(--accent);border:1px dashed rgba(var(--accent-rgb),.35);
+      background:rgba(var(--accent-rgb),.06);border-radius:10px;
+      padding:10px 14px;cursor:pointer;transition:all .15s;margin-top:4px;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .suggest-btn:hover{background:rgba(var(--accent-rgb),.12);border-color:rgba(var(--accent-rgb),.6)}
+    .suggest-btn .suggest-icon{font-size:16px}
+    .suggest-loading{font-size:12px;color:var(--muted);margin-top:6px;display:none}
+    .suggest-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .suggest-item{
+      background:var(--surface);border:1px solid var(--border);border-radius:10px;
+      padding:11px 14px;font-size:13px;color:var(--text);cursor:pointer;
+      transition:all .15s;line-height:1.4;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .suggest-item:hover{border-color:rgba(var(--accent-rgb),.4);background:rgba(var(--accent-rgb),.05)}
   </style>
 </head>
 <body>
@@ -324,14 +344,41 @@
         <span>📎</span> <span id="upload-label">Enviar print ou imagem</span>
       </button>
     </div>
+    <button class="suggest-btn" onclick="sugerirTema()">
+      <span class="suggest-icon">💡</span> Não sabe o que falar? Clique aqui
+    </button>
+    <div class="suggest-loading" id="suggest-loading">Gerando ideias para você...</div>
+    <div class="suggest-list" id="suggest-list"></div>
     <div class="nav-row">
       <button class="btn-back" onclick="goStep(2)">←</button>
       <button class="btn-next" id="btn-next-3" disabled onclick="goStep(4)">Continuar</button>
     </div>
   </div>
 
-  <!-- STEP 4: Objetivo -->
+  <!-- STEP 4: Com fotos? -->
   <div class="step hidden" id="step-4">
+    <div class="step-question">Como prefere as imagens?</div>
+    <div class="step-sub">Fotos de fundo tornam o visual mais impactante.</div>
+    <div class="options cols-2">
+      <div class="opt-card" data-val="fotos" onclick="selectOpt(this,'uso_fotos')">
+        <div class="opt-icon">🖼️</div>
+        <div class="opt-label">Com fotos</div>
+        <div class="opt-desc">Fotos reais de fundo nos slides</div>
+      </div>
+      <div class="opt-card" data-val="sem_fotos" onclick="selectOpt(this,'uso_fotos')">
+        <div class="opt-icon">✏️</div>
+        <div class="opt-label">Só tipografia</div>
+        <div class="opt-desc">Foco no texto, visual limpo</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(3)">←</button>
+      <button class="btn-next" id="btn-next-4" disabled onclick="goStep(5)">Continuar</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Objetivo -->
+  <div class="step hidden" id="step-5">
     <div class="step-question">Qual o objetivo do carrossel?</div>
     <div class="options cols-2">
       <div class="opt-card" data-val="educacional" onclick="selectOpt(this,'finalidade')">
@@ -356,13 +403,13 @@
       </div>
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goStep(3)">←</button>
-      <button class="btn-next" id="btn-next-4" disabled onclick="goStep(5)">Continuar</button>
+      <button class="btn-back" onclick="goStep(4)">←</button>
+      <button class="btn-next" id="btn-next-5" disabled onclick="goStep(6)">Continuar</button>
     </div>
   </div>
 
-  <!-- STEP 5: CTA -->
-  <div class="step hidden" id="step-5">
+  <!-- STEP 6: CTA -->
+  <div class="step hidden" id="step-6">
     <div class="step-question">O que você quer que o seguidor faça?</div>
     <div class="options cols-2">
       <div class="opt-card" data-val="link_bio" onclick="selectOpt(this,'cta_objetivo')">
@@ -387,13 +434,13 @@
       </div>
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goStep(4)">←</button>
-      <button class="btn-next" id="btn-next-5" disabled onclick="goStep(6)">Continuar</button>
+      <button class="btn-back" onclick="goStep(5)">←</button>
+      <button class="btn-next" id="btn-next-6" disabled onclick="goStep(7)">Continuar</button>
     </div>
   </div>
 
-  <!-- STEP 6: Template -->
-  <div class="step hidden" id="step-6">
+  <!-- STEP 7: Template -->
+  <div class="step hidden" id="step-7">
     <div class="step-question">Escolha o estilo visual</div>
     <div class="templates" id="opts-modelo">
 
@@ -488,13 +535,13 @@
 
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goStep(5)">←</button>
-      <button class="btn-next" id="btn-next-6" disabled onclick="goStep(7)">Continuar</button>
+      <button class="btn-back" onclick="goStep(6)">←</button>
+      <button class="btn-next" id="btn-next-7" disabled onclick="goStep(8)">Continuar</button>
     </div>
   </div>
 
-  <!-- STEP 7: Marca -->
-  <div class="step hidden" id="step-7">
+  <!-- STEP 8: Marca -->
+  <div class="step hidden" id="step-8">
     <div class="step-question">Identidade da marca</div>
     <div class="step-sub">Opcional — ajuda a personalizar as cores e visual.</div>
 
@@ -530,17 +577,17 @@
     </div>
 
     <div class="nav-row">
-      <button class="btn-back" onclick="goStep(6)">←</button>
-      <button class="btn-next" onclick="goStep(8)">Continuar</button>
+      <button class="btn-back" onclick="goStep(7)">←</button>
+      <button class="btn-next" onclick="goStep(9)">Continuar</button>
     </div>
   </div>
 
-  <!-- STEP 8: Resumo + Gerar -->
-  <div class="step hidden" id="step-8">
+  <!-- STEP 9: Resumo + Gerar -->
+  <div class="step hidden" id="step-9">
     <div class="step-question">Pronto para gerar!</div>
     <div class="summary-list" id="summary-list"></div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goStep(7)">←</button>
+      <button class="btn-back" onclick="goStep(8)">←</button>
       <button class="btn-next" id="btn-gerar" onclick="gerarCarrossel()">Gerar carrossel</button>
     </div>
   </div>
@@ -561,12 +608,12 @@ function auth(extra){ return Object.assign({'Authorization':'Bearer '+token}, ex
 
 // ── State ──────────────────────────────────────────────────────────
 const state = {
-  plataforma: '', nicho: '', tema: '', finalidade: '', cta_objetivo: '',
+  plataforma: '', nicho: '', tema: '', uso_fotos: 'fotos', finalidade: '', cta_objetivo: '',
   modelo: '', cores_marca: '', username_slide: '', logo_file: null,
 };
 let prevPrefs = null;
 let currentStep = 0;
-const TOTAL_STEPS = 9; // 0..8
+const TOTAL_STEPS = 10; // 0..9
 
 const PLAT_LABELS  = {'1':'Instagram','2':'LinkedIn','3':'TikTok','4':'X / Twitter'};
 const FIN_LABELS   = {'educacional':'Educar','vender':'Vender','engajamento':'Engajar','awareness':'Autoridade'};
@@ -643,11 +690,11 @@ function goStep(n, instant) {
 
   currentStep = n;
   updateProgress();
-  if (n === 8) buildSummary();
+  if (n === 9) buildSummary();
 }
 
 function updateProgress() {
-  const pct = currentStep === 0 ? 0 : Math.round((currentStep / 8) * 100);
+  const pct = currentStep === 0 ? 0 : Math.round((currentStep / 9) * 100);
   document.getElementById('prog-fill').style.width = pct + '%';
 }
 
@@ -686,7 +733,7 @@ function selectOpt(el, field) {
   // Auto-avança em 300ms se for card simples
   setTimeout(() => {
     const next = currentStep + 1;
-    if (next <= 8) goStep(next);
+    if (next <= 9) goStep(next);
   }, 280);
 }
 
@@ -710,8 +757,8 @@ function selectTplEl(el) {
   document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   state.modelo = el.dataset.val;
-  document.getElementById('btn-next-6').disabled = false;
-  setTimeout(() => goStep(7), 280);
+  document.getElementById('btn-next-7').disabled = false;
+  setTimeout(() => goStep(8), 280);
 }
 
 // ── Text inputs ───────────────────────────────────────────────────
@@ -722,6 +769,35 @@ function updateNicho() {
 function updateTema() {
   state.tema = document.getElementById('input-tema').value.trim();
   document.getElementById('btn-next-3').disabled = state.tema.length < 3;
+}
+
+// ── Sugestões de tema ──────────────────────────────────────────────
+async function sugerirTema() {
+  const loadEl = document.getElementById('suggest-loading');
+  const listEl = document.getElementById('suggest-list');
+  loadEl.style.display = 'block';
+  listEl.innerHTML = '';
+  try {
+    const fd = new FormData();
+    fd.append('nicho', state.nicho || '');
+    fd.append('plataforma', state.plataforma || '');
+    const r = await fetch('/sugerir-tema', { method: 'POST', headers: auth(), body: fd });
+    if (r.ok) {
+      const d = await r.json();
+      listEl.innerHTML = (d.sugestoes || []).map(s =>
+        `<div class="suggest-item" onclick="escolherSugestao(this)">${s}</div>`
+      ).join('');
+    }
+  } catch(e) { console.error(e); }
+  finally { loadEl.style.display = 'none'; }
+}
+
+function escolherSugestao(el) {
+  const tema = el.textContent.trim();
+  document.getElementById('input-tema').value = tema;
+  state.tema = tema;
+  document.getElementById('btn-next-3').disabled = false;
+  document.getElementById('suggest-list').innerHTML = '';
 }
 
 // ── Image analysis ────────────────────────────────────────────────
@@ -791,12 +867,13 @@ function buildSummary() {
   state.tema           = document.getElementById('input-tema').value.trim();
 
   const rows = [
-    ['Plataforma', PLAT_LABELS[state.plataforma] || state.plataforma],
-    ['Tema',       state.tema || '—'],
-    ['Nicho',      state.nicho || '—'],
-    ['Objetivo',   FIN_LABELS[state.finalidade] || state.finalidade || '—'],
-    ['CTA',        CTA_LABELS[state.cta_objetivo] || state.cta_objetivo || '—'],
-    ['Template',   TPL_LABELS[state.modelo] || state.modelo || '—'],
+    ['Plataforma',  PLAT_LABELS[state.plataforma] || state.plataforma],
+    ['Nicho',       state.nicho       || '(geral)'],
+    ['Tema',        state.tema],
+    ['Imagens',     state.uso_fotos === 'fotos' ? 'Com fotos' : 'Só tipografia'],
+    ['Objetivo',    FIN_LABELS[state.finalidade]   || state.finalidade],
+    ['CTA',         CTA_LABELS[state.cta_objetivo] || state.cta_objetivo],
+    ['Template',    TPL_LABELS[state.modelo]        || state.modelo],
     ['Cores',      c1 + ' · ' + c2],
   ];
   if (state.username_slide) rows.push(['@username', state.username_slide]);
@@ -827,6 +904,7 @@ async function gerarCarrossel() {
   fd.append('modelo',        state.modelo || '1');
   fd.append('cores_marca',   state.cores_marca);
   fd.append('username_slide', state.username_slide);
+  fd.append('uso_fotos',     state.uso_fotos || 'fotos');
   if (state.logo_file) fd.append('logo', state.logo_file);
 
   try {
