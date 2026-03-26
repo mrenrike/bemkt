@@ -631,26 +631,7 @@
       .faq-item.open .faq-a { padding: 0 18px 16px; }
     }
   </style>
-  <!-- Meta Pixel -->
-  <script>
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '319489982256904');
-  fbq('track', 'PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
-  <!-- GA4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
-  <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-54MPDRQ62N');
-  </script>
+  <script src="/static/analytics.js"></script>
 </head>
 <body>
 
@@ -663,7 +644,7 @@
     <a href="#precos">Precos</a>
     <a href="#faq">FAQ</a>
   </div>
-  <a href="/static/entrar.html" class="nav-cta">Começar grátis</a>
+  <a href="/static/entrar.html" class="nav-cta" data-track="nav_comecar_gratis">Começar grátis</a>
 </nav>
 
 <!-- HERO -->
@@ -675,8 +656,8 @@
     O BeContent escreve o conteúdo, busca as fotos e gera 7 slides em menos de 60 segundos.
   </p>
   <div class="hero-btns">
-    <a href="/static/entrar.html" class="btn-primary">Criar meu carrossel grátis</a>
-    <a href="#sem-com" class="btn-secondary">Ver a diferença</a>
+    <a href="/static/entrar.html" class="btn-primary" data-track="hero_cta_principal">Criar meu carrossel grátis</a>
+    <a href="#sem-com" class="btn-secondary" data-track="hero_ver_diferenca">Ver a diferença</a>
   </div>
   <div class="hero-proof">
     <span>1 crédito grátis ao cadastrar</span>
@@ -806,7 +787,7 @@
 
 <!-- CTA INTERMEDIÁRIO -->
 <div style="text-align:center; padding: 0 5% 80px;">
-  <a href="/static/entrar.html" class="btn-primary" style="display:inline-block">Quero criar meu conteúdo agora</a>
+  <a href="/static/entrar.html" class="btn-primary" style="display:inline-block" data-track="mid_cta_quero_criar">Quero criar meu conteúdo agora</a>
 </div>
 
 <!-- SEM vs COM -->
@@ -1050,7 +1031,7 @@
         <li>Legenda do post gerada por IA</li>
         <li>Modo Automático ou Manual</li>
       </ul>
-      <a href="/static/entrar.html" class="plan-btn">Começar</a>
+      <a href="/static/entrar.html" class="plan-btn" data-track="landing_plano_starter">Começar</a>
       <div class="pay-strip">
         <span class="pay-chip pix">PIX</span>
         <span class="pay-chip card">Visa</span>
@@ -1072,7 +1053,7 @@
         <li>Modo Automático e Manual</li>
         <li>Créditos não expiram</li>
       </ul>
-      <a href="/static/entrar.html" class="plan-btn">Começar</a>
+      <a href="/static/entrar.html" class="plan-btn" data-track="landing_plano_pro">Começar</a>
       <div class="pay-strip">
         <span class="pay-chip pix">PIX</span>
         <span class="pay-chip card">Visa</span>
@@ -1093,7 +1074,7 @@
         <li>Modo Automático e Manual</li>
         <li>Créditos não expiram</li>
       </ul>
-      <a href="/static/entrar.html" class="plan-btn">Começar</a>
+      <a href="/static/entrar.html" class="plan-btn" data-track="landing_plano_agency">Começar</a>
       <div class="pay-strip">
         <span class="pay-chip pix">PIX</span>
         <span class="pay-chip card">Visa</span>
@@ -1158,7 +1139,7 @@
   <div class="section-tag">Comece agora</div>
   <h2>Seu próximo carrossel está a 60 segundos</h2>
   <p>1 carrossel grátis ao criar sua conta. Sem cartão de crédito.</p>
-  <a href="/static/entrar.html" class="btn-primary btn-inline">Criar conta grátis</a>
+  <a href="/static/entrar.html" class="btn-primary btn-inline" data-track="bottom_cta_criar_conta">Criar conta grátis</a>
 </div>
 
 <!-- FOOTER -->

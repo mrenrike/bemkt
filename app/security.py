@@ -52,11 +52,20 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+                "cdn.jsdelivr.net fonts.googleapis.com "
+                "www.googletagmanager.com www.google-analytics.com "
+                "connect.facebook.net; "
             "style-src 'self' 'unsafe-inline' fonts.googleapis.com cdn.jsdelivr.net; "
             "font-src 'self' fonts.gstatic.com; "
-            "img-src 'self' data: blob:; "
-            "connect-src 'self'; "
+            "img-src 'self' data: blob: www.facebook.com www.google-analytics.com "
+                "stats.g.doubleclick.net; "
+            "connect-src 'self' "
+                "www.google-analytics.com analytics.google.com "
+                "www.googletagmanager.com stats.g.doubleclick.net "
+                "www.facebook.com connect.facebook.net "
+                "pagead2.googlesyndication.com; "
+            "frame-src www.googletagmanager.com; "
             "frame-ancestors 'none';"
         )
         # Remove headers que revelam stack

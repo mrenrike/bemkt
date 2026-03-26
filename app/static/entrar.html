@@ -17,26 +17,7 @@
     .support-line a  { color: var(--muted); text-decoration: underline; }
     .hidden          { display: none; }
   </style>
-  <!-- Meta Pixel -->
-  <script>
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '319489982256904');
-  fbq('track', 'PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=319489982256904&ev=PageView&noscript=1"/></noscript>
-  <!-- GA4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
-  <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-54MPDRQ62N');
-  </script>
+  <script src="/static/analytics.js"></script>
 </head>
 <body>
   <div class="container auth-wrap">
@@ -126,6 +107,7 @@ async function login() {
   if (!r.ok) { showErro('login-erro', d.detail || 'Erro ao entrar'); return; }
   localStorage.setItem('token', d.token);
   localStorage.setItem('nome', d.nome);
+  if(typeof bct!=='undefined') bct('login');
   window.location = '/static/chat.html';
 }
 
@@ -144,8 +126,7 @@ async function cadastrar() {
   if (!r.ok) { showErro('cad-erro', d.detail || 'Erro ao cadastrar'); return; }
   localStorage.setItem('token', d.token);
   localStorage.setItem('nome', d.nome);
-  if (typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration');
-  if (typeof gtag !== 'undefined') gtag('event', 'sign_up', { method: 'email' });
+  if(typeof bct!=='undefined') bct('sign_up');
   window.location = '/static/chat.html';
 }
 

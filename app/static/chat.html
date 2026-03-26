@@ -6,22 +6,7 @@
   <title>BeContent — Criar Carrossel</title>
   <link rel="stylesheet" href="/static/style.css?v=2">
   <script src="/static/auth.js"></script>
-  <!-- Meta Pixel -->
-  <script>
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init','319489982256904'); fbq('track','PageView');
-  </script>
-  <!-- GA4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-54MPDRQ62N"></script>
-  <script>
-  window.dataLayer=window.dataLayer||[];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js',new Date()); gtag('config','G-54MPDRQ62N');
-  </script>
+  <script src="/static/analytics.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -829,6 +814,7 @@ async function gerarCarrossel() {
       return;
     }
     localStorage.setItem('job_id', d.job_id);
+    if(typeof bct!=='undefined') bct('carousel_start', {template: state.modelo||''});
     window.location = '/static/loading.html';
   } catch(e) {
     document.getElementById('gen-overlay').classList.remove('show');
@@ -843,8 +829,7 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
 (function(){
   const p = new URLSearchParams(window.location.search);
   if (p.get('status')==='approved'||p.get('collection_status')==='approved'){
-    if(typeof fbq!=='undefined') fbq('track','Purchase',{currency:'BRL',value:parseFloat(p.get('transaction_amount')||'0')});
-    if(typeof gtag!=='undefined') gtag('event','purchase',{currency:'BRL',value:parseFloat(p.get('transaction_amount')||'0')});
+    if(typeof bct!=='undefined') bct('purchase', {valor: parseFloat(p.get('transaction_amount')||'0'), plano: ''});
     window.history.replaceState({},'','/static/chat.html');
   }
 })();
