@@ -605,7 +605,8 @@ async function init() {
 function goStep(n, instant) {
   const prev = document.getElementById('step-' + currentStep);
   const next = document.getElementById('step-' + n);
-  if (!next || n === currentStep) return;
+  if (!next) return;
+  if (n === currentStep && !instant) return;
 
   const goingForward = n > currentStep;
 
