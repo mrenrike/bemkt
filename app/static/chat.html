@@ -36,17 +36,26 @@
       display:flex;align-items:center;justify-content:center;
       padding:20px 16px;overflow:hidden;
     }
+    /* container que segura os steps absolutos */
+    .stage-inner{
+      position:relative;width:100%;max-width:600px;
+      height:calc(100dvh - 94px);
+      display:flex;align-items:center;
+    }
 
     /* ── steps ── */
     .step{
-      position:absolute;width:100%;max-width:600px;
+      position:absolute;width:100%;
       display:flex;flex-direction:column;gap:28px;
-      transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease;
       padding:0 4px;
+      max-height:calc(100dvh - 110px);
+      overflow-y:auto;
+      scrollbar-width:none;
     }
-    .step.hidden  {transform:translateX(100%);opacity:0;pointer-events:none}
-    .step.exit    {transform:translateX(-100%);opacity:0;pointer-events:none}
-    .step.active  {transform:translateX(0);opacity:1}
+    .step::-webkit-scrollbar{display:none}
+    .step.hidden  {transform:translateX(105%);opacity:0;pointer-events:none;visibility:hidden}
+    .step.exit    {transform:translateX(-105%);opacity:0;pointer-events:none;visibility:hidden}
+    .step.active  {transform:translateX(0);opacity:1;visibility:visible}
 
     .step-question{font-size:22px;font-weight:800;line-height:1.3;letter-spacing:-0.3px}
     .step-sub{font-size:14px;color:var(--muted);margin-top:-18px;line-height:1.5}
@@ -241,6 +250,7 @@
 <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
 
 <div class="stage" id="stage">
+<div class="stage-inner">
 
   <!-- STEP 0: Boas-vindas / recall -->
   <div class="step hidden" id="step-0">
@@ -535,6 +545,7 @@
     </div>
   </div>
 
+</div><!-- /stage-inner -->
 </div><!-- /stage -->
 
 <!-- Loading overlay -->
@@ -594,31 +605,43 @@ async function init() {
 function goStep(n, instant) {
   const prev = document.getElementById('step-' + currentStep);
   const next = document.getElementById('step-' + n);
-  if (!next) return;
+  if (!next || n === currentStep) return;
 
-  if (prev && prev.id !== next.id) {
+  const goingForward = n > currentStep;
+
+  // Esconde o step atual
+  if (prev) {
+    // Limpa estilos inline antes de aplicar classes
+    prev.style.cssText = '';
     prev.classList.remove('active');
-    prev.classList.add(n > currentStep ? 'exit' : 'hidden');
-    setTimeout(() => { prev.classList.add('hidden'); prev.classList.remove('exit'); }, 350);
+    prev.classList.add(goingForward ? 'exit' : 'hidden');
+    // Garante que vai para hidden após a transição
+    setTimeout(() => {
+      prev.classList.remove('exit');
+      prev.classList.add('hidden');
+      prev.style.cssText = '';
+    }, 380);
   }
 
-  next.classList.remove('hidden','exit');
+  // Prepara o próximo step fora da tela (sem transição ainda)
+  next.style.cssText = 'transition:none;transform:' + (goingForward ? 'translateX(100%)' : 'translateX(-100%)') + ';opacity:0';
+  next.classList.remove('hidden', 'exit');
+  next.classList.add('active');
+
+  // Força reflow para garantir que o browser "viu" a posição inicial
+  next.getBoundingClientRect();
+
+  // Anima para a posição final
   if (instant) {
-    next.classList.add('active');
+    next.style.cssText = '';
   } else {
-    next.style.transform = n > currentStep ? 'translateX(100%)' : 'translateX(-100%)';
-    next.style.opacity = '0';
-    next.classList.add('active');
-    requestAnimationFrame(() => {
-      next.style.transition = 'transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease';
-      next.style.transform = 'translateX(0)';
-      next.style.opacity = '1';
-    });
+    next.style.cssText = 'transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s ease;transform:translateX(0);opacity:1';
+    // Limpa inline styles após a animação (deixa só as classes)
+    setTimeout(() => { next.style.cssText = ''; }, 350);
   }
 
   currentStep = n;
   updateProgress();
-
   if (n === 8) buildSummary();
 }
 
