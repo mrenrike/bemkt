@@ -238,6 +238,33 @@
       margin-top:8px;border:1px solid var(--border);display:none;
     }
 
+    /* ── card exclusivo upsell ── */
+    .excl-card{
+      display:flex;align-items:center;gap:12px;
+      background:linear-gradient(135deg,rgba(140,255,46,.06) 0%,rgba(140,255,46,.02) 100%);
+      border:1.5px solid rgba(140,255,46,.3);border-radius:14px;
+      padding:14px 16px;cursor:pointer;transition:all .2s;
+      -webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;
+    }
+    .excl-card::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,rgba(140,255,46,.08),transparent);
+      opacity:0;transition:opacity .2s;
+    }
+    .excl-card:hover::before{opacity:1}
+    .excl-card:hover{border-color:rgba(140,255,46,.6);transform:translateY(-1px)}
+    .excl-badge{
+      position:absolute;top:10px;right:10px;
+      font-size:9px;font-weight:800;letter-spacing:1.5px;
+      background:var(--accent);color:#080808;
+      padding:2px 7px;border-radius:20px;
+    }
+    .excl-icon{font-size:22px;flex-shrink:0;color:var(--accent)}
+    .excl-body{flex:1;min-width:0}
+    .excl-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
+    .excl-sub{font-size:11px;color:var(--muted);line-height:1.4}
+    .excl-arrow{font-size:16px;color:var(--accent);flex-shrink:0;font-weight:700}
+
     /* ── sugestões de tema ── */
     .suggest-btn{
       display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
@@ -534,6 +561,18 @@
       </div>
 
     </div>
+
+    <!-- Card exclusivo upsell -->
+    <div class="excl-card" onclick="window.open('/static/exclusivo.html','_blank')">
+      <div class="excl-badge">NOVO</div>
+      <div class="excl-icon">✦</div>
+      <div class="excl-body">
+        <div class="excl-title">Template Exclusivo da sua marca</div>
+        <div class="excl-sub">Design 100% personalizado, só seu — entregue em 48h a partir de R$127</div>
+      </div>
+      <div class="excl-arrow">→</div>
+    </div>
+
     <div class="nav-row">
       <button class="btn-back" onclick="goStep(6)">←</button>
       <button class="btn-next" id="btn-next-7" disabled onclick="goStep(8)">Continuar</button>

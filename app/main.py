@@ -74,8 +74,10 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 UPLOAD_DIR = Path("uploads")
 CARROSSEIS_DIR = Path("carrosseis")
+REFS_DIR = Path("uploads/refs_template")
 UPLOAD_DIR.mkdir(exist_ok=True)
 CARROSSEIS_DIR.mkdir(exist_ok=True)
+REFS_DIR.mkdir(exist_ok=True)
 
 @app.get("/")
 def root():
@@ -1494,3 +1496,120 @@ def admin_bloqueio(data: BloqueioIn, _: int = Depends(admin_atual)):
 @app.get("/admin")
 def admin_page():
     return FileResponse(os.path.join(static_dir, "admin.html"))
+
+
+# ── Template Exclusivo endpoints ──────────────────────────────────
+
+@app.post("/pedido-template")
+async def pedido_template(
+    background_tasks: BackgroundTasks,
+    plano: str = Form(...),
+    valor: float = Form(...),
+    briefing_nome: str = Form(""),
+    briefing_nicho: str = Form(""),
+    briefing_username: str = Form(""),
+    briefing_cores: str = Form(""),
+    briefing_fontes: str = Form(""),
+    briefing_estilo: str = Form(""),
+    briefing_refs_texto: str = Form(""),
+    briefing_obs: str = Form(""),
+    refs: list[UploadFile] = File(default=[]),
+    user_id: int = Depends(usuario_atual),
+):
+    """Recebe briefing pós-compra e cria pedido de template exclusivo."""
+    plano_s = plano if plano in {"starter", "pro", "agency"} else "starter"
+    valor_f = round(float(valor), 2)
+
+    # Salva arquivos de referência
+    refs_paths = []
+    for i, arquivo in enumerate(refs[:5]):  # máx 5 arquivos
+        if not arquivo.filename:
+            continue
+        conteudo = await arquivo.read()
+        if len(conteudo) > 10 * 1024 * 1024:  # 10MB por arquivo
+            continue
+        ext = Path(arquivo.filename).suffix.lower()
+        if ext not in {".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"}:
+            continue
+        nome = f"ref_{user_id}_{int(__import__('time').time())}_{i}{ext}"
+        caminho = REFS_DIR / nome
+        caminho.write_bytes(conteudo)
+        refs_paths.append(str(caminho))
+
+    briefing_obs_s = sanitizar_texto(briefing_obs, 2000)
+    briefing_estilo_s = sanitizar_texto(briefing_estilo, 2000)
+    briefing_refs_s = sanitizar_texto(briefing_refs_texto, 1000)
+
+    db = get_db()
+    db.execute(
+        """INSERT INTO pedidos_template
+           (user_id, plano, valor, status, briefing_nome, briefing_cores,
+            briefing_fontes, briefing_nicho, briefing_username, briefing_obs, refs_paths)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+        (user_id, plano_s, valor_f, "aguardando_producao",
+         sanitizar_texto(briefing_nome, 200),
+         sanitizar_texto(briefing_cores, 200),
+         sanitizar_texto(briefing_fontes, 100),
+         sanitizar_texto(briefing_nicho, 200),
+         sanitizar_texto(briefing_username, 60),
+         briefing_estilo_s + "\n" + briefing_refs_s + "\n" + briefing_obs_s,
+         json.dumps(refs_paths))
+    )
+    pedido_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+    user = db.execute("SELECT nome, email FROM users WHERE id=?", (user_id,)).fetchone()
+    db.commit()
+    db.close()
+
+    # Notifica admin
+    background_tasks.add_task(
+        _notificar_pedido_template, pedido_id, dict(user), plano_s, valor_f
+    )
+
+    logger.info("Pedido template #%s user_id=%s plano=%s", pedido_id, user_id, plano_s)
+    return {"ok": True, "pedido_id": pedido_id}
+
+
+async def _notificar_pedido_template(pedido_id: int, user: dict, plano: str, valor: float):
+    try:
+        from app.email_sender import enviar_email
+        corpo = f"""
+        <h2>Novo pedido de template exclusivo #{pedido_id}</h2>
+        <p><b>Cliente:</b> {user.get('nome')} ({user.get('email')})</p>
+        <p><b>Plano:</b> {plano.title()} — R${valor:.2f}</p>
+        <p>Acesse o painel admin para ver o briefing completo.</p>
+        """
+        enviar_email("bruno@bemkt.com.br", f"[BeContent] Novo pedido template #{pedido_id}", corpo)
+    except Exception as e:
+        logger.error("Erro ao notificar pedido template: %s", e)
+
+
+@app.get("/admin/pedidos-template")
+def admin_pedidos_template(_: int = Depends(admin_atual)):
+    """Lista todos os pedidos de template exclusivo para o admin."""
+    db = get_db()
+    rows = db.execute(
+        """SELECT pt.*, u.nome as user_nome, u.email as user_email
+           FROM pedidos_template pt
+           JOIN users u ON u.id = pt.user_id
+           ORDER BY pt.criado_em DESC"""
+    ).fetchall()
+    db.close()
+    return [dict(r) for r in rows]
+
+
+@app.post("/admin/pedidos-template/{pedido_id}/status")
+def admin_atualizar_status_template(
+    pedido_id: int,
+    status: str = Form(...),
+    _: int = Depends(admin_atual),
+):
+    """Atualiza status de um pedido (aguardando_briefing/aguardando_producao/entregue)."""
+    status_s = status if status in {"aguardando_briefing", "aguardando_producao", "em_producao", "entregue"} else "em_producao"
+    db = get_db()
+    db.execute(
+        "UPDATE pedidos_template SET status=?, entregue_em=CASE WHEN ?='entregue' THEN CURRENT_TIMESTAMP ELSE entregue_em END WHERE id=?",
+        (status_s, status_s, pedido_id)
+    )
+    db.commit()
+    db.close()
+    return {"ok": True}

@@ -195,6 +195,7 @@
     <button class="tab-btn active" onclick="switchTab('usuarios')">Usuários</button>
     <button class="tab-btn" onclick="switchTab('carrosseis')">Carrosseis</button>
     <button class="tab-btn" onclick="switchTab('pagamentos')">Pagamentos</button>
+    <button class="tab-btn" onclick="switchTab('templates')" style="color:#8cff2e">Templates ✦</button>
   </div>
 
   <!-- Tab: Usuários -->
@@ -253,6 +254,35 @@
     </div>
   </div>
 
+  <!-- Tab: Templates Exclusivos -->
+  <div id="tab-templates" class="tab-content">
+    <div class="toolbar">
+      <span class="count-label" id="templates-count">— pedidos</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Cliente</th><th>Plano</th><th>Valor</th>
+            <th>Status</th><th>Data</th><th>Briefing</th><th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-templates"><tr><td colspan="8" class="loading">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Briefing -->
+<div class="modal-overlay" id="modal-briefing">
+  <div class="modal">
+    <h3>Briefing do pedido <span id="briefing-pedido-id"></span></h3>
+    <div id="briefing-content" style="font-size:13px;color:var(--muted);line-height:1.8;white-space:pre-wrap;max-height:320px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn-cancel" onclick="document.getElementById('modal-briefing').classList.remove('open')">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal: Créditos -->
@@ -298,22 +328,88 @@ function auth() { return { 'Authorization': 'Bearer ' + token, 'Content-Type': '
 let _usuarios = [], _carrosseis = [], _pagamentos = [];
 let _creditosTarget = null, _bloqueioTarget = null;
 
+let _templates = [];
+
 async function loadAll() {
   try {
-    const [stats, usuarios, carrosseis, pagamentos] = await Promise.all([
-      fetch('/admin/stats',      { headers: auth() }).then(r => { if (!r.ok) throw r; return r.json(); }),
-      fetch('/admin/usuarios',   { headers: auth() }).then(r => r.json()),
-      fetch('/admin/carrosseis', { headers: auth() }).then(r => r.json()),
-      fetch('/admin/pagamentos', { headers: auth() }).then(r => r.json()),
+    const [stats, usuarios, carrosseis, pagamentos, templates] = await Promise.all([
+      fetch('/admin/stats',              { headers: auth() }).then(r => { if (!r.ok) throw r; return r.json(); }),
+      fetch('/admin/usuarios',           { headers: auth() }).then(r => r.json()),
+      fetch('/admin/carrosseis',         { headers: auth() }).then(r => r.json()),
+      fetch('/admin/pagamentos',         { headers: auth() }).then(r => r.json()),
+      fetch('/admin/pedidos-template',   { headers: auth() }).then(r => r.json()),
     ]);
     renderStats(stats);
-    _usuarios = usuarios; _carrosseis = carrosseis; _pagamentos = pagamentos;
+    _usuarios = usuarios; _carrosseis = carrosseis; _pagamentos = pagamentos; _templates = templates;
     renderUsuarios(_usuarios);
     renderCarrosseis(_carrosseis);
     renderPagamentos(_pagamentos);
+    renderTemplates(_templates);
   } catch(e) {
     if (e.status === 403) { window.location = '/'; return; }
     document.body.innerHTML = '<div style="padding:40px;color:#ff4444;font-family:sans-serif">Erro ao carregar. Você é admin?</div>';
+  }
+}
+
+function renderTemplates(list) {
+  document.getElementById('templates-count').textContent = list.length + ' pedido' + (list.length !== 1 ? 's' : '');
+  const STATUS_LABEL = {
+    'aguardando_briefing': '<span style="color:#f59e0b">Aguard. briefing</span>',
+    'aguardando_producao': '<span style="color:#60a5fa">Aguard. produção</span>',
+    'em_producao':         '<span style="color:#a78bfa">Em produção</span>',
+    'entregue':            '<span style="color:#8cff2e">Entregue</span>',
+  };
+  const STATUS_OPTS = ['aguardando_briefing','aguardando_producao','em_producao','entregue'];
+  const tbody = document.getElementById('tbody-templates');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" class="loading">Nenhum pedido ainda.</td></tr>'; return; }
+  tbody.innerHTML = list.map(t => `
+    <tr>
+      <td>#${t.id}</td>
+      <td><b>${esc(t.user_nome)}</b><br><small style="color:var(--muted)">${esc(t.user_email)}</small></td>
+      <td>${t.plano}</td>
+      <td>R$${Number(t.valor).toFixed(2).replace('.',',')}</td>
+      <td>${STATUS_LABEL[t.status] || t.status}</td>
+      <td>${fmtData(t.criado_em)}</td>
+      <td><button class="btn-action" onclick="verBriefing(${t.id})">Ver briefing</button></td>
+      <td>
+        <select onchange="atualizarStatusTemplate(${t.id}, this.value)" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer">
+          ${STATUS_OPTS.map(s => `<option value="${s}" ${s===t.status?'selected':''}>${s.replace(/_/g,' ')}</option>`).join('')}
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function verBriefing(id) {
+  const t = _templates.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('briefing-pedido-id').textContent = '#' + id;
+  const linhas = [
+    'Cliente: ' + t.user_nome + ' (' + t.user_email + ')',
+    'Plano: ' + t.plano + ' — R$' + Number(t.valor).toFixed(2),
+    '',
+    'Nome da marca: ' + (t.briefing_nome || '—'),
+    'Nicho: ' + (t.briefing_nicho || '—'),
+    'Username: ' + (t.briefing_username || '—'),
+    'Cores: ' + (t.briefing_cores || '—'),
+    'Fontes: ' + (t.briefing_fontes || '—'),
+    '',
+    'Observações / Estilo / Referências:',
+    t.briefing_obs || '—',
+    '',
+    'Arquivos de referência: ' + (t.refs_paths ? JSON.parse(t.refs_paths).length + ' arquivo(s)' : '0'),
+  ];
+  document.getElementById('briefing-content').textContent = linhas.join('\n');
+  document.getElementById('modal-briefing').classList.add('open');
+}
+
+async function atualizarStatusTemplate(id, status) {
+  const fd = new FormData();
+  fd.append('status', status);
+  const r = await fetch('/admin/pedidos-template/' + id + '/status', { method: 'POST', headers: auth(), body: fd });
+  if (r.ok) {
+    const t = _templates.find(x => x.id === id);
+    if (t) t.status = status;
   }
 }
 
@@ -423,7 +519,7 @@ function filtrarPagamentos(q) {
 }
 
 function switchTab(name) {
-  const tabs = ['usuarios','carrosseis','pagamentos'];
+  const tabs = ['usuarios','carrosseis','pagamentos','templates'];
   document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', tabs[i] === name));
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
