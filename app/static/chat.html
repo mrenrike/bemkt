@@ -610,8 +610,8 @@ function goStep(n, instant) {
 
   const goingForward = n > currentStep;
 
-  // Esconde o step atual
-  if (prev) {
+  // Esconde o step atual (só se for um step diferente)
+  if (prev && prev !== next) {
     // Limpa estilos inline antes de aplicar classes
     prev.style.cssText = '';
     prev.classList.remove('active');
