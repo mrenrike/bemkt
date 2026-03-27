@@ -4,18 +4,96 @@
     <loc>https://becontent.bemkt.com.br/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2026-03-22</lastmod>
+    <lastmod>2026-03-26</lastmod>
   </url>
   <url>
     <loc>https://becontent.bemkt.com.br/static/planos.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-    <lastmod>2026-03-22</lastmod>
+    <lastmod>2026-03-26</lastmod>
   </url>
   <url>
     <loc>https://becontent.bemkt.com.br/static/entrar.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2026-03-22</lastmod>
+    <lastmod>2026-03-26</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-03-26</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/como-criar-carrossel-para-instagram</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-01-15</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/automacao-conteudo-instagram-ia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-01-22</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/carrossel-instagram-automatico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-02-01</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/ia-para-criar-conteudo-instagram</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-02-08</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/tamanho-carrossel-instagram</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-02-15</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/carrossel-para-linkedin</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-02-22</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/gerador-carrossel-ia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-03-01</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/como-crescer-instagram-com-carrossel</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-03-05</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/becontent-vs-canva</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-03-08</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/carrossel-viral-instagram-estrategia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-03-10</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/automacao-marketing-digital-pequenas-empresas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-03-12</lastmod>
+  </url>
+  <url>
+    <loc>https://becontent.bemkt.com.br/blog/conteudo-para-instagram-dicas-iniciantes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-03-10</lastmod>
   </url>
 </urlset>

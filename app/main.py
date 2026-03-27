@@ -33,6 +33,7 @@ from app.security import (
     SecurityHeadersMiddleware, rate_limit,
     validar_email, sanitizar_texto, validar_magic_bytes
 )
+from app.blog import render_blog_list, render_blog_post
 
 # ── Startup hook ─────────────────────────────────────────────────
 @asynccontextmanager
@@ -94,6 +95,20 @@ def sitemap():
 @app.get("/robots.txt")
 def robots():
     return FileResponse(os.path.join(static_dir, "robots.txt"), media_type="text/plain")
+
+# ── Blog ──────────────────────────────────────────────────────────
+from fastapi.responses import HTMLResponse
+
+@app.get("/blog", response_class=HTMLResponse)
+def blog_list():
+    return HTMLResponse(content=render_blog_list())
+
+@app.get("/blog/{slug}", response_class=HTMLResponse)
+def blog_post(slug: str):
+    html = render_blog_post(slug)
+    if html is None:
+        raise HTTPException(status_code=404, detail="Artigo não encontrado")
+    return HTMLResponse(content=html)
 
 # ── Schemas ───────────────────────────────────────────────────────
 class CadastroIn(BaseModel):
