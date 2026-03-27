@@ -146,6 +146,33 @@
     .p-xthread .p-xts,.p-xthread-dark .p-xts{font-size:6.5px;color:#8b98a5;margin-top:8px}
     .p-xcounter{position:absolute;top:10px;right:10px;font-size:7px;font-weight:700;color:#8b98a5}
 
+    /* LinkedIn Blur */
+    .p-lkblur{background:#F0EEF8;display:flex;flex-direction:column;padding:12px;height:100%;position:relative;overflow:hidden}
+    .p-lkblur-dark{background:#1C1C1E;display:flex;flex-direction:column;padding:12px;height:100%;position:relative;overflow:hidden}
+    .p-blob{position:absolute;top:-30px;right:-20px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(130,80,220,0.55) 0%,transparent 70%);filter:blur(18px);pointer-events:none}
+    .p-blob2{position:absolute;top:10px;right:20px;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(190,120,255,0.35) 0%,transparent 70%);filter:blur(12px);pointer-events:none}
+    .p-ghost{position:absolute;top:8px;left:10px;font-size:64px;font-weight:900;opacity:0.06;line-height:1;color:#1a1a1a}
+    .p-ghost-d{position:absolute;top:8px;left:10px;font-size:64px;font-weight:900;opacity:0.08;line-height:1;color:#fff}
+    .p-lkblur .p-titulo{font-size:13px;font-weight:800;color:#1a1a1a;line-height:1.2;margin-top:auto;max-width:85%}
+    .p-lkblur-dark .p-titulo{font-size:13px;font-weight:800;color:#fff;line-height:1.2;margin-top:auto;max-width:85%}
+    .p-lkfoot{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .p-lkav{width:14px;height:14px;border-radius:50%;background:#8cff2e;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:800;color:#080808}
+    .p-lkby{font-size:6px;color:#888;margin-left:4px}
+    .p-lknav{width:16px;height:16px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:9px}
+    /* Studio Shodwe */
+    .p-shodwe{background:#F2F0EB;display:flex;flex-direction:column;padding:12px;height:100%;position:relative}
+    .p-sh-circle{width:18px;height:18px;border-radius:50%;border:1.5px solid #0d0d0d;display:flex;align-items:center;justify-content:center;font-size:10px;position:absolute;top:10px;right:10px}
+    /* Serif Elegante */
+    .p-serif{background:#F5F2EC;display:flex;flex-direction:column;padding:12px;height:100%;position:relative}
+    .p-serif-head{display:flex;align-items:flex-start;gap:6px}
+    .p-snum{font-family:Georgia,serif;font-style:italic;font-size:48px;font-weight:400;line-height:0.85;color:#1B5E4B}
+    .p-srule{flex:1;height:1px;background:#1B5E4B;opacity:0.3;margin-top:22px}
+    .p-snext{width:16px;height:16px;border-radius:50%;border:1.5px solid #1B5E4B;display:flex;align-items:center;justify-content:center;font-size:9px;color:#1B5E4B;position:absolute;bottom:28px;right:12px}
+    /* BrandsDecoded */
+    .p-brands{background:#fff;display:flex;flex-direction:column;padding:10px 10px 22px;height:100%;position:relative}
+    .p-brands-foot{position:absolute;bottom:0;left:0;right:0;height:18px;border-top:1px solid rgba(0,0,0,0.1);display:flex;align-items:center;padding:0 10px;justify-content:space-between}
+    .p-brands-foot span{font-size:5.5px;color:#888}
+
     /* ── text inputs ── */
     .field-wrap{display:flex;flex-direction:column;gap:8px}
     .field-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
@@ -621,6 +648,111 @@
         <div class="tpl-info">
           <div class="tpl-name">X Thread — Dark</div>
           <div class="tpl-tag">Estilo tweet · Dark mode</div>
+        </div>
+      </div>
+
+      <!-- 7: LinkedIn Blur (claro) -->
+      <div class="tpl-card" data-val="7" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-lkblur">
+            <div class="p-blob"></div><div class="p-blob2"></div>
+            <div class="p-ghost">1</div>
+            <div class="p-titulo">Your catchy title here</div>
+            <div class="p-lkfoot">
+              <div style="display:flex;align-items:center">
+                <div class="p-lkav">V</div>
+                <span class="p-lkby" style="color:#666">Written by<br><b style="color:#1a1a1a">User Name</b></span>
+              </div>
+              <div class="p-lknav" style="border-color:#1a1a1a;color:#1a1a1a">›</div>
+            </div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">LinkedIn Blur</div>
+          <div class="tpl-tag">LinkedIn · Gradiente blob</div>
+        </div>
+      </div>
+
+      <!-- 7d: LinkedIn Blur (dark) -->
+      <div class="tpl-card" data-val="7d" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-lkblur-dark">
+            <div class="p-blob"></div><div class="p-blob2"></div>
+            <div class="p-ghost-d">1</div>
+            <div class="p-titulo">Your catchy title here</div>
+            <div class="p-lkfoot">
+              <div style="display:flex;align-items:center">
+                <div class="p-lkav">V</div>
+                <span class="p-lkby" style="color:#8b98a5">Written by<br><b style="color:#fff">User Name</b></span>
+              </div>
+              <div class="p-lknav" style="border-color:#fff;color:#fff">›</div>
+            </div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">LinkedIn Blur Dark</div>
+          <div class="tpl-tag">LinkedIn · Dark mode</div>
+        </div>
+      </div>
+
+      <!-- 8: Studio Shodwe -->
+      <div class="tpl-card" data-val="8" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-shodwe">
+            <div style="font-size:7px;font-weight:400;color:#0d0d0d;letter-spacing:0.03em">Studio</div>
+            <div class="p-sh-circle">→</div>
+            <div style="margin-top:auto">
+              <div style="font-family:Georgia,serif;font-size:9px;font-weight:400;color:#0d0d0d">How I</div>
+              <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;font-style:italic;color:#0d0d0d;line-height:1.0">Side Hustles</div>
+              <div style="font-family:Georgia,serif;font-size:9px;font-weight:400;color:#0d0d0d">&amp; a Full-Time Job</div>
+            </div>
+            <div style="margin-top:12px;font-size:6.5px;color:#555;line-height:1.4">Practical tips from real experience!</div>
+            <div style="font-size:7px;font-weight:700;color:#0d0d0d;margin-top:4px">@voce</div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Studio Shodwe</div>
+          <div class="tpl-tag">Serif elegante · Espaço</div>
+        </div>
+      </div>
+
+      <!-- 9: Serif Elegante -->
+      <div class="tpl-card" data-val="9" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-serif">
+            <div class="p-serif-head">
+              <div class="p-snum" style="color:#1B5E4B">1</div>
+              <div class="p-srule"></div>
+            </div>
+            <div style="flex:1;display:flex;align-items:center">
+              <div style="font-family:Georgia,serif;font-weight:700;font-size:16px;line-height:1.0;color:#1B5E4B">DAY IN MY LIFE</div>
+            </div>
+            <div style="width:16px;height:16px;border-left:2px solid #1B5E4B;border-top:2px solid #1B5E4B;margin:6px 0"></div>
+            <div style="font-size:7px;color:#1B5E4B;opacity:0.7;line-height:1.4">Share a moment from your daily routine…</div>
+            <div class="p-snext">›</div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">Serif Elegante</div>
+          <div class="tpl-tag">Lifestyle · Creme + verde</div>
+        </div>
+      </div>
+
+      <!-- 10: BrandsDecoded -->
+      <div class="tpl-card" data-val="10" onclick="selectTpl(this)">
+        <div class="tpl-preview">
+          <div class="p-brands">
+            <div style="font-weight:900;font-size:16px;line-height:0.88;color:#CC0000;text-transform:uppercase;letter-spacing:-0.3px;margin-bottom:6px">VOCÊ SÓ CRESCE DEPOIS QUE ENTENDE</div>
+            <div style="font-size:7px;color:#CC0000;text-decoration:underline;line-height:1.4;margin-bottom:5px">dos erros acontece antes de dar compra, quando ninguém analisa uso…</div>
+            <div style="font-size:6.5px;color:#0d0d0d;line-height:1.45">Você escolhe achando que o seu problema é só o tipo da pedra, mas não é…</div>
+            <div class="p-brands-foot">
+              <span>‹›</span><span>@odebrand ●</span><span>Seguindo ∨</span><span>Jan 2026</span>
+            </div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">BrandsDecoded</div>
+          <div class="tpl-tag">Bold · Manifesto · Foto</div>
         </div>
       </div>
 
