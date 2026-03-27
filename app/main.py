@@ -741,7 +741,7 @@ async def gerar_direto(
     username_s     = sanitizar_texto(username_slide, max_len=60)
     finalidade_s   = sanitizar_texto(finalidade, max_len=50)
     cta_s          = sanitizar_texto(cta_objetivo, max_len=50)
-    modelo_s       = modelo if modelo in {"1","2","3","4","5"} else "1"
+    modelo_s       = modelo if modelo in {"1","2","3","4","5","6","6d","7","7d","8","9","10"} else "1"
     plataforma_s   = plataforma if plataforma in {"1","2","3","4"} else "1"
 
     # Cria job e já preenche todos os campos
