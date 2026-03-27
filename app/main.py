@@ -1066,9 +1066,21 @@ async def reeditar_slide(job_id: int, num: int, data: dict, user_id: int = Depen
     if img_path.exists():
         img_local = str(img_path)
 
+    # Para X Thread: lê avatar já baixado na pasta
+    avatar_local = ""
+    nome_display = ""
+    if template in ("6", "6d"):
+        av = pasta / "avatar.jpg"
+        if av.exists():
+            avatar_local = str(av)
+        if username:
+            nome_display = username.lstrip("@").replace("_", " ").replace(".", " ").title()
+
     html_content = gerar_html_slide(
         slide, len(slides), tema,
-        accent, accent2, img_local, logo_url, username, template
+        accent, accent2, img_local, logo_url, username, template,
+        avatar_local=avatar_local,
+        nome_display=nome_display,
     )
     pasta_html = pasta / "html"
     pasta_html.mkdir(exist_ok=True)

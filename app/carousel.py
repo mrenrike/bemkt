@@ -56,11 +56,13 @@ def _font_size(titulo: str, sz_sm: int = 48, sz_md: int = 58, sz_lg: int = 72) -
 
 # ── Prompt builder v2 ─────────────────────────────────────────────
 _TEMPLATE_NAMES = {
-    "1": "authority_dark",
-    "2": "clean_editorial",
-    "3": "vibrant_gradient",
-    "4": "foto_bold",
-    "5": "minimal_type",
+    "1":  "authority_dark",
+    "2":  "clean_editorial",
+    "3":  "vibrant_gradient",
+    "4":  "foto_bold",
+    "5":  "minimal_type",
+    "6":  "x_thread",
+    "6d": "x_thread_dark",
 }
 _TEMPLATE_HINTS = {
     "authority_dark":   "Títulos bold e curtos. Uma palavra/frase em titulo_highlight (substring exata). Tom: autoridade, premium. Sem emoji no corpo.",
@@ -68,6 +70,8 @@ _TEMPLATE_HINTS = {
     "vibrant_gradient": "Energia alta. Verbos de ação. Emojis ocasionais no corpo. Tom: motivacional.",
     "foto_bold":        "Headline único e poderoso (máx 6 palavras). Corpo mínimo. A foto carrega o visual.",
     "minimal_type":     "Frases filosóficas, dados isolados ou perguntas provocadoras. Use dado_destaque para estatísticas. Máx 1 ideia por slide. Corpo curto.",
+    "x_thread":         "Estilo tweet real. Cada slide = 1 tweet da thread. titulo é o gancho do tweet (max 8 palavras). corpo é o desenvolvimento (max 280 chars, linguagem conversacional, opinativa). Use lista para threads com bullets. Nada de formatação excessiva — texto limpo como um tweet real.",
+    "x_thread_dark":    "Igual x_thread mas versão dark mode. Mesma linguagem de tweet real.",
 }
 _PLAT_HINTS = {
     "Instagram": "Tom emocional, próximo, 'você'. Frases curtas. Hashtags no campo hashtags. Melhor horário: 19h-21h.",
@@ -109,7 +113,7 @@ def construir_prompt(
     finalidade: str = "",
     cta_objetivo: str = "",
 ) -> str:
-    tname    = _TEMPLATE_NAMES.get(str(template), "foto_bold")
+    tname    = _TEMPLATE_NAMES.get(str(template), _TEMPLATE_NAMES.get(_NAME_TO_NUM.get(str(template).lower().strip(), "4"), "foto_bold"))
     plat_hint = _PLAT_HINTS.get(plataforma, _PLAT_HINTS["Instagram"])
     tpl_hint  = _TEMPLATE_HINTS.get(tname, "")
 
@@ -211,6 +215,54 @@ def baixar_imagem(query: str, destino: Path, pexels_key: str = "", width=1080, h
     with urllib.request.urlopen(req, timeout=15) as r:
         destino.write_bytes(r.read())
     return str(destino.absolute())
+
+# ── Avatar Instagram ───────────────────────────────────────────────
+def buscar_avatar_instagram(username: str, destino: Path) -> str:
+    """Busca avatar público do Instagram via scrape da página de perfil.
+    Retorna caminho local do arquivo salvo, ou string vazia se falhar."""
+    if not username:
+        return ""
+    handle = username.lstrip("@").strip()
+    if not handle:
+        return ""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) "
+                      "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
+        "Accept-Language": "pt-BR,pt;q=0.9",
+    }
+    try:
+        url = f"https://www.instagram.com/{handle}/?__a=1&__d=dis"
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=8) as r:
+            data = json.loads(r.read())
+            pic_url = (
+                data.get("graphql", {}).get("user", {}).get("profile_pic_url_hd")
+                or data.get("graphql", {}).get("user", {}).get("profile_pic_url")
+            )
+            if pic_url:
+                req2 = urllib.request.Request(pic_url, headers={"User-Agent": headers["User-Agent"]})
+                with urllib.request.urlopen(req2, timeout=10) as r2:
+                    destino.write_bytes(r2.read())
+                return str(destino.absolute())
+    except Exception:
+        pass
+    # Fallback: scrape da página HTML pública
+    try:
+        req = urllib.request.Request(f"https://www.instagram.com/{handle}/", headers=headers)
+        with urllib.request.urlopen(req, timeout=8) as r:
+            html = r.read().decode("utf-8", errors="ignore")
+        match = re.search(r'"profile_pic_url_hd":"(https://[^"]+)"', html)
+        if not match:
+            match = re.search(r'"profile_pic_url":"(https://[^"]+)"', html)
+        if match:
+            pic_url = match.group(1).replace("\\u0026", "&")
+            req2 = urllib.request.Request(pic_url, headers={"User-Agent": headers["User-Agent"]})
+            with urllib.request.urlopen(req2, timeout=10) as r2:
+                destino.write_bytes(r2.read())
+            return str(destino.absolute())
+    except Exception:
+        pass
+    return ""
 
 # ── Font imports ───────────────────────────────────────────────────
 _INTER   = "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');"
@@ -989,6 +1041,213 @@ body{{width:1080px;height:1080px;overflow:hidden;background:{bg_color};
 </body></html>"""
 
 
+# ══════════════════════════════════════════════════════════════════
+# TEMPLATE 6 — X Thread
+# Imita post real do X/Twitter: avatar + nome + @handle + ícone X
+# Versão clara (fundo branco, borda accent) e escura (#1a1a1a)
+# ══════════════════════════════════════════════════════════════════
+def _html_x_thread(
+    slide: dict,
+    total: int,
+    tema: str,
+    accent: str,
+    avatar_local: str,
+    nome_display: str,
+    username: str,
+    dark: bool = False,
+) -> str:
+    num     = slide.get("numero", 1)
+    titulo  = slide.get("titulo", "")
+    corpo   = slide.get("corpo") or slide.get("texto", "")
+    lista   = slide.get("lista") or []
+    dado    = slide.get("dado_destaque", "") or ""
+    cta_txt = slide.get("cta", "") or corpo
+
+    is_capa = (num == 1)
+    is_cta  = (num == total)
+
+    # Cores dark vs light
+    if dark:
+        bg          = "#15202B"
+        card_bg     = "#1e2732"
+        txt_primary = "#E7E9EA"
+        txt_muted   = "#8B98A5"
+        border_clr  = "rgba(255,255,255,0.08)"
+        x_icon_clr  = "#E7E9EA"
+        pill_clr    = "#E7E9EA"
+        pill_txt    = "#15202B"
+    else:
+        bg          = "#F7F9FA"
+        card_bg     = "#FFFFFF"
+        txt_primary = "#0F1419"
+        txt_muted   = "#536471"
+        border_clr  = accent
+        x_icon_clr  = "#0F1419"
+        pill_clr    = "#0F1419"
+        pill_txt    = "#FFFFFF"
+
+    handle = ("@" + username.lstrip("@")) if username else "@voce"
+    nome   = nome_display or handle.lstrip("@").replace("_", " ").title()
+
+    # Avatar: imagem local ou iniciais
+    if avatar_local:
+        av_url  = f"file:///{avatar_local.replace(chr(92), '/')}"
+        avatar_html = f'<img src="{av_url}" class="avatar">'
+    else:
+        inicial = (nome[0] if nome else "U").upper()
+        avatar_html = f'<div class="avatar avatar-init" style="background:{accent}">{inicial}</div>'
+
+    # Timestamp fixo visual
+    from datetime import datetime
+    ts_str = datetime.now().strftime("%-I:%M %p · %b %-d, %Y") if hasattr(datetime.now(), 'strftime') else "12:00 PM · Jan 1, 2025"
+    try:
+        ts_str = datetime.now().strftime("%I:%M %p · %b %d, %Y").lstrip("0")
+    except Exception:
+        ts_str = "12:00 PM · Jan 1, 2025"
+
+    # Contador no canto superior direito
+    counter = f'<div class="counter" style="color:{txt_muted}">{num}/{total}</div>'
+
+    # ícone X (SVG compacto)
+    x_svg = f'''<svg width="22" height="22" viewBox="0 0 24 24" fill="{x_icon_clr}" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.26 5.632 5.905-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>'''
+
+    # Conteúdo do tweet
+    def build_tweet_body() -> str:
+        parts = []
+        if is_capa:
+            parts.append(f'<p class="tweet-text">{titulo}</p>')
+            if corpo:
+                parts.append(f'<p class="tweet-text tweet-sub">{corpo}</p>')
+        elif is_cta:
+            parts.append(f'<p class="tweet-text">{cta_txt}</p>')
+        else:
+            if dado:
+                parts.append(f'<div class="tweet-dado" style="color:{accent}">{dado}</div>')
+            if titulo:
+                parts.append(f'<p class="tweet-text tweet-bold">{titulo}</p>')
+            if corpo:
+                parts.append(f'<p class="tweet-text">{corpo}</p>')
+            if lista:
+                items_html = "".join(
+                    f'<div class="tweet-list-item"><span style="color:{accent}">·</span> {item}</div>'
+                    for item in lista
+                )
+                parts.append(f'<div class="tweet-list">{items_html}</div>')
+        return "\n".join(parts)
+
+    tweet_body = build_tweet_body()
+
+    # Borda do card: accent na versão clara, sutil no dark
+    card_border = f"3px solid {accent}" if not dark else f"1px solid {border_clr}"
+
+    css = f"""
+{_INTER}
+*{{margin:0;padding:0;box-sizing:border-box}}
+body{{
+  width:1080px;height:1080px;overflow:hidden;
+  font-family:'Inter',sans-serif;
+  background:{bg};
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}}
+.watermark{{
+  position:absolute;bottom:32px;right:40px;
+  font-size:13px;font-weight:600;letter-spacing:0.04em;
+  color:{txt_muted};opacity:0.5;
+}}
+.card{{
+  width:880px;
+  background:{card_bg};
+  border-radius:20px;
+  border:{card_border};
+  padding:52px 56px 44px;
+  display:flex;flex-direction:column;gap:0;
+  box-shadow:{'0 8px 48px rgba(0,0,0,0.28)' if dark else '0 4px 32px rgba(0,0,0,0.08)'};
+  position:relative;
+}}
+.card-header{{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;
+}}
+.header-left{{display:flex;align-items:center;gap:18px}}
+.avatar{{
+  width:72px;height:72px;border-radius:50%;
+  object-fit:cover;flex-shrink:0;
+}}
+.avatar-init{{
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:800;color:#fff;
+}}
+.user-info{{display:flex;flex-direction:column;gap:2px}}
+.display-name{{
+  font-size:22px;font-weight:700;color:{txt_primary};
+  letter-spacing:-0.01em;
+}}
+.handle{{font-size:19px;color:{txt_muted};font-weight:400}}
+.tweet-text{{
+  font-size:28px;line-height:1.55;color:{txt_primary};
+  font-weight:400;margin-bottom:18px;
+}}
+.tweet-bold{{font-weight:700;font-size:30px;}}
+.tweet-sub{{color:{txt_muted};font-size:24px;}}
+.tweet-dado{{
+  font-size:80px;font-weight:800;line-height:1;
+  letter-spacing:-2px;margin-bottom:12px;
+}}
+.tweet-list{{
+  display:flex;flex-direction:column;gap:10px;
+  margin-top:8px;
+}}
+.tweet-list-item{{
+  font-size:26px;line-height:1.5;color:{txt_primary};
+  display:flex;gap:12px;
+}}
+.divider{{
+  height:1px;background:{'rgba(255,255,255,0.08)' if dark else 'rgba(0,0,0,0.08)'};
+  margin:28px 0;
+}}
+.timestamp{{font-size:18px;color:{txt_muted};font-weight:400}}
+.counter{{
+  position:absolute;top:52px;right:56px;
+  font-size:16px;font-weight:700;letter-spacing:0.05em;
+}}
+.cta-pill{{
+  display:inline-block;margin-top:24px;
+  background:{pill_clr};color:{pill_txt};
+  font-size:16px;font-weight:700;letter-spacing:0.12em;
+  padding:16px 40px;border-radius:100px;
+}}
+"""
+
+    cta_pill = '<div class="cta-pill">SALVA · COMPARTILHA · SEGUE</div>' if is_cta else ""
+
+    return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>{css}</style></head><body>
+<div class="card">
+  {counter}
+  <div class="card-header">
+    <div class="header-left">
+      {avatar_html}
+      <div class="user-info">
+        <span class="display-name">{nome}</span>
+        <span class="handle">{handle}</span>
+      </div>
+    </div>
+    {x_svg}
+  </div>
+  <div class="tweet-content">
+    {tweet_body}
+    {cta_pill}
+  </div>
+  <div class="divider"></div>
+  <div class="timestamp">{ts_str}</div>
+</div>
+<div class="watermark">{'@' + username if username else ''}</div>
+</body></html>"""
+
+
 # ── Dispatcher ────────────────────────────────────────────────────
 _NAME_TO_NUM = {
     "authority_dark":   "1",
@@ -1005,6 +1264,11 @@ _NAME_TO_NUM = {
     "minimal_type":     "5",
     "minimal type":     "5",
     "minimal":          "5",
+    "x_thread":         "6",
+    "x thread":         "6",
+    "x_thread_dark":    "6d",
+    "x thread dark":    "6d",
+    "thread":           "6",
 }
 
 def gerar_html_slide(
@@ -1017,6 +1281,8 @@ def gerar_html_slide(
     logo_url: str | None = None,
     username: str = "",
     template: str = "4",
+    avatar_local: str = "",
+    nome_display: str = "",
 ) -> str:
     t = _NAME_TO_NUM.get(str(template).lower().strip(), template)
     if t == "1":
@@ -1027,6 +1293,10 @@ def gerar_html_slide(
         return _html_vibrant_gradient(slide, total, tema, accent, accent2, logo_url, username)
     elif t == "5":
         return _html_minimal_type(slide, total, tema, accent, logo_url, username)
+    elif t == "6":
+        return _html_x_thread(slide, total, tema, accent, avatar_local, nome_display, username, dark=False)
+    elif t == "6d":
+        return _html_x_thread(slide, total, tema, accent, avatar_local, nome_display, username, dark=True)
     else:  # "4" default
         return _html_foto_bold(slide, total, tema, accent, accent2, img_local, logo_url, username)
 
@@ -1089,12 +1359,13 @@ async def gerar_carrossel(
 
     # Normalise template to numeric key
     t = _NAME_TO_NUM.get(str(template).lower().strip(), str(template))
-    if t not in ("1", "2", "3", "4", "5"):
+    if t not in ("1", "2", "3", "4", "5", "6", "6d"):
         t = "4"
     template = t
 
-    # Templates 1, 2, 3, 5 não precisam de foto; Template 4 precisa
+    # Templates 1, 2, 3, 5, 6, 6d não precisam de foto; Template 4 precisa
     needs_image = (template == "4")
+    is_x_thread = template in ("6", "6d")
 
     # Extract brand colors
     accent, accent2 = _extract_colors(cores_marca)
@@ -1112,6 +1383,20 @@ async def gerar_carrossel(
     logo_url = None
     if logo_path and Path(logo_path).exists():
         logo_url = f"file:///{logo_path.replace(chr(92), '/')}"
+
+    # Para X Thread: busca avatar do Instagram
+    avatar_local = ""
+    nome_display = ""
+    if is_x_thread and username:
+        avatar_path = pasta_destino / "avatar.jpg"
+        try:
+            avatar_local = await asyncio.to_thread(
+                buscar_avatar_instagram, username, avatar_path
+            )
+        except Exception:
+            avatar_local = ""
+        # nome display: tenta pegar do primeiro slide ou do username formatado
+        nome_display = username.lstrip("@").replace("_", " ").replace(".", " ").title()
 
     pngs = []
     for slide in slides:
@@ -1134,6 +1419,8 @@ async def gerar_carrossel(
             accent, accent2,
             img_local, logo_url, username,
             template,
+            avatar_local=avatar_local,
+            nome_display=nome_display,
         )
         html_path = pasta_html / f"slide_{num:02d}.html"
         html_path.write_text(html_content, encoding="utf-8")
@@ -1215,16 +1502,30 @@ async def gerar_carrossel_manual(
 
     # Normalise template
     t = _NAME_TO_NUM.get(str(template).lower().strip(), str(template))
-    if t not in ("1", "2", "3", "4", "5"):
+    if t not in ("1", "2", "3", "4", "5", "6", "6d"):
         t = "4"
     template = t
 
     needs_image = (template == "4") and usar_foto
+    is_x_thread = template in ("6", "6d")
     accent, accent2 = _extract_colors(cores_marca)
 
     logo_url = None
     if logo_path and Path(logo_path).exists():
         logo_url = f"file:///{logo_path.replace(chr(92), '/')}"
+
+    # Para X Thread: busca avatar do Instagram
+    avatar_local = ""
+    nome_display = ""
+    if is_x_thread and username:
+        avatar_path = pasta_destino / "avatar.jpg"
+        try:
+            avatar_local = await asyncio.to_thread(
+                buscar_avatar_instagram, username, avatar_path
+            )
+        except Exception:
+            avatar_local = ""
+        nome_display = username.lstrip("@").replace("_", " ").replace(".", " ").title()
 
     # Normalise slides — garante campos obrigatórios
     TIPOS = ["gancho", "setup", "conteudo", "conteudo", "conteudo", "virada", "cta"]
@@ -1266,6 +1567,8 @@ async def gerar_carrossel_manual(
             accent, accent2,
             img_local, logo_url, username,
             template,
+            avatar_local=avatar_local,
+            nome_display=nome_display,
         )
         html_path = pasta_html / f"slide_{num:02d}.html"
         html_path.write_text(html_content, encoding="utf-8")
