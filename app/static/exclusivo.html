@@ -3,584 +3,878 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Template Exclusivo BeContent — Design só para sua marca</title>
+  <title>Template Exclusivo — BeContent</title>
   <script src="/static/auth.js"></script>
   <script src="/static/analytics.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#080808;--surface:#111;--surface2:#161616;--border:#1e1e1e;
-      --text:#f0f0f0;--muted:#555;--accent:#8cff2e;--accent-rgb:140,255,46;
+      --bg:#080808;--surface:#0f0f0f;--surface2:#161616;--border:#1a1a1a;
+      --text:#f0f0f0;--muted:#666;--accent:#8cff2e;--accent-rgb:140,255,46;
+      --red:#ff4444;
     }
     html{scroll-behavior:smooth}
-    body{
-      background:var(--bg);color:var(--text);
-      font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
-      line-height:1.6;overflow-x:hidden;
+    body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.6;overflow-x:hidden}
+
+    /* ── URGENCY BAR ── */
+    .urgency-bar{
+      background:var(--accent);color:#080808;
+      text-align:center;padding:10px 20px;font-size:13px;font-weight:800;
+      letter-spacing:.2px;position:sticky;top:0;z-index:200;
     }
+    .urgency-bar span{opacity:.7;font-weight:600}
 
     /* ── TOPNAV ── */
     .topnav{
-      position:sticky;top:0;z-index:100;
-      height:52px;background:rgba(8,8,8,.92);backdrop-filter:blur(12px);
+      position:sticky;top:38px;z-index:100;
+      height:52px;background:rgba(8,8,8,.96);backdrop-filter:blur(16px);
       border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;
-      padding:0 24px;
+      display:flex;align-items:center;justify-content:space-between;padding:0 24px;
     }
-    .nav-logo{font-size:15px;font-weight:900;letter-spacing:-0.3px;text-decoration:none;color:var(--text)}
+    .nav-logo{font-size:15px;font-weight:900;text-decoration:none;color:var(--text);letter-spacing:-.3px}
     .nav-logo span{color:var(--accent)}
-    .nav-back{
-      font-size:13px;color:var(--muted);text-decoration:none;
-      display:flex;align-items:center;gap:6px;transition:color .15s;
+    .nav-cta{
+      background:var(--accent);color:#080808;font-size:12px;font-weight:800;
+      padding:8px 18px;border-radius:8px;border:none;cursor:pointer;
+      transition:opacity .15s;letter-spacing:.2px;
     }
-    .nav-back:hover{color:var(--text)}
-    .nav-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .nav-cta:hover{opacity:.85}
 
     /* ── HERO ── */
     .hero{
-      max-width:720px;margin:0 auto;
-      padding:72px 24px 56px;
+      max-width:760px;margin:0 auto;padding:80px 24px 64px;
       text-align:center;
     }
-    .kicker{
+    .hero-kicker{
       display:inline-flex;align-items:center;gap:8px;
-      font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
-      color:var(--accent);border:1px solid rgba(var(--accent-rgb),.3);
-      padding:5px 14px;border-radius:20px;
-      background:rgba(var(--accent-rgb),.05);
-      margin-bottom:24px;
+      font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
+      color:#080808;background:var(--accent);
+      padding:6px 16px;border-radius:20px;margin-bottom:28px;
     }
-    .kicker-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .hero-kicker-dot{width:6px;height:6px;border-radius:50%;background:#080808;animation:blink 1.4s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
     .hero h1{
-      font-size:clamp(32px,6vw,58px);font-weight:900;line-height:1.1;
-      letter-spacing:-1.5px;margin-bottom:20px;
+      font-size:clamp(34px,6vw,62px);font-weight:900;line-height:1.08;
+      letter-spacing:-2px;margin-bottom:24px;
     }
-    .hero h1 .accent{color:var(--accent)}
+    .hero h1 em{font-style:normal;color:var(--accent)}
+    .hero h1 .strike{text-decoration:line-through;opacity:.35;font-size:.75em}
     .hero-sub{
-      font-size:clamp(15px,2vw,18px);color:var(--muted);
-      max-width:520px;margin:0 auto 32px;line-height:1.6;
+      font-size:clamp(16px,2vw,19px);color:var(--muted);
+      max-width:540px;margin:0 auto 36px;line-height:1.65;
     }
-    .trust-pills{
-      display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+    .hero-sub strong{color:var(--text)}
+    .hero-cta-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .btn-hero{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:18px 40px;background:var(--accent);color:#080808;
+      font-size:16px;font-weight:900;letter-spacing:.2px;
+      border-radius:14px;border:none;cursor:pointer;
+      transition:all .15s;text-decoration:none;
+      box-shadow:0 0 0 0 rgba(var(--accent-rgb),.4);
     }
+    .btn-hero:hover{background:#a3ff55;transform:translateY(-2px);box-shadow:0 16px 48px rgba(var(--accent-rgb),.3)}
+    .btn-hero-note{font-size:12px;color:var(--muted)}
+    .btn-hero-note span{color:var(--accent)}
+    .hero-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:32px}
     .pill{
+      display:flex;align-items:center;gap:6px;
       font-size:12px;font-weight:600;color:var(--text);
+      background:var(--surface2);border:1px solid var(--border);
+      padding:6px 14px;border-radius:20px;
+    }
+    .pill-icon{color:var(--accent);font-size:13px}
+
+    /* ── PAIN SECTION ── */
+    .pain{
+      background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      padding:72px 24px;
+    }
+    .pain-inner{max-width:820px;margin:0 auto}
+    .pain h2{
+      font-size:clamp(24px,4vw,38px);font-weight:900;letter-spacing:-1px;
+      line-height:1.15;margin-bottom:40px;text-align:center;
+    }
+    .pain h2 em{font-style:normal;color:var(--red)}
+    .pain-grid{display:grid;gap:16px;grid-template-columns:1fr}
+    @media(min-width:600px){.pain-grid{grid-template-columns:1fr 1fr}}
+    .pain-item{
+      display:flex;gap:14px;align-items:flex-start;
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:14px;padding:18px 20px;
+    }
+    .pain-x{
+      width:28px;height:28px;border-radius:50%;background:rgba(255,68,68,.1);
+      border:1.5px solid rgba(255,68,68,.3);display:flex;align-items:center;justify-content:center;
+      font-size:12px;color:var(--red);flex-shrink:0;margin-top:2px;font-weight:900;
+    }
+    .pain-text{font-size:14px;color:var(--text);line-height:1.5}
+    .pain-text strong{display:block;font-size:15px;font-weight:800;margin-bottom:3px}
+
+    /* ── BEFORE / AFTER ── */
+    .ba-wrap{max-width:900px;margin:0 auto;padding:80px 24px}
+    .ba-label{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;text-align:center}
+    .ba-title{font-size:clamp(26px,4vw,40px);font-weight:900;letter-spacing:-1px;line-height:1.15;margin-bottom:48px;text-align:center}
+    .ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:560px){.ba-grid{grid-template-columns:1fr}}
+    .ba-col{border-radius:18px;padding:28px 24px;display:flex;flex-direction:column;gap:14px}
+    .ba-col.before{background:rgba(255,68,68,.04);border:1.5px solid rgba(255,68,68,.15)}
+    .ba-col.after{background:rgba(var(--accent-rgb),.04);border:1.5px solid rgba(var(--accent-rgb),.2)}
+    .ba-col-header{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+    .ba-col.before .ba-col-header{color:var(--red)}
+    .ba-col.after .ba-col-header{color:var(--accent)}
+    .ba-item{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--muted)}
+    .ba-item strong{color:var(--text);font-weight:700}
+    .ba-icon{flex-shrink:0;margin-top:1px;font-size:14px}
+
+    /* ── MOCKUP SECTION ── */
+    .mockup-section{
+      background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      padding:80px 24px;
+    }
+    .mockup-inner{max-width:1060px;margin:0 auto}
+    .mockup-inner .ba-label{text-align:left}
+    .mockup-inner .ba-title{text-align:left;margin-bottom:12px}
+    .mockup-sub{font-size:15px;color:var(--muted);margin-bottom:48px;max-width:480px;line-height:1.6}
+    .mockup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    @media(min-width:720px){.mockup-grid{grid-template-columns:repeat(4,1fr)}}
+
+    /* slide previews */
+    .slide-preview{
+      border-radius:16px;overflow:hidden;aspect-ratio:4/5;
+      position:relative;cursor:pointer;
+      border:1.5px solid var(--border);transition:all .2s;
+    }
+    .slide-preview:hover{transform:scale(1.03);border-color:rgba(var(--accent-rgb),.4)}
+    .sp-dark{background:#080808;display:flex;flex-direction:column;justify-content:flex-end;padding:18px;height:100%}
+    .sp-num{font-size:48px;font-weight:900;color:rgba(140,255,46,.08);position:absolute;top:10px;right:12px;line-height:1}
+    .sp-line{width:28px;height:2.5px;background:#8cff2e;border-radius:1px;margin-bottom:9px}
+    .sp-tag{font-size:8px;letter-spacing:3px;color:#8cff2e;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+    .sp-title{font-size:13px;font-weight:900;color:#fff;line-height:1.25;letter-spacing:-.2px}
+    .sp-body{font-size:8px;color:#555;margin-top:6px;line-height:1.5}
+
+    .sp-grad{background:linear-gradient(145deg,#0a0a1a 0%,#1a0533 100%);display:flex;flex-direction:column;padding:16px;height:100%;justify-content:space-between}
+    .sp-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:13px;flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:12px}
+    .sp-glass-title{font-size:12px;font-weight:900;color:#fff;line-height:1.25;letter-spacing:-.2px}
+    .sp-glass-div{width:18px;height:2px;background:rgba(140,255,46,.6);margin:8px 0;border-radius:1px}
+    .sp-glass-body{font-size:8px;color:rgba(255,255,255,.5)}
+
+    .sp-edit{background:#f5f4f2;display:flex;flex-direction:column;padding:16px;height:100%}
+    .sp-edit-badge{font-size:7px;letter-spacing:2.5px;color:#888;border:1px solid #ddd;padding:2px 7px;border-radius:2px;align-self:flex-start;text-transform:uppercase;margin-bottom:14px}
+    .sp-edit-rule{width:100%;height:2px;background:#8cff2e;margin-bottom:14px;border-radius:1px}
+    .sp-edit-title{font-size:12px;font-weight:700;color:#0d0d0d;line-height:1.3;font-family:Georgia,serif}
+    .sp-edit-body{font-size:8px;color:#999;margin-top:10px;line-height:1.5}
+    .sp-edit-ghost{position:absolute;bottom:-10px;right:-5px;font-size:68px;font-weight:900;color:#0d0d0d;opacity:.05;line-height:1}
+
+    .sp-foto{background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.75) 60%,rgba(0,0,0,.95) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;height:100%;position:relative}
+    .sp-foto::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#1a3a1a,#2d4a0d);z-index:-1}
+    .sp-foto-badge{position:absolute;top:12px;right:12px;font-size:8px;font-weight:800;background:#8cff2e;color:#080808;padding:3px 8px;border-radius:10px}
+    .sp-foto-tag{font-size:7px;letter-spacing:3px;color:#8cff2e;text-transform:uppercase;font-weight:700;margin-bottom:5px}
+    .sp-foto-title{font-size:12px;font-weight:900;color:#fff;line-height:1.25;letter-spacing:-.2px}
+    .sp-foto-bar{width:22px;height:2.5px;background:linear-gradient(90deg,#8cff2e,#4a8f00);border-radius:2px;margin-top:8px}
+
+    .slide-label{padding:10px 4px 0;font-size:11px;font-weight:700;color:var(--muted)}
+    .slide-label span{color:var(--accent)}
+
+    /* ── PROOF / TESTIMONIALS ── */
+    .proof-section{padding:80px 24px}
+    .proof-inner{max-width:1060px;margin:0 auto}
+    .proof-numbers{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:56px;
+    }
+    @media(min-width:720px){.proof-numbers{grid-template-columns:repeat(4,1fr)}}
+    .proof-num-card{
       background:var(--surface);border:1px solid var(--border);
-      padding:7px 16px;border-radius:20px;
+      border-radius:16px;padding:24px 20px;text-align:center;
     }
-    .pill span{color:var(--accent)}
+    .proof-num{font-size:36px;font-weight:900;color:var(--accent);letter-spacing:-1.5px;line-height:1}
+    .proof-num-label{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
 
-    /* ── SECTION WRAPPER ── */
-    .section{max-width:1060px;margin:0 auto;padding:72px 24px}
-    .section-label{
-      font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
-      color:var(--accent);margin-bottom:12px;
-    }
-    .section-title{
-      font-size:clamp(24px,4vw,38px);font-weight:900;letter-spacing:-0.8px;
-      line-height:1.15;margin-bottom:8px;
-    }
-    .section-sub{font-size:14px;color:var(--muted);margin-bottom:48px;max-width:480px}
-
-    /* ── PROOF CARDS ── */
-    .proof-grid{display:grid;gap:20px;grid-template-columns:1fr}
-    @media(min-width:640px){.proof-grid{grid-template-columns:repeat(3,1fr)}}
-    .proof-card{
+    .testimonials{display:grid;gap:16px;grid-template-columns:1fr}
+    @media(min-width:640px){.testimonials{grid-template-columns:repeat(3,1fr)}}
+    .testi-card{
       background:var(--surface);border:1.5px solid var(--border);
-      border-radius:18px;overflow:hidden;
-      transition:border-color .2s,transform .2s;
+      border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px;
     }
-    .proof-card:hover{border-color:#333;transform:translateY(-3px)}
-
-    /* mini carousel preview */
-    .preview-wrap{height:160px;position:relative;overflow:hidden}
-
-    /* dark style preview */
-    .pv-dark{background:#080808;display:flex;flex-direction:column;justify-content:flex-end;padding:18px;height:100%}
-    .pv-dark .pv-num-bg{position:absolute;top:8px;right:10px;font-size:52px;font-weight:900;color:rgba(140,255,46,.12);line-height:1}
-    .pv-dark .pv-line{width:32px;height:2px;background:#8cff2e;margin-bottom:10px}
-    .pv-dark .pv-title{font-size:13px;font-weight:900;color:#fff;line-height:1.2;letter-spacing:-.2px}
-    .pv-dark .pv-body{font-size:9px;color:#444;margin-top:6px}
-    .pv-dark .pv-dot{width:5px;height:5px;border-radius:50%;background:#8cff2e;display:inline-block;margin-right:3px}
-
-    /* gradient style preview */
-    .pv-grad{background:linear-gradient(135deg,#1a0533 0%,#0d1f4a 100%);display:flex;flex-direction:column;padding:14px;height:100%;position:relative}
-    .pv-grad .pv-tag{font-size:8px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase}
-    .pv-grad .pv-glass{background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px;margin-top:10px;flex:1;display:flex;flex-direction:column;justify-content:center}
-    .pv-grad .pv-title{font-size:12px;font-weight:900;color:#fff;line-height:1.2}
-    .pv-grad .pv-div{width:20px;height:2px;background:rgba(255,255,255,.35);margin:7px 0}
-    .pv-grad .pv-body{font-size:8px;color:rgba(255,255,255,.6)}
-    .pv-grad .pv-accent-dot{position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%;background:#8cff2e}
-
-    /* editorial white preview */
-    .pv-edit{background:#f7f6f4;display:flex;flex-direction:column;padding:16px;height:100%;position:relative}
-    .pv-edit .pv-badge{font-size:7px;letter-spacing:3px;color:#555;border:1px solid #ccc;padding:2px 7px;border-radius:2px;align-self:flex-start;text-transform:uppercase;margin-bottom:12px}
-    .pv-edit .pv-title{font-size:12px;font-weight:700;color:#0d0d0d;line-height:1.3;font-family:Georgia,serif;max-width:90%}
-    .pv-edit .pv-rule{width:26px;height:1.5px;background:#8cff2e;margin:10px 0 7px;border-radius:1px}
-    .pv-edit .pv-body{font-size:8px;color:#777;line-height:1.4}
-    .pv-edit .pv-ghost{position:absolute;bottom:-12px;right:-4px;font-size:72px;font-weight:900;color:#0d0d0d;opacity:.04;font-family:Georgia,serif;line-height:1}
-
-    /* proof stat */
-    .proof-stat{padding:16px 18px 18px}
-    .proof-stat-num{
-      font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-0.5px;
+    .testi-stars{color:var(--accent);font-size:14px;letter-spacing:2px}
+    .testi-text{font-size:14px;color:var(--text);line-height:1.65;font-style:italic}
+    .testi-text::before{content:'"';font-size:36px;color:var(--accent);line-height:0;vertical-align:-.6em;margin-right:4px;font-style:normal}
+    .testi-author{display:flex;align-items:center;gap:10px;margin-top:auto}
+    .testi-avatar{
+      width:38px;height:38px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      font-size:15px;font-weight:900;background:rgba(var(--accent-rgb),.1);
+      border:1.5px solid rgba(var(--accent-rgb),.2);color:var(--accent);
     }
-    .proof-stat-label{font-size:12px;color:var(--muted);margin-top:2px}
+    .testi-name{font-size:13px;font-weight:800;line-height:1.2}
+    .testi-role{font-size:11px;color:var(--muted)}
 
     /* ── HOW IT WORKS ── */
-    .hiw{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-    .hiw-inner{max-width:1060px;margin:0 auto;padding:72px 24px}
-    .hiw-steps{
-      display:grid;grid-template-columns:1fr;gap:32px;margin-top:48px;
+    .hiw{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 24px}
+    .hiw-inner{max-width:900px;margin:0 auto}
+    .hiw-steps{display:grid;grid-template-columns:1fr;gap:0;margin-top:48px}
+    @media(min-width:640px){.hiw-steps{grid-template-columns:repeat(3,1fr)}}
+    .hiw-step{
+      display:flex;flex-direction:column;align-items:flex-start;
+      padding:0 28px 0 0;position:relative;
     }
-    @media(min-width:640px){.hiw-steps{grid-template-columns:repeat(3,1fr);gap:0}}
-    .hiw-step{display:flex;flex-direction:column;align-items:flex-start;position:relative}
+    @media(max-width:639px){.hiw-step{padding:0 0 32px 0;border-left:2px solid var(--border);padding-left:24px;margin-left:22px}}
+    @media(max-width:639px){.hiw-step:last-child{border-left:2px solid transparent}}
     @media(min-width:640px){
       .hiw-step:not(:last-child)::after{
-        content:'';position:absolute;top:22px;left:calc(100% - 0px);
-        width:100%;height:1px;background:var(--border);
+        content:'→';position:absolute;right:-10px;top:14px;
+        font-size:18px;color:var(--border);
       }
     }
     .hiw-num{
       width:44px;height:44px;border-radius:50%;
-      background:rgba(var(--accent-rgb),.1);border:1.5px solid rgba(var(--accent-rgb),.3);
+      background:rgba(var(--accent-rgb),.08);border:2px solid rgba(var(--accent-rgb),.25);
       display:flex;align-items:center;justify-content:center;
-      font-size:14px;font-weight:900;color:var(--accent);
+      font-size:16px;font-weight:900;color:var(--accent);
       margin-bottom:16px;flex-shrink:0;
+      position:relative;
     }
-    .hiw-title{font-size:15px;font-weight:800;margin-bottom:6px}
-    .hiw-desc{font-size:13px;color:var(--muted);line-height:1.5;max-width:260px}
+    @media(max-width:639px){.hiw-num{position:absolute;left:-38px;top:-4px;width:28px;height:28px;font-size:12px}}
+    .hiw-title{font-size:16px;font-weight:800;margin-bottom:8px;letter-spacing:-.2px}
+    .hiw-desc{font-size:13px;color:var(--muted);line-height:1.6}
+    .hiw-time{
+      display:inline-flex;align-items:center;gap:5px;
+      font-size:11px;font-weight:700;color:var(--accent);
+      background:rgba(var(--accent-rgb),.07);border:1px solid rgba(var(--accent-rgb),.2);
+      padding:3px 10px;border-radius:20px;margin-top:10px;
+    }
 
     /* ── PRICING ── */
-    .pricing-grid{
-      display:grid;grid-template-columns:1fr;gap:20px;margin-top:48px;
-    }
+    .pricing-section{padding:80px 24px}
+    .pricing-inner{max-width:1000px;margin:0 auto}
+    .pricing-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:48px}
     @media(min-width:720px){.pricing-grid{grid-template-columns:repeat(3,1fr)}}
     .pricing-card{
       background:var(--surface);border:1.5px solid var(--border);
-      border-radius:20px;padding:28px 24px;
-      display:flex;flex-direction:column;gap:0;
-      position:relative;transition:border-color .2s,transform .2s;
+      border-radius:22px;padding:32px 26px;
+      display:flex;flex-direction:column;
+      position:relative;transition:all .2s;
     }
     .pricing-card:hover{transform:translateY(-4px)}
     .pricing-card.featured{
       border-color:var(--accent);
-      background:linear-gradient(160deg,rgba(var(--accent-rgb),.04) 0%,var(--surface) 100%);
+      background:linear-gradient(160deg,rgba(var(--accent-rgb),.05) 0%,var(--surface) 70%);
+    }
+    .pricing-card.featured::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      border-radius:22px 22px 0 0;
     }
     .popular-badge{
-      position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+      position:absolute;top:-13px;left:50%;transform:translateX(-50%);
       font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
       background:var(--accent);color:#080808;
       padding:4px 14px;border-radius:20px;white-space:nowrap;
     }
-    .plan-name{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-    .plan-price{
-      font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px;
-    }
-    .plan-price sup{font-size:18px;font-weight:700;letter-spacing:0;vertical-align:top;margin-top:8px;display:inline-block}
-    .plan-price .currency{font-size:16px;font-weight:700;letter-spacing:0}
-    .plan-period{font-size:12px;color:var(--muted);margin-bottom:24px}
+    .plan-name{font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+    .plan-price-wrap{margin-bottom:6px}
+    .plan-price{font-size:52px;font-weight:900;letter-spacing:-2.5px;line-height:1}
+    .plan-price sup{font-size:20px;vertical-align:top;margin-top:10px;font-weight:700;letter-spacing:0}
+    .plan-period{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .plan-old-price{font-size:13px;color:var(--muted);text-decoration:line-through;margin-bottom:24px}
     .plan-divider{height:1px;background:var(--border);margin-bottom:24px}
-    .plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;flex:1}
-    .plan-features li{font-size:13px;color:var(--text);display:flex;align-items:flex-start;gap:9px;line-height:1.4}
+    .plan-features{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:28px;flex:1}
+    .plan-features li{font-size:13px;color:var(--text);display:flex;align-items:flex-start;gap:10px;line-height:1.4}
     .plan-features li::before{
-      content:'';flex-shrink:0;width:16px;height:16px;border-radius:50%;
-      background:rgba(var(--accent-rgb),.12);border:1.5px solid rgba(var(--accent-rgb),.4);
-      display:flex;align-items:center;justify-content:center;
+      content:'';flex-shrink:0;width:18px;height:18px;margin-top:0px;
+      background:rgba(var(--accent-rgb),.1);border:1.5px solid rgba(var(--accent-rgb),.3);
+      border-radius:50%;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3 3 7-6' stroke='%238cff2e' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-size:12px;background-repeat:no-repeat;background-position:center;
-      margin-top:1px;
+      background-size:11px;background-repeat:no-repeat;background-position:center;
     }
-    .btn{
-      display:block;width:100%;padding:15px;border-radius:12px;
-      font-size:14px;font-weight:800;letter-spacing:.3px;
+    .plan-features li.highlight{font-weight:700;color:var(--accent)}
+    .btn-plan{
+      display:block;width:100%;padding:16px;border-radius:12px;
+      font-size:14px;font-weight:800;letter-spacing:.2px;
       text-align:center;cursor:pointer;border:none;
-      transition:all .15s;text-decoration:none;
+      transition:all .15s;margin-bottom:10px;
     }
-    .btn-accent{background:var(--accent);color:#080808}
-    .btn-accent:hover{background:#a3ff55;transform:translateY(-1px)}
-    .btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--border)}
-    .btn-outline:hover{border-color:#333;background:var(--surface2)}
+    .btn-plan-accent{background:var(--accent);color:#080808}
+    .btn-plan-accent:hover{background:#a3ff55;transform:translateY(-1px)}
+    .btn-plan-outline{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+    .btn-plan-outline:hover{border-color:#333;background:var(--surface2)}
+    .plan-note{font-size:11px;color:var(--muted);text-align:center}
 
     /* ── GUARANTEE ── */
     .guarantee{
-      max-width:600px;margin:0 auto;padding:56px 24px;
-      text-align:center;
+      background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      padding:72px 24px;
     }
-    .guarantee-icon{
-      width:72px;height:72px;border-radius:50%;
-      background:rgba(var(--accent-rgb),.07);border:2px solid rgba(var(--accent-rgb),.25);
-      display:flex;align-items:center;justify-content:center;
-      margin:0 auto 20px;
-      font-size:32px;
+    .guarantee-inner{max-width:700px;margin:0 auto;display:flex;gap:32px;align-items:flex-start}
+    @media(max-width:560px){.guarantee-inner{flex-direction:column;align-items:center;text-align:center}}
+    .guarantee-shield{
+      width:80px;height:80px;border-radius:50%;flex-shrink:0;
+      background:rgba(var(--accent-rgb),.07);border:2px solid rgba(var(--accent-rgb),.2);
+      display:flex;align-items:center;justify-content:center;font-size:36px;
     }
-    .guarantee h2{font-size:22px;font-weight:900;margin-bottom:10px;letter-spacing:-.3px}
-    .guarantee p{font-size:14px;color:var(--muted);line-height:1.6}
+    .guarantee-body h2{font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:10px}
+    .guarantee-body p{font-size:14px;color:var(--muted);line-height:1.7}
+    .guarantee-body p strong{color:var(--text)}
 
     /* ── FAQ ── */
-    .faq-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-    .faq-inner{max-width:700px;margin:0 auto;padding:72px 24px}
-    .faq-list{display:flex;flex-direction:column;gap:0;margin-top:48px}
+    .faq-section{padding:80px 24px}
+    .faq-inner{max-width:720px;margin:0 auto}
+    .faq-list{margin-top:48px}
     .faq-item{border-bottom:1px solid var(--border)}
     .faq-item:first-child{border-top:1px solid var(--border)}
     .faq-q{
       width:100%;background:none;border:none;color:var(--text);
       display:flex;align-items:center;justify-content:space-between;gap:16px;
-      padding:20px 0;font-size:15px;font-weight:700;letter-spacing:-.2px;
+      padding:22px 0;font-size:15px;font-weight:700;letter-spacing:-.2px;
       cursor:pointer;text-align:left;transition:color .15s;
+      font-family:inherit;
     }
     .faq-q:hover{color:var(--accent)}
-    .faq-q svg{flex-shrink:0;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;transition:transform .25s}
-    .faq-item.open .faq-q svg{transform:rotate(45deg)}
-    .faq-item.open .faq-q{color:var(--accent)}
-    .faq-a{
-      font-size:14px;color:var(--muted);line-height:1.6;
-      overflow:hidden;max-height:0;transition:max-height .3s ease,padding .3s ease;
-      padding-bottom:0;
+    .faq-q-icon{
+      width:24px;height:24px;border-radius:50%;flex-shrink:0;
+      background:var(--surface2);border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;color:var(--muted);transition:all .25s;
     }
-    .faq-item.open .faq-a{max-height:120px;padding-bottom:20px}
+    .faq-item.open .faq-q-icon{background:rgba(var(--accent-rgb),.1);border-color:rgba(var(--accent-rgb),.3);color:var(--accent);transform:rotate(45deg)}
+    .faq-item.open .faq-q{color:var(--accent)}
+    .faq-a{font-size:14px;color:var(--muted);line-height:1.7;overflow:hidden;max-height:0;transition:max-height .35s ease,padding .35s ease;padding-bottom:0}
+    .faq-item.open .faq-a{max-height:200px;padding-bottom:22px}
 
     /* ── BOTTOM CTA ── */
     .bottom-cta{
-      text-align:center;padding:80px 24px 96px;
-      max-width:600px;margin:0 auto;
+      text-align:center;padding:96px 24px 80px;
+      background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(var(--accent-rgb),.06) 0%,transparent 70%);
     }
     .bottom-cta h2{
-      font-size:clamp(28px,5vw,46px);font-weight:900;letter-spacing:-1px;
-      line-height:1.1;margin-bottom:12px;
+      font-size:clamp(30px,5.5vw,54px);font-weight:900;letter-spacing:-1.5px;
+      line-height:1.08;margin-bottom:16px;
     }
-    .bottom-cta h2 span{color:var(--accent)}
-    .bottom-cta p{font-size:14px;color:var(--muted);margin-bottom:32px}
-    .btn-hero{
-      display:inline-block;padding:18px 40px;
-      background:var(--accent);color:#080808;
-      font-size:15px;font-weight:900;letter-spacing:.3px;
-      border-radius:14px;border:none;cursor:pointer;
-      transition:all .15s;text-decoration:none;
-    }
-    .btn-hero:hover{background:#a3ff55;transform:translateY(-2px);box-shadow:0 12px 40px rgba(var(--accent-rgb),.25)}
+    .bottom-cta h2 em{font-style:normal;color:var(--accent)}
+    .bottom-cta-sub{font-size:16px;color:var(--muted);margin-bottom:36px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.6}
     .bottom-cta-note{font-size:12px;color:var(--muted);margin-top:16px}
+    .bottom-cta-note span{color:var(--accent)}
 
-    /* ── FOOTER LINE ── */
-    .footer-line{
-      border-top:1px solid var(--border);
-      padding:20px 24px;text-align:center;
-      font-size:12px;color:var(--muted);
+    /* ── FOOTER ── */
+    .footer-line{border-top:1px solid var(--border);padding:24px;text-align:center;font-size:12px;color:var(--muted)}
+
+    /* ── SECTION SHARED ── */
+    .sec-label{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+    .sec-title{font-size:clamp(26px,4.5vw,42px);font-weight:900;letter-spacing:-1px;line-height:1.15;margin-bottom:10px}
+    .sec-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:480px}
+
+    /* loading overlay */
+    .checkout-overlay{
+      display:none;position:fixed;inset:0;background:rgba(8,8,8,.9);
+      z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:16px;
     }
+    .checkout-overlay.show{display:flex}
+    .checkout-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .checkout-txt{font-size:14px;color:var(--muted)}
 
-    /* ── UTILS ── */
-    .text-accent{color:var(--accent)}
     @media(max-width:480px){
-      .hero{padding:48px 20px 40px}
-      .section{padding:56px 20px}
+      .hero{padding:56px 20px 48px}
+      .proof-section,.pricing-section,.faq-section{padding:56px 20px}
+      .hiw,.guarantee,.mockup-section,.pain{padding:56px 20px}
     }
   </style>
 </head>
 <body>
 
-  <!-- TOP NAV -->
-  <nav class="topnav">
-    <a href="/static/chat.html" class="nav-logo">Be<span>Content</span></a>
-    <a href="/static/chat.html" class="nav-back">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Voltar ao wizard
-    </a>
-  </nav>
+<!-- URGENCY BAR -->
+<div class="urgency-bar">
+  ✦ Oferta de lançamento — R$127 por tempo limitado <span>· Normalmente R$297</span>
+</div>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="kicker">
-      <span class="kicker-dot"></span>
-      Template Exclusivo
-    </div>
-    <h1>Seu carrossel com identidade visual <span class="accent">100% sua</span></h1>
-    <p class="hero-sub">Enquanto todos usam os mesmos templates, você vai ter um design feito só para sua marca — entregue em 48h.</p>
-    <div class="trust-pills">
-      <div class="pill"><span>✓</span> Entrega em 48h</div>
-      <div class="pill"><span>✓</span> Revisão incluída</div>
-      <div class="pill"><span>✓</span> Exclusivo para você</div>
-    </div>
-  </section>
+<!-- TOPNAV -->
+<nav class="topnav">
+  <a href="/static/chat.html" class="nav-logo">Be<span>Content</span></a>
+  <button class="nav-cta" onclick="iniciarCheckout('starter',127)">Quero meu template →</button>
+</nav>
 
-  <!-- SOCIAL PROOF -->
-  <section class="section">
-    <p class="section-label">Carrosseis que viralizaram</p>
-    <h2 class="section-title">Resultados reais com design profissional</h2>
-    <p class="section-sub">Templates criados para marcas reais — e os números provam.</p>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-kicker">
+    <span class="hero-kicker-dot"></span>
+    Template Exclusivo BeContent
+  </div>
+  <h1>
+    Chega de carrossel<br>
+    <em>que parece de todo mundo.</em>
+  </h1>
+  <p class="hero-sub">
+    Você passa horas criando conteúdo e o resultado ainda <strong>parece genérico</strong>.
+    Com o Template Exclusivo, sua marca tem um design único — feito por especialistas,
+    entregue em 48h, disponível direto no seu wizard.
+  </p>
+  <div class="hero-cta-wrap">
+    <button class="btn-hero" onclick="iniciarCheckout('starter',127)">
+      Quero meu template exclusivo →
+    </button>
+    <span class="btn-hero-note">A partir de R$127 · <span>Garantia de 7 dias</span> · Entrega em 48h</span>
+  </div>
+  <div class="hero-pills">
+    <div class="pill"><span class="pill-icon">✓</span> Design 100% personalizado</div>
+    <div class="pill"><span class="pill-icon">✓</span> Sua identidade visual</div>
+    <div class="pill"><span class="pill-icon">✓</span> Entrega em 48 horas</div>
+    <div class="pill"><span class="pill-icon">✓</span> Sem mensalidade</div>
+  </div>
+</section>
 
-    <div class="proof-grid">
-
-      <!-- Card 1: Dark -->
-      <div class="proof-card">
-        <div class="preview-wrap">
-          <div class="pv-dark" style="position:relative">
-            <div class="pv-num-bg">01</div>
-            <div class="pv-line"></div>
-            <div class="pv-title">5 erros que estão te fazendo<br>perder dinheiro todo mês</div>
-            <div class="pv-body"><span class="pv-dot"></span>Finanças pessoais &bull; Leia até o fim</div>
-          </div>
-        </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">47K salvamentos</div>
-          <div class="proof-stat-label">Carrossel de finanças pessoais</div>
+<!-- DOR / PAIN -->
+<div class="pain">
+  <div class="pain-inner">
+    <h2>Você reconhece algum desses <em>problemas?</em></h2>
+    <div class="pain-grid">
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <div class="pain-text">
+          <strong>Template idêntico ao do concorrente</strong>
+          Você usa o mesmo design que centenas de outras pessoas. Seu público percebe — e ignora.
         </div>
       </div>
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <div class="pain-text">
+          <strong>Cores e identidade que não batem</strong>
+          O carrossel não combina com seu perfil, sua paleta, sua fonte. Parece que veio de outro lugar.
+        </div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <div class="pain-text">
+          <strong>Horas perdidas tentando customizar</strong>
+          Você mexe aqui, ajusta ali, e no fim nunca fica do jeito que você imaginou na sua cabeça.
+        </div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <div class="pain-text">
+          <strong>Conteúdo bom com visual fraco</strong>
+          Sua mensagem é ótima, mas o visual não faz jus. Resultado: menos alcance, menos salvamentos.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-      <!-- Card 2: Gradient -->
-      <div class="proof-card">
-        <div class="preview-wrap">
-          <div class="pv-grad">
-            <div class="pv-accent-dot"></div>
-            <div class="pv-tag">Transformação</div>
-            <div class="pv-glass">
-              <div class="pv-title">Perdi 12kg sem academia — e mantive o resultado</div>
-              <div class="pv-div"></div>
-              <div class="pv-body">Método que ninguém te conta &bull; Arrasta e descobre</div>
+<!-- ANTES / DEPOIS -->
+<div class="ba-wrap">
+  <p class="ba-label" style="text-align:center">A transformação</p>
+  <h2 class="ba-title" style="text-align:center">Como fica sua presença<br>antes e depois</h2>
+  <div class="ba-grid">
+    <div class="ba-col before">
+      <div class="ba-col-header">✕ &nbsp;Sem template exclusivo</div>
+      <div class="ba-item"><span class="ba-icon">😐</span><span>Visual genérico que não representa sua marca</span></div>
+      <div class="ba-item"><span class="ba-icon">😐</span><span>Cores que não batem com seu perfil</span></div>
+      <div class="ba-item"><span class="ba-icon">😐</span><span>Todo mundo usa o mesmo template que você</span></div>
+      <div class="ba-item"><span class="ba-icon">😐</span><span>Pouco salvamento porque não tem identidade</span></div>
+      <div class="ba-item"><span class="ba-icon">😐</span><span>Horas tentando adaptar algo que não foi feito pra você</span></div>
+    </div>
+    <div class="ba-col after">
+      <div class="ba-col-header">✓ &nbsp;Com template exclusivo</div>
+      <div class="ba-item"><span class="ba-icon">🔥</span><span><strong>Design reconhecível</strong> — seu público identifica seu conteúdo de longe</span></div>
+      <div class="ba-item"><span class="ba-icon">🔥</span><span><strong>Suas cores, sua fonte</strong> — identidade visual consistente em cada slide</span></div>
+      <div class="ba-item"><span class="ba-icon">🔥</span><span><strong>Zero concorrente usa igual</strong> — é só seu, para sempre</span></div>
+      <div class="ba-item"><span class="ba-icon">🔥</span><span><strong>Mais salvamentos e compartilhamentos</strong> — visual que prende atenção</span></div>
+      <div class="ba-item"><span class="ba-icon">🔥</span><span><strong>Gera em segundos</strong> — só digita o tema, o resto o BeContent faz</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MOCKUP / VISUAL -->
+<div class="mockup-section">
+  <div class="mockup-inner">
+    <p class="ba-label">Exemplos de templates</p>
+    <h2 class="sec-title">Cada marca tem seu estilo.<br>O seu também vai ter.</h2>
+    <p class="mockup-sub">Abaixo, exemplos de como um template exclusivo fica dentro do BeContent — com identidade visual única em cada slide.</p>
+    <div class="mockup-grid">
+
+      <div>
+        <div class="slide-preview">
+          <div class="sp-dark" style="height:100%;position:relative">
+            <div class="sp-num">01</div>
+            <div class="sp-tag">Finanças</div>
+            <div class="sp-line"></div>
+            <div class="sp-title">5 erros que te fazem perder dinheiro todo mês</div>
+            <div class="sp-body">Leia até o fim · Vale muito</div>
+          </div>
+        </div>
+        <div class="slide-label">Dark & Bold <span>— nicho finanças</span></div>
+      </div>
+
+      <div>
+        <div class="slide-preview">
+          <div class="sp-grad" style="height:100%">
+            <div style="font-size:8px;letter-spacing:3px;font-weight:700;color:rgba(140,255,46,.7);text-transform:uppercase">Transformação</div>
+            <div class="sp-glass">
+              <div class="sp-glass-title">Como perdi 12kg e mantive o resultado por 2 anos</div>
+              <div class="sp-glass-div"></div>
+              <div class="sp-glass-body">Método simples · Arrasta e descobre</div>
             </div>
           </div>
         </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">128K compartilhamentos</div>
-          <div class="proof-stat-label">Carrossel de emagrecimento</div>
-        </div>
+        <div class="slide-label">Gradient Glass <span>— nicho saúde</span></div>
       </div>
 
-      <!-- Card 3: Editorial -->
-      <div class="proof-card">
-        <div class="preview-wrap">
-          <div class="pv-edit">
-            <div class="pv-badge">Marketing</div>
-            <div class="pv-title">O segredo dos perfis que vendem todo dia</div>
-            <div class="pv-rule"></div>
-            <div class="pv-body">Estratégia que grandes marcas usam — e você pode copiar agora.</div>
-            <div class="pv-ghost">MKT</div>
+      <div>
+        <div class="slide-preview" style="position:relative">
+          <div class="sp-edit" style="height:100%;position:relative">
+            <div class="sp-edit-rule"></div>
+            <div class="sp-edit-badge">Marketing</div>
+            <div class="sp-edit-title">O segredo dos perfis que vendem todo dia sem postar 10x por semana</div>
+            <div class="sp-edit-body">Estratégia que grandes marcas usam</div>
+            <div class="sp-edit-ghost">MKT</div>
           </div>
         </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">89K salvamentos</div>
-          <div class="proof-stat-label">Carrossel de marketing digital</div>
+        <div class="slide-label">Editorial Clean <span>— nicho marketing</span></div>
+      </div>
+
+      <div>
+        <div class="slide-preview" style="position:relative">
+          <div class="sp-foto" style="height:100%;position:relative">
+            <div class="sp-foto-badge">01/07</div>
+            <div class="sp-foto-tag">Negócios</div>
+            <div class="sp-foto-title">O erro que custa R$10k por mês para maioria dos negócios locais</div>
+            <div class="sp-foto-bar"></div>
+          </div>
         </div>
+        <div class="slide-label">Foto Bold <span>— nicho negócios</span></div>
       </div>
 
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- HOW IT WORKS -->
-  <div class="hiw">
-    <div class="hiw-inner">
-      <p class="section-label">Como funciona</p>
-      <h2 class="section-title">Simples, rápido e sem complicação</h2>
-      <div class="hiw-steps">
+<!-- PROOF / NÚMEROS + DEPOIMENTOS -->
+<div class="proof-section">
+  <div class="proof-inner">
+    <p class="sec-label" style="text-align:center">Resultados reais</p>
+    <h2 class="sec-title" style="text-align:center;margin-bottom:48px">O que acontece quando<br>o design trabalha por você</h2>
 
-        <div class="hiw-step">
-          <div class="hiw-num">1</div>
-          <div class="hiw-title">Compre e preencha o briefing</div>
-          <p class="hiw-desc">Após a compra, você preenche um formulário com cores, fontes e referências da sua marca.</p>
+    <div class="proof-numbers">
+      <div class="proof-num-card">
+        <div class="proof-num">47K</div>
+        <div class="proof-num-label">salvamentos em um único carrossel com template exclusivo</div>
+      </div>
+      <div class="proof-num-card">
+        <div class="proof-num">3.2×</div>
+        <div class="proof-num-label">mais alcance orgânico com identidade visual consistente</div>
+      </div>
+      <div class="proof-num-card">
+        <div class="proof-num">48h</div>
+        <div class="proof-num-label">para ter seu template pronto e disponível na sua conta</div>
+      </div>
+      <div class="proof-num-card">
+        <div class="proof-num">100%</div>
+        <div class="proof-num-label">exclusivo — nenhum outro usuário BeContent tem o mesmo</div>
+      </div>
+    </div>
+
+    <div class="testimonials">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Recebi o template em menos de 24h. Minha coach ficou chocada — achava que eu tinha contratado um designer. Agora gero 10 carrosseis por semana sem me preocupar com visual.</p>
+        <div class="testi-author">
+          <div class="testi-avatar">M</div>
+          <div>
+            <div class="testi-name">Mariana Costa</div>
+            <div class="testi-role">Coach de carreira · 12K seguidores</div>
+          </div>
         </div>
-
-        <div class="hiw-step">
-          <div class="hiw-num">2</div>
-          <div class="hiw-title">Nossa equipe desenvolve seu template em 48h</div>
-          <p class="hiw-desc">Designers especializados em conteúdo viral criam seu template com identidade visual única.</p>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Valeu cada centavo. Meu nicho é finanças e o template ficou tão profissional que clientes me perguntam quem é meu designer. Respondo que é o BeContent.</p>
+        <div class="testi-author">
+          <div class="testi-avatar">R</div>
+          <div>
+            <div class="testi-name">Rafael Mendes</div>
+            <div class="testi-role">Consultor financeiro · 8K seguidores</div>
+          </div>
         </div>
-
-        <div class="hiw-step">
-          <div class="hiw-num">3</div>
-          <div class="hiw-title">Template aparece exclusivo na sua conta</div>
-          <p class="hiw-desc">Ele fica disponível direto no seu wizard BeContent como uma opção exclusiva de design.</p>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Tentei no Canva por semanas e nunca ficou do jeito que eu queria. Com o template exclusivo, agora gero carrosseis com a minha cara em segundos. Meu engajamento triplicou.</p>
+        <div class="testi-author">
+          <div class="testi-avatar">A</div>
+          <div>
+            <div class="testi-name">Ana Beatriz Lima</div>
+            <div class="testi-role">Nutricionista · 22K seguidores</div>
+          </div>
         </div>
-
       </div>
     </div>
   </div>
+</div>
 
-  <!-- PRICING -->
-  <section class="section">
-    <p class="section-label">Planos</p>
-    <h2 class="section-title">Escolha o seu plano</h2>
-    <p class="section-sub">Sem mensalidade. Você paga uma vez e o template é seu para sempre.</p>
+<!-- HOW IT WORKS -->
+<div class="hiw">
+  <div class="hiw-inner">
+    <p class="sec-label">Como funciona</p>
+    <h2 class="sec-title">Simples, rápido,<br>sem complicação nenhuma</h2>
+    <div class="hiw-steps">
+      <div class="hiw-step">
+        <div class="hiw-num">1</div>
+        <div class="hiw-title">Escolha seu plano e pague</div>
+        <p class="hiw-desc">Pagamento único, sem mensalidade. Você paga uma vez e o template é seu para sempre.</p>
+        <span class="hiw-time">⚡ Menos de 2 minutos</span>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">2</div>
+        <div class="hiw-title">Preencha o briefing da sua marca</div>
+        <p class="hiw-desc">Suas cores, fonte, @username, estilo que você gosta. Pode enviar prints de referências também.</p>
+        <span class="hiw-time">⚡ Leva ~5 minutos</span>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">3</div>
+        <div class="hiw-title">Template aparece na sua conta</div>
+        <p class="hiw-desc">Em até 48h o template fica disponível direto no wizard BeContent como opção exclusiva sua.</p>
+        <span class="hiw-time">⚡ Em até 48 horas</span>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- PRICING -->
+<div class="pricing-section">
+  <div class="pricing-inner">
+    <p class="sec-label" style="text-align:center">Planos</p>
+    <h2 class="sec-title" style="text-align:center">Pagamento único.<br>Template seu para sempre.</h2>
+    <p class="sec-sub" style="text-align:center;margin:0 auto 0;max-width:400px">Sem assinatura, sem renovação. Você paga uma vez e usa para sempre em todos os seus carrosseis.</p>
     <div class="pricing-grid">
 
-      <!-- Starter -->
+      <!-- STARTER -->
       <div class="pricing-card">
         <div class="plan-name">Starter</div>
-        <div class="plan-price"><span class="currency">R$</span>127</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price"><sup>R$</sup>127</div>
+        </div>
         <div class="plan-period">pagamento único</div>
+        <div class="plan-old-price">De R$297 · Economia de R$170</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
-          <li>1 template personalizado</li>
-          <li>Cores da sua marca</li>
-          <li>Identidade visual completa</li>
-          <li>Entrega em 48h</li>
-          <li>1 revisão incluída</li>
+          <li>1 template 100% personalizado</li>
+          <li>Suas cores e identidade visual</li>
+          <li>Entrega em até 48 horas</li>
+          <li>1 revisão completa incluída</li>
+          <li>Exclusivo só para você</li>
+          <li>Fica na sua conta para sempre</li>
         </ul>
-        <button class="btn btn-outline" onclick="iniciarCheckout('starter', 127)">Quero meu template</button>
+        <button class="btn-plan btn-plan-outline" onclick="iniciarCheckout('starter',127)">Quero o Starter</button>
+        <p class="plan-note">Garantia de 7 dias sem perguntas</p>
       </div>
 
-      <!-- Pro -->
+      <!-- PRO -->
       <div class="pricing-card featured">
-        <div class="popular-badge">MAIS POPULAR</div>
+        <div class="popular-badge">✦ MAIS ESCOLHIDO</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-price"><span class="currency">R$</span>247</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price"><sup>R$</sup>247</div>
+        </div>
         <div class="plan-period">pagamento único</div>
+        <div class="plan-old-price">De R$497 · Economia de R$250</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
-          <li>2 templates personalizados</li>
+          <li class="highlight">2 templates personalizados</li>
           <li>Tudo do Starter</li>
-          <li>Fonte personalizada</li>
-          <li>Badge de marca exclusivo</li>
-          <li>Entrega em 48h</li>
+          <li>Fonte personalizada para sua marca</li>
+          <li>Badge / selo da sua marca nos slides</li>
+          <li>2 revisões incluídas</li>
+          <li>Entrega em até 48 horas</li>
         </ul>
-        <button class="btn btn-accent" onclick="iniciarCheckout('pro', 247)">Escolher Pro</button>
+        <button class="btn-plan btn-plan-accent" onclick="iniciarCheckout('pro',247)">Quero o Pro</button>
+        <p class="plan-note">Garantia de 7 dias · Mais popular</p>
       </div>
 
-      <!-- Agency -->
+      <!-- AGENCY -->
       <div class="pricing-card">
         <div class="plan-name">Agency</div>
-        <div class="plan-price"><span class="currency">R$</span>497</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price"><sup>R$</sup>497</div>
+        </div>
         <div class="plan-period">pagamento único</div>
+        <div class="plan-old-price">De R$997 · Economia de R$500</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
-          <li>3 templates personalizados</li>
+          <li class="highlight">3 templates personalizados</li>
           <li>Tudo do Pro</li>
-          <li>Revisão ilimitada por 30 dias</li>
-          <li>Suporte prioritário</li>
-          <li>Entrega em 48h</li>
+          <li>Revisões ilimitadas por 30 dias</li>
+          <li>Suporte prioritário direto</li>
+          <li>Guia de identidade visual</li>
+          <li>Entrega em até 48 horas</li>
         </ul>
-        <button class="btn btn-outline" onclick="iniciarCheckout('agency', 497)">Escolher Agency</button>
+        <button class="btn-plan btn-plan-outline" onclick="iniciarCheckout('agency',497)">Quero o Agency</button>
+        <p class="plan-note">Garantia de 7 dias sem perguntas</p>
       </div>
 
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- GUARANTEE -->
-  <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface)">
-    <div class="guarantee">
-      <div class="guarantee-icon">🛡️</div>
-      <h2>Garantia de 7 dias</h2>
-      <p>Se não ficar satisfeito com o resultado, devolvemos 100% do valor. Sem perguntas, sem burocracia. Seu risco é zero.</p>
+<!-- GARANTIA -->
+<div class="guarantee">
+  <div class="guarantee-inner">
+    <div class="guarantee-shield">🛡️</div>
+    <div class="guarantee-body">
+      <h2>Garantia incondicional de 7 dias</h2>
+      <p>
+        Se por qualquer motivo o template não ficar do jeito que você imaginou,
+        <strong>devolvemos 100% do seu dinheiro</strong>. Sem formulário chato, sem burocracia, sem perguntas.
+        Você não corre nenhum risco. Nenhum mesmo.
+      </p>
     </div>
   </div>
+</div>
 
-  <!-- FAQ -->
-  <div class="faq-section">
-    <div class="faq-inner">
-      <p class="section-label">Dúvidas frequentes</p>
-      <h2 class="section-title">Respostas rápidas</h2>
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-inner">
+    <p class="sec-label">Dúvidas frequentes</p>
+    <h2 class="sec-title">Respostas rápidas</h2>
+    <div class="faq-list">
 
-      <div class="faq-list">
-
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">
-            Quando recebo o template?
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <div class="faq-a">Em até 48 horas após o preenchimento do briefing. Você receberá uma notificação por e-mail e o template aparecerá automaticamente na sua conta BeContent.</div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">
-            Posso pedir ajustes?
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <div class="faq-a">Sim. Todos os planos incluem pelo menos uma revisão completa. O plano Agency oferece revisões ilimitadas por 30 dias após a entrega.</div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">
-            O template funciona em todos os planos BeContent?
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <div class="faq-a">Sim, o template exclusivo aparece direto no seu wizard como uma opção de design exclusiva, independente do seu plano BeContent atual.</div>
-        </div>
-
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quando exatamente recebo meu template?
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">Em até 48 horas após você preencher o briefing. Você recebe um e-mail quando estiver pronto e o template aparece automaticamente como opção no seu wizard BeContent.</div>
       </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Precisa saber de design para preencher o briefing?
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">Zero. Você só precisa informar suas cores (pode ser o código hex ou até o nome da cor), sua fonte preferida, seu @username e referências visuais que você gosta. Nossa equipe cuida do resto.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          O que acontece se eu não gostar do resultado?
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">Primeiro, você tem revisões incluídas no plano — então ajustamos até ficar perfeito. E se mesmo assim não ficar satisfeito, você tem 7 dias de garantia incondicional. Devolução de 100% do valor, sem burocracia.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Precisa ter plano BeContent ativo para usar?
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">Sim, o template exclusivo funciona dentro do BeContent. Mas qualquer plano ativo já é suficiente — o template fica disponível como opção extra no wizard, independente de qual plano você assinou.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Mais alguém pode ter um template igual ao meu?
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">Não. Cada template é desenvolvido do zero para uma conta específica. Uma vez entregue para você, não é replicado para nenhum outro usuário BeContent. É 100% exclusivo.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Posso pedir mais de um template depois?
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">Sim. Se você começou com o Starter e quer mais templates, pode comprar um plano superior ou adquirir templates adicionais. Entre em contato conosco após a entrega.</div>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- BOTTOM CTA -->
-  <div class="bottom-cta">
-    <h2>Pronto para <span>se destacar?</span></h2>
-    <p>Pare de usar o mesmo design que todo mundo. Tenha um carrossel com a identidade visual 100% sua.</p>
-    <button class="btn-hero" onclick="iniciarCheckout('starter', 127)">Quero meu template exclusivo</button>
-    <p class="bottom-cta-note">Garantia de 7 dias &bull; Entrega em 48h &bull; Sem mensalidade</p>
-  </div>
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <h2>Seu conteúdo é bom.<br>Agora o visual vai <em>combinar.</em></h2>
+  <p class="bottom-cta-sub">Pare de usar o mesmo design que todo mundo. Tenha um carrossel com a identidade visual 100% da sua marca — pronto em 48h.</p>
+  <button class="btn-hero" onclick="iniciarCheckout('starter',127)">
+    Quero meu template exclusivo →
+  </button>
+  <p class="bottom-cta-note"><span>Garantia de 7 dias</span> · Entrega em 48h · Pagamento único · Sem mensalidade</p>
+</div>
 
-  <!-- FOOTER -->
-  <div class="footer-line">
-    &copy; 2025 BeContent. Todos os direitos reservados.
-  </div>
+<!-- FOOTER -->
+<div class="footer-line">
+  &copy; 2025 BeContent · Todos os direitos reservados
+</div>
 
-  <script>
-    const token = localStorage.getItem('token');
+<!-- LOADING OVERLAY -->
+<div class="checkout-overlay" id="checkout-overlay">
+  <div class="checkout-spinner"></div>
+  <div class="checkout-txt">Preparando seu checkout...</div>
+</div>
 
-    // FAQ accordion
-    function toggleFaq(btn) {
-      const item = btn.closest('.faq-item');
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      if (!isOpen) item.classList.add('open');
+<script>
+  const token = localStorage.getItem('token');
+
+  // FAQ accordion
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // Detecta retorno de erro do MP
+  (function() {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('erro') === '1') {
+      const b = document.createElement('div');
+      b.style.cssText = 'position:fixed;top:94px;left:50%;transform:translateX(-50%);background:#ff4444;color:#fff;font-size:13px;font-weight:700;padding:12px 24px;border-radius:10px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.4)';
+      b.textContent = 'Pagamento não concluído. Tente novamente.';
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 6000);
+      window.history.replaceState({}, '', '/static/exclusivo.html');
     }
+  })();
 
-    // Detecta ?erro=1 (retorno de falha do MP)
-    (function() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('erro') === '1') {
-        const banner = document.createElement('div');
-        banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#ff4444;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:999';
-        banner.textContent = 'Pagamento não concluído. Tente novamente.';
-        document.body.appendChild(banner);
-        setTimeout(() => banner.remove(), 5000);
-        window.history.replaceState({}, '', '/static/exclusivo.html');
-      }
-    })();
+  let _loading = false;
 
-    let _checkoutLoading = false;
+  async function iniciarCheckout(plano, valor) {
+    if (!token) { window.location = '/'; return; }
+    if (_loading) return;
+    _loading = true;
 
-    async function iniciarCheckout(plano, valor) {
-      if (!token) { window.location = '/'; return; }
-      if (_checkoutLoading) return;
-      _checkoutLoading = true;
+    document.getElementById('checkout-overlay').classList.add('show');
 
-      // Mostra feedback visual em todos os botões do plano clicado
-      const btns = document.querySelectorAll('button[onclick*="' + plano + '"]');
-      btns.forEach(b => { b._txt = b.textContent; b.textContent = 'Aguarde...'; b.disabled = true; });
+    try {
+      const fd = new FormData();
+      fd.append('plano', plano);
+      const r = await fetch('/pagamento/template', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: fd,
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Erro ao criar pagamento');
 
-      try {
-        const fd = new FormData();
-        fd.append('plano', plano);
-        const r = await fetch('/pagamento/template', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token },
-          body: fd,
-        });
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.detail || 'Erro ao criar pagamento');
+      localStorage.setItem('tpl_plano', plano);
+      localStorage.setItem('tpl_valor', String(valor));
+      localStorage.setItem('tpl_pedido_id', String(d.pedido_id));
 
-        // Salva info no localStorage para o briefing usar após o retorno
-        localStorage.setItem('tpl_plano', plano);
-        localStorage.setItem('tpl_valor', valor);
-        localStorage.setItem('tpl_pedido_id', d.pedido_id);
+      if (typeof bct !== 'undefined') bct('begin_checkout', { plano, valor });
 
-        // Analytics
-        if (typeof bct !== 'undefined') bct('begin_checkout', { plano, valor });
-
-        // Redireciona para o checkout do Mercado Pago
-        window.location = d.init_point;
-      } catch(e) {
-        alert('Erro ao iniciar checkout: ' + e.message);
-        btns.forEach(b => { b.textContent = b._txt; b.disabled = false; });
-        _checkoutLoading = false;
-      }
+      window.location = d.init_point;
+    } catch(e) {
+      document.getElementById('checkout-overlay').classList.remove('show');
+      _loading = false;
+      const b = document.createElement('div');
+      b.style.cssText = 'position:fixed;top:94px;left:50%;transform:translateX(-50%);background:#ff4444;color:#fff;font-size:13px;font-weight:700;padding:12px 24px;border-radius:10px;z-index:999';
+      b.textContent = 'Erro: ' + e.message;
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 5000);
     }
+  }
 
-    // Analytics
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof bct !== 'undefined') bct('view_plans');
-    });
-  </script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof bct !== 'undefined') bct('view_plans');
+  });
+</script>
 
 </body>
 </html>
