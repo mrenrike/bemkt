@@ -694,6 +694,7 @@ async def gerar_direto(
     restricoes: str = Form(""),
     uso_fotos: str = Form("fotos"),
     logo: UploadFile | None = File(None),
+    avatar: UploadFile | None = File(None),
     user_id: int = Depends(usuario_atual),
 ):
     """Cria e inicia um job de geração a partir do wizard form."""
@@ -729,6 +730,17 @@ async def gerar_direto(
         logo_file = UPLOAD_DIR / f"logo_{user_id}_{nome_seguro}"
         logo_file.write_bytes(conteudo_logo)
         logo_path = str(logo_file)
+
+    # Avatar upload (foto de perfil para X Thread)
+    avatar_path = None
+    if avatar and avatar.filename:
+        ext_av = Path(avatar.filename).suffix.lower()
+        if ext_av in [".png", ".jpg", ".jpeg"]:
+            conteudo_av = await avatar.read()
+            if len(conteudo_av) <= 5 * 1024 * 1024 and validar_magic_bytes(conteudo_av, avatar.filename):
+                av_file = UPLOAD_DIR / f"avatar_{user_id}.jpg"
+                av_file.write_bytes(conteudo_av)
+                avatar_path = str(av_file)
 
     # Sanitiza campos
     tema_s         = sanitizar_texto(tema, max_len=2000)
@@ -778,7 +790,10 @@ async def gerar_direto(
     job = db.execute("SELECT * FROM carrosseis WHERE id=?", (job_id,)).fetchone()
     db.close()
 
-    background_tasks.add_task(_executar_job, job_id, user_id, dict(job))
+    job_dict = dict(job)
+    if avatar_path:
+        job_dict["avatar_path"] = avatar_path
+    background_tasks.add_task(_executar_job, job_id, user_id, job_dict)
     return {"status": "gerando", "job_id": job_id}
 
 
@@ -804,6 +819,7 @@ async def _executar_job(job_id: int, user_id: int, job: dict):
             template=job.get("modelo") or "4",
             finalidade=job.get("finalidade") or "",
             cta_objetivo=job.get("cta_objetivo") or "",
+            avatar_path=job.get("avatar_path") or "",
         )
         print(f">>> JOB {job_id} SUCESSO {len(pngs)} slides", flush=True)
         ok = True

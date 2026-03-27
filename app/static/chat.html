@@ -811,6 +811,14 @@
       </button>
     </div>
 
+    <div class="field-wrap" id="wrap-avatar" style="display:none">
+      <label class="field-label">Foto de perfil <span style="color:var(--accent);font-size:12px">— obrigatório para X Thread</span></label>
+      <input type="file" class="hidden-input" id="file-avatar" accept=".png,.jpg,.jpeg" onchange="previewAvatar(this)">
+      <button class="upload-btn" id="btn-avatar" onclick="document.getElementById('file-avatar').click()">
+        <span>👤</span> <span id="avatar-label">Enviar foto de perfil</span>
+      </button>
+    </div>
+
     <div class="nav-row">
       <button class="btn-back" onclick="goStep(7)">←</button>
       <button class="btn-next" onclick="goStep(9)">Continuar</button>
@@ -844,7 +852,7 @@ function auth(extra){ return Object.assign({'Authorization':'Bearer '+token}, ex
 // ── State ──────────────────────────────────────────────────────────
 const state = {
   plataforma: '', nicho: '', tema: '', uso_fotos: 'fotos', finalidade: '', cta_objetivo: '',
-  modelo: '', cores_marca: '', username_slide: '', logo_file: null,
+  modelo: '', cores_marca: '', username_slide: '', logo_file: null, avatar_file: null,
 };
 let prevPrefs = null;
 let currentStep = 0;
@@ -993,6 +1001,8 @@ function selectTplEl(el) {
   el.classList.add('selected');
   state.modelo = el.dataset.val;
   document.getElementById('btn-next-7').disabled = false;
+  const isXThread = (el.dataset.val === '6' || el.dataset.val === '6d');
+  document.getElementById('wrap-avatar').style.display = isXThread ? 'block' : 'none';
   setTimeout(() => goStep(8), 280);
 }
 
@@ -1092,6 +1102,15 @@ function previewLogo(input) {
   document.getElementById('btn-logo').classList.add('has-file');
 }
 
+// ── Avatar (foto de perfil para X Thread) ─────────────────────────
+function previewAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  state.avatar_file = file;
+  document.getElementById('avatar-label').textContent = file.name;
+  document.getElementById('btn-avatar').classList.add('has-file');
+}
+
 // ── Summary ───────────────────────────────────────────────────────
 function buildSummary() {
   const c1 = document.getElementById('color1').value;
@@ -1140,7 +1159,8 @@ async function gerarCarrossel() {
   fd.append('cores_marca',   state.cores_marca);
   fd.append('username_slide', state.username_slide);
   fd.append('uso_fotos',     state.uso_fotos || 'fotos');
-  if (state.logo_file) fd.append('logo', state.logo_file);
+  if (state.logo_file)   fd.append('logo', state.logo_file);
+  if (state.avatar_file) fd.append('avatar', state.avatar_file);
 
   try {
     const r = await fetch('/gerar', { method: 'POST', headers: auth(), body: fd });

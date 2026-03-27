@@ -2050,6 +2050,7 @@ async def gerar_carrossel(
     template: str = "4",
     finalidade: str = "",
     cta_objetivo: str = "",
+    avatar_path: str = "",
 ) -> list[Path]:
     pasta_destino.mkdir(parents=True, exist_ok=True)
     pasta_html = pasta_destino / "html"
@@ -2082,19 +2083,24 @@ async def gerar_carrossel(
     if logo_path and Path(logo_path).exists():
         logo_url = f"file:///{logo_path.replace(chr(92), '/')}"
 
-    # Para X Thread: busca avatar do Instagram
+    # Para X Thread: usa avatar enviado pelo usuário ou tenta scrape do Instagram
     avatar_local = ""
     nome_display = ""
-    if is_x_thread and username:
-        avatar_path = pasta_destino / "avatar.jpg"
-        try:
-            avatar_local = await asyncio.to_thread(
-                buscar_avatar_instagram, username, avatar_path
-            )
-        except Exception:
-            avatar_local = ""
-        # nome display: tenta pegar do primeiro slide ou do username formatado
+    if is_x_thread:
         nome_display = username.lstrip("@").replace("_", " ").replace(".", " ").title()
+        if avatar_path and Path(avatar_path).exists():
+            # Copia para a pasta do carrossel para ter o arquivo local junto
+            dest_av = pasta_destino / "avatar.jpg"
+            dest_av.write_bytes(Path(avatar_path).read_bytes())
+            avatar_local = str(dest_av.absolute())
+        elif username:
+            dest_av = pasta_destino / "avatar.jpg"
+            try:
+                avatar_local = await asyncio.to_thread(
+                    buscar_avatar_instagram, username, dest_av
+                )
+            except Exception:
+                avatar_local = ""
 
     pngs = []
     for slide in slides:
